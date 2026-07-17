@@ -25,7 +25,6 @@ export function TaskCard({ task, onView }: TaskCardProps) {
     setIsToggling(true);
     try {
       await toggleTask(task.id, e.target.checked);
-      toast.success(e.target.checked ? "Task completed!" : "Task marked active");
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to toggle task status");
     } finally {
