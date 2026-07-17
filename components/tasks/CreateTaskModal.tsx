@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useTaskStore } from "../../store/taskStore";
-import { X, Calendar, AlertCircle } from "lucide-react";
+import { X, Calendar, AlertCircle, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -17,10 +17,17 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<number>(5); // Default is Medium (5)
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [dueDate, setDueDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
+
+  const getPriorityText = (val: number) => {
+    if (val <= 3) return "Low 🟢";
+    if (val >= 8) return "High 🔴";
+    return "Medium 🟡";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,27 +127,51 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
           {/* Priority and Due Date Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Priority selection */}
-            <div>
+            <div className="relative">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                 Priority
               </label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(Number(e.target.value))}
-                className="w-full rounded-xl border border-slate-200/80 bg-slate-50/30 px-4 py-2 text-sm text-slate-850 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100 dark:focus:border-indigo-500 dark:focus:bg-slate-950 cursor-pointer"
-              >
-                {[...Array(10)].map((_, i) => {
-                  const val = i + 1;
-                  let label = "Medium 🟡";
-                  if (val <= 3) label = "Low 🟢";
-                  if (val >= 8) label = "High 🔴";
-                  return (
-                    <option key={val} value={val} className="dark:bg-slate-900">
-                      {val} - {label}
-                    </option>
-                  );
-                })}
-              </select>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsPriorityOpen(!isPriorityOpen)}
+                  className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/30 px-4 py-2 text-sm text-slate-800 outline-none transition-all hover:bg-slate-50 focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100 dark:focus:border-indigo-500 dark:focus:bg-slate-950 cursor-pointer"
+                >
+                  <span>{priority} - {getPriorityText(priority)}</span>
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                </button>
+
+                {isPriorityOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setIsPriorityOpen(false)} 
+                    />
+                    <div className="absolute left-0 z-20 mt-1 w-full rounded-b-xl bg-white shadow-xl dark:bg-slate-900 overflow-hidden max-h-60 overflow-y-auto border-none outline-none">
+                      {[...Array(10)].map((_, i) => {
+                        const val = i + 1;
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => {
+                              setPriority(val);
+                              setIsPriorityOpen(false);
+                            }}
+                            className={`flex w-full items-center px-4 py-2 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors ${
+                              priority === val 
+                                ? "bg-indigo-50/50 text-indigo-600 font-semibold dark:bg-indigo-950/30 dark:text-indigo-400" 
+                                : "text-slate-700 dark:text-slate-200"
+                            }`}
+                          >
+                            {val} - {getPriorityText(val)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Due Date */}
