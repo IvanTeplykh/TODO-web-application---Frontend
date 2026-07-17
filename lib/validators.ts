@@ -23,7 +23,7 @@ export const registerSchema = z
 export type RegisterInput = z.infer<typeof registerSchema>;
 
 export const taskSchema = z.object({
-  title: z.string().min(1, "Task name is required"),
+  title: z.string().min(1, "Task name is required").max(100, "Task name cannot exceed 100 characters"),
   priority: z.number().min(1).max(10),
 });
 

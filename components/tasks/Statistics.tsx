@@ -3,15 +3,17 @@
 import React, { useEffect, useState } from "react";
 import { tasksService } from "../../services/tasks";
 import { useTaskStore } from "../../store/taskStore";
+import { getTaskFields, isOverdue } from "../../lib/taskHelpers";
 import { Card } from "../ui/Card";
-import { CheckCircle2, ListTodo, Flag, Sparkles } from "lucide-react";
+import { CheckCircle2, ListTodo, AlertCircle, Clock } from "lucide-react";
 
 export function Statistics() {
   const { tasks, total, status } = useTaskStore();
   const [stats, setStats] = useState({
     total: 0,
     completed: 0,
-    remaining: 0,
+    pending: 0,
+    overdue: 0,
     percent: 0,
   });
 
@@ -20,16 +22,24 @@ export function Statistics() {
       try {
         const allRes = await tasksService.getTasks({ limit: 1, status: "all" });
         const doneRes = await tasksService.getTasks({ limit: 1, status: "done" });
+        const undoneRes = await tasksService.getTasks({ limit: 200, status: "undone" });
         
         const tot = allRes.total;
         const comp = doneRes.total;
-        const rem = tot - comp;
+        const pend = tot - comp;
         const pct = tot > 0 ? Math.round((comp / tot) * 100) : 0;
+
+        // Calculate overdue from undone tasks
+        const overdueTasksCount = undoneRes.items.filter((task) => {
+          const parsed = getTaskFields(task);
+          return isOverdue(parsed.dueDate, task.completed);
+        }).length;
 
         setStats({
           total: tot,
           completed: comp,
-          remaining: rem,
+          pending: pend,
+          overdue: overdueTasksCount,
           percent: pct,
         });
       } catch (error) {
@@ -45,65 +55,102 @@ export function Statistics() {
       label: "Total Tasks",
       value: stats.total,
       icon: ListTodo,
-      color: "text-violet-600 bg-violet-50 dark:bg-violet-950/20 dark:text-violet-400",
-      isRate: false,
+      color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-indigo-400 border-indigo-100/30 dark:border-indigo-500/10",
     },
     {
       label: "Completed",
       value: stats.completed,
       icon: CheckCircle2,
-      color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400",
-      isRate: false,
+      color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400 border-emerald-100/30 dark:border-emerald-500/10",
     },
     {
-      label: "Remaining",
-      value: stats.remaining,
-      icon: Sparkles,
-      color: "text-amber-600 bg-amber-50 dark:bg-amber-950/20 dark:text-amber-400",
-      isRate: false,
+      label: "Pending",
+      value: stats.pending,
+      icon: Clock,
+      color: "text-amber-600 bg-amber-50 dark:bg-amber-950/20 dark:text-amber-400 border-amber-100/30 dark:border-amber-500/10",
     },
     {
-      label: "Completion Rate",
-      value: `${stats.percent}%`,
-      icon: Flag,
-      color: "text-blue-600 bg-blue-50 dark:bg-blue-950/20 dark:text-blue-400",
-      isRate: true,
-      percentage: stats.percent,
+      label: "Overdue",
+      value: stats.overdue,
+      icon: AlertCircle,
+      color: stats.overdue > 0 
+        ? "text-rose-600 bg-rose-50 dark:bg-rose-950/20 dark:text-rose-450 border-rose-100/50 dark:border-rose-500/20"
+        : "text-slate-500 bg-slate-50 dark:bg-slate-900/50 dark:text-slate-400 border-slate-100 dark:border-slate-800/40",
     },
   ];
 
+  // Circular progress calculations
+  const radius = 18;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (stats.percent / 100) * circumference;
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {statCards.map((c, idx) => {
-        const Icon = c.icon;
-        return (
-          <Card key={idx} className="!p-4 border border-slate-200/50 dark:border-slate-800/80">
-            <div className="flex flex-col w-full gap-2">
+    <div className="flex flex-col gap-4 w-full">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((c, idx) => {
+          const Icon = c.icon;
+          return (
+            <Card key={idx} className="!p-4 border border-slate-200/50 dark:border-slate-800/80 shadow-sm flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${c.color} flex-shrink-0`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${c.color} flex-shrink-0`}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-500">
                     {c.label}
                   </span>
-                  <span className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate">
+                  <span className="text-xl font-extrabold text-slate-800 dark:text-slate-100 truncate">
                     {c.value}
                   </span>
                 </div>
               </div>
-              {c.isRate && (
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
-                  <div
-                    className="bg-blue-600 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${c.percentage}%` }}
-                  />
-                </div>
-              )}
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Completion rate card styled like the mockup (radial circle on the right) */}
+      <Card className="!p-4 border border-slate-205 dark:border-slate-800/80 shadow-sm bg-gradient-to-r from-indigo-50/20 to-cyan-50/10 dark:from-indigo-950/5 dark:to-cyan-950/5">
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <h4 className="text-xs font-bold text-slate-500 dark:text-slate-450 uppercase tracking-wider">
+              Workspace Progress
+            </h4>
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              {stats.completed} of {stats.total} tasks completed
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-extrabold text-slate-800 dark:text-slate-150">
+              {stats.percent}%
+            </span>
+            <div className="relative h-12 w-12 flex items-center justify-center">
+              <svg className="absolute transform -rotate-95 w-full h-full">
+                <circle
+                  cx="24"
+                  cy="24"
+                  r={radius}
+                  className="stroke-slate-100 dark:stroke-slate-800"
+                  strokeWidth="3.5"
+                  fill="transparent"
+                />
+                <circle
+                  cx="24"
+                  cy="24"
+                  r={radius}
+                  className="stroke-indigo-600 dark:stroke-indigo-400 transition-all duration-500 ease-in-out"
+                  strokeWidth="3.5"
+                  fill="transparent"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
-          </Card>
-        );
-      })}
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }

@@ -17,13 +17,36 @@ export const tasksService = {
     return response.data;
   },
 
-  createTask: async (title: string, priority: number): Promise<Task> => {
-    const response = await api.post<Task>("/tasks", { title, priority });
+  createTask: async (
+    title: string,
+    priority: number,
+    description?: string,
+    dueDate?: string
+  ): Promise<Task> => {
+    const response = await api.post<Task>("/tasks", {
+      title,
+      priority,
+      description: description || null,
+      due_date: dueDate ? new Date(dueDate).toISOString() : null,
+    });
     return response.data;
   },
 
-  updateTask: async (id: string, title: string, priority: number, completed: boolean): Promise<Task> => {
-    const response = await api.put<Task>(`/tasks/${id}`, { title, priority, completed });
+  updateTask: async (
+    id: string,
+    title: string,
+    priority: number,
+    completed: boolean,
+    description?: string,
+    dueDate?: string
+  ): Promise<Task> => {
+    const response = await api.put<Task>(`/tasks/${id}`, {
+      title,
+      priority,
+      completed,
+      description: description || null,
+      due_date: dueDate ? new Date(dueDate).toISOString() : null,
+    });
     return response.data;
   },
 

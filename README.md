@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TODO Web Application - Frontend
 
-## Getting Started
+Цей проект є клієнтською частиною (Frontend) веб-додатку для планування робочого часу та керування завданнями (TODO). Дизайн виконано у сучасному мінімалістичному стилі, наближеному до Notion, Todoist та TickTick.
 
-First, run the development server:
+---
 
+## 🛠️ Стек технологій (Tech Stack)
+
+*   **Фреймворк**: **Next.js 16** (App Router, Turbopack) — для швидкої статичної генерації та оптимального рендерингу.
+*   **Бібліотека рендерингу**: **React 19**
+*   **Типізація**: **TypeScript** — надійна типізація даних та моделей.
+*   **Стилізація (CSS)**:
+    *   **TailwindCSS v4** — для побудови адаптивного інтерфейсу та швидкої розробки.
+    *   **PostCSS** — обробка стилів.
+*   **Управління станом (State Management)**: **Zustand** — мінімалістичний та реактивний клієнтський стейт для управління задачами та автентифікацією.
+*   **Мережеві запити**: **Axios** — клієнт для взаємодії з REST API із вбудованими Request Interceptors для автоматичного додавання JWT токенів.
+*   **Форми та валідація**:
+    *   **React Hook Form** — оптимізована робота з полями введення без зайвих ререндерів.
+    *   **Zod** & **@hookform/resolvers** — валідація даних форми на клієнті (наприклад, перевірка довжини назви задачі до 100 символів, коректність паролів).
+*   **Анімації**: **Framer Motion** — плавні переходи сторінок та модальних вікон.
+*   **Іконки**: **Lucide React** — сучасні векторні іконки.
+*   **Сповіщення**: **Sonner** — красиві спливаючі тости після завершення операцій (створення, зміна статусу, оновлення, видалення).
+
+---
+
+## 🚀 Особливості інтерфейсу (UI Features)
+
+1.  **Public Landing Page (`/`)**:
+    *   Сучасна презентаційна сторінка для неавторизованих користувачів.
+    *   Адаптивна інтерактивна CSS-ілюстрація інтерфейсу (Dashboard Preview).
+    *   Швидкі переходи до реєстрації чи входу.
+2.  **Dashboard Workspace (`/dashboard`)**:
+    *   **Модальне створення та редагування**: Форма винесена у спливаючі модальні вікна.
+    *   **Візуалізація картками**: Замість таблиць кожна задача представлена інформативною карткою.
+    *   **Швидка статистика**: Total, Completed, Pending та Overdue показники, а також Progress Ring виконання задач.
+    *   **Пріоритети та підсвічування простроченості**: Бейджі Low 🟢, Medium 🟡, High 🔴, а також підсвічування прострочених задач червоною рамкою та бейджем "Overdue".
+    *   **Швидкий контроль**: Миттєвий пошук завдань за назвою та фільтри статусів.
+3.  **Темна та світла теми**:
+    *   Повна сумісність інтерфейсу з перемикачем теми в навігаційній панелі.
+4.  **Маршрутизація**:
+    *   Автоматичний захист сторінок (`/dashboard`, `/profile`) за допомогою захищеного роута (`ProtectedRoute`).
+
+---
+
+## ⚙️ Налаштування оточення (Environment Variables)
+
+Для локальної розробки або деплою створіть файл `.env.local` в корені фронтенду:
+
+```env
+NEXT_PUBLIC_API_URL=https://todo-web-application-backend-3xoh.onrender.com/api/v1
+```
+*Якщо ви хочете запустити локальний бекенд, змініть адресу на `http://localhost:8000/api/v1`.*
+
+---
+
+## 🏁 Швидкий старт (Quick Start)
+
+### 1. Встановлення залежностей
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Запуск у режимі розробки
+```bash
+npm run dev
+```
+Додаток відкриється за адресою `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3. Збірка для продакшену
+```bash
+npm run build
+```
+Команда компілює TypeScript, перевіряє код лінтером і створює оптимізовану версію Next.js додатку.

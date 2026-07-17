@@ -15,9 +15,9 @@ interface TaskState {
   sort: string;
   order: "asc" | "desc";
   fetchTasks: () => Promise<void>;
-  createTask: (title: string, priority: number) => Promise<void>;
+  createTask: (title: string, priority: number, description?: string, dueDate?: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
-  updateTask: (id: string, title: string, priority: number, completed: boolean) => Promise<void>;
+  updateTask: (id: string, title: string, priority: number, completed: boolean, description?: string, dueDate?: string) => Promise<void>;
   toggleTask: (id: string, completed: boolean) => Promise<void>;
   setPage: (page: number) => void;
   setFilters: (filters: Partial<Omit<GetTasksParams, "page">>) => void;
@@ -60,10 +60,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
 
-  createTask: async (title: string, priority: number) => {
+  createTask: async (title: string, priority: number, description?: string, dueDate?: string) => {
     set({ loading: true });
     try {
-      await tasksService.createTask(title, priority);
+      await tasksService.createTask(title, priority, description, dueDate);
       await get().fetchTasks();
     } catch (error) {
       set({ loading: false });
@@ -93,10 +93,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
 
-  updateTask: async (id: string, title: string, priority: number, completed: boolean) => {
+  updateTask: async (id: string, title: string, priority: number, completed: boolean, description?: string, dueDate?: string) => {
     set({ loading: true });
     try {
-      await tasksService.updateTask(id, title, priority, completed);
+      await tasksService.updateTask(id, title, priority, completed, description, dueDate);
       await get().fetchTasks();
     } catch (error) {
       set({ loading: false });
