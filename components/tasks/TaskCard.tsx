@@ -41,7 +41,7 @@ export function TaskCard({ task, onView }: TaskCardProps) {
   if (task.priority >= 8) {
     priorityLabel = "High";
     priorityStyle = "bg-rose-50 text-rose-700 dark:bg-rose-550/10 dark:text-rose-400 border-rose-100/50 dark:border-rose-500/20";
-    priorityIcon = "🔥 High";
+    priorityIcon = "🔥";
   } else if (task.priority >= 4) {
     priorityLabel = "Medium";
     priorityStyle = "bg-amber-50 text-amber-700 dark:bg-amber-550/10 dark:text-amber-400 border-amber-100/50 dark:border-amber-500/20";
