@@ -14,7 +14,15 @@ import { User, Mail, Lock, UserPlus } from "lucide-react";
 
 export function RegisterForm() {
   const registerUser = useAuthStore((state) => state.register);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const loading = useAuthStore((state) => state.loading);
   const router = useRouter();
+
+  React.useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, loading, router]);
 
   const {
     register,

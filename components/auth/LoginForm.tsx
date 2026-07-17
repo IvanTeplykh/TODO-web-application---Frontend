@@ -15,7 +15,15 @@ import { Mail, Lock, LogIn } from "lucide-react";
 
 export function LoginForm() {
   const login = useAuthStore((state) => state.login);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const loading = useAuthStore((state) => state.loading);
   const router = useRouter();
+
+  React.useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, loading, router]);
 
   const {
     register,
