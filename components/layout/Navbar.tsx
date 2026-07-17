@@ -25,7 +25,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-950">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white/80 backdrop-blur-md dark:border-slate-800/50 dark:bg-slate-950/80">
         <div className="flex h-16 items-center justify-between px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-550 to-cyan-500 text-white shadow-md shadow-indigo-500/20">
@@ -37,7 +37,6 @@ export function Navbar() {
           </Link>
 
           <div className="flex items-center gap-4">
-
             <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
@@ -85,8 +84,8 @@ export function Navbar() {
           </div>
         </div>
       </header>
-      
-      <ConfirmLogoutModal 
+
+      <ConfirmLogoutModal
         isOpen={isLogoutOpen}
         onClose={() => setIsLogoutOpen(false)}
         onConfirm={handleConfirmLogout}

@@ -3,16 +3,16 @@
 import React from "react";
 import Link from "next/link";
 import { useAuthStore } from "../store/authStore";
-import { 
-  CheckCircle2, 
-  ListTodo, 
-  Clock, 
-  Search, 
-  BarChart3, 
-  Shield, 
-  ArrowRight, 
-  Zap, 
-  Sparkles 
+import {
+  CheckCircle2,
+  ListTodo,
+  Clock,
+  Search,
+  BarChart3,
+  Shield,
+  ArrowRight,
+  Zap,
+  Sparkles,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -23,7 +23,8 @@ export default function LandingPage() {
       title: "Task Management",
       desc: "Organize everything in one place with simple list structures.",
       icon: ListTodo,
-      color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-indigo-400",
+      color:
+        "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-indigo-400",
     },
     {
       title: "Priority Levels",
@@ -35,7 +36,8 @@ export default function LandingPage() {
       title: "Due Dates",
       desc: "Assign deadlines and get visual warnings when a task is overdue.",
       icon: Clock,
-      color: "text-amber-600 bg-amber-50 dark:bg-amber-950/20 dark:text-amber-400",
+      color:
+        "text-amber-600 bg-amber-50 dark:bg-amber-950/20 dark:text-amber-400",
     },
     {
       title: "Fast Search",
@@ -47,20 +49,22 @@ export default function LandingPage() {
       title: "Statistics",
       desc: "Monitor your completion rates and track daily performance stats.",
       icon: BarChart3,
-      color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400",
+      color:
+        "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400",
     },
     {
       title: "Secure Authentication",
       desc: "Your tasks are private and securely stored with JWT encryption.",
       icon: Shield,
-      color: "text-violet-600 bg-violet-50 dark:bg-violet-950/20 dark:text-violet-400",
+      color:
+        "text-violet-600 bg-violet-50 dark:bg-violet-950/20 dark:text-violet-400",
     },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300 dark:bg-slate-955 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
       {/* Navigation Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white dark:border-slate-900/55 dark:bg-slate-950">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white/80 backdrop-blur-md dark:border-slate-900/55 dark:bg-slate-950/80">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-550 text-white shadow-md shadow-indigo-500/20">
@@ -108,7 +112,7 @@ export default function LandingPage() {
             <Sparkles className="h-3.5 w-3.5" />
             <span>Smart Task Management</span>
           </div>
-          
+
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent dark:from-white dark:via-slate-200 dark:to-slate-450">
             Organize your work. <br />
             <span className="bg-gradient-to-r from-indigo-650 to-cyan-500 bg-clip-text text-transparent dark:from-indigo-400 dark:to-cyan-400">
@@ -117,7 +121,8 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
-            Manage your daily tasks, priority levels, and due dates in a clean workspace designed to keep you focused.
+            Manage your daily tasks, priority levels, and due dates in a clean
+            workspace designed to keep you focused.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
@@ -141,7 +146,7 @@ export default function LandingPage() {
         <div className="lg:col-span-6 relative w-full overflow-hidden select-none">
           <div className="absolute -top-12 -left-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-          
+
           <div className="relative rounded-2xl border border-slate-200/60 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-2xl p-6 overflow-hidden">
             {/* Mock Dashboard Top Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
@@ -156,29 +161,37 @@ export default function LandingPage() {
               <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                 <div className="flex items-center">
                   <div className="h-5 w-5 rounded-md border border-slate-200 dark:border-slate-800 flex-shrink-0" />
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 ml-3">Finish Backend API</span>
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 ml-3">
+                    Finish Backend API
+                  </span>
                 </div>
                 <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30 flex items-center gap-1">
                   <span>🔥</span> High
                 </span>
               </div>
-              
+
               {/* Task Item 2 */}
               <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                 <div className="flex items-center">
-                  <div className="h-5 w-5 rounded-md bg-indigo-650 flex items-center justify-center text-white text-[10px] flex-shrink-0">✓</div>
-                  <span className="text-sm font-medium text-slate-300/40 dark:text-slate-700/40 line-through ml-3">Buy groceries</span>
+                  <div className="h-5 w-5 rounded-md bg-indigo-650 flex items-center justify-center text-white text-[10px] flex-shrink-0">
+                    ✓
+                  </div>
+                  <span className="text-sm font-medium text-slate-300/40 dark:text-slate-700/40 line-through ml-3">
+                    Buy groceries
+                  </span>
                 </div>
                 <span className="text-[10px] font-bold px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30">
                   Low
                 </span>
               </div>
-              
+
               {/* Task Item 3 */}
               <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                 <div className="flex items-center">
                   <div className="h-5 w-5 rounded-md border border-slate-200 dark:border-slate-800 flex-shrink-0" />
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 ml-3">Design UI components</span>
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 ml-3">
+                    Design UI components
+                  </span>
                 </div>
                 <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30">
                   Medium
@@ -197,7 +210,8 @@ export default function LandingPage() {
               Features Built for Productivity
             </h2>
             <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-              Everything you need to focus, optimize your schedule, and execute your goals.
+              Everything you need to focus, optimize your schedule, and execute
+              your goals.
             </p>
           </div>
 
@@ -205,11 +219,13 @@ export default function LandingPage() {
             {features.map((f, idx) => {
               const Icon = f.icon;
               return (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className="p-6 rounded-2xl border border-slate-200/50 dark:border-slate-800/80 bg-white dark:bg-slate-900 hover:shadow-md transition-shadow"
                 >
-                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl mb-4 border ${f.color}`}>
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl mb-4 border ${f.color}`}
+                  >
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="text-base font-bold text-slate-800 dark:text-slate-150 mb-1.5">
@@ -226,13 +242,17 @@ export default function LandingPage() {
       </section>
 
       {/* Large Dashboard Preview Mockup Section */}
-      <section id="preview" className="mx-auto max-w-6xl px-6 py-16 md:py-24 text-center">
+      <section
+        id="preview"
+        className="mx-auto max-w-6xl px-6 py-16 md:py-24 text-center"
+      >
         <div className="max-w-2xl mx-auto mb-12 space-y-3">
           <h2 className="text-3xl font-black tracking-tight text-slate-800 dark:text-slate-100">
             A Clean Workspace
           </h2>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-            Take a look at the dashboard workflow interface. Manage your lifecycle in real-time.
+            Take a look at the dashboard workflow interface. Manage your
+            lifecycle in real-time.
           </p>
         </div>
 
@@ -244,7 +264,9 @@ export default function LandingPage() {
               <div className="h-7 w-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white text-xs font-bold">
                 T
               </div>
-              <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">TODO APP</span>
+              <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">
+                TODO APP
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="h-7 w-48 bg-slate-100 dark:bg-slate-800 rounded-lg hidden sm:block" />
@@ -255,20 +277,36 @@ export default function LandingPage() {
           {/* Quick stats grid mockup */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-6">
             <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-950/10">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Tasks</span>
-              <span className="text-base font-extrabold text-slate-800 dark:text-slate-100">12</span>
+              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                Total Tasks
+              </span>
+              <span className="text-base font-extrabold text-slate-800 dark:text-slate-100">
+                12
+              </span>
             </div>
             <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-950/10">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Completed</span>
-              <span className="text-base font-extrabold text-slate-850 dark:text-slate-100">5</span>
+              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                Completed
+              </span>
+              <span className="text-base font-extrabold text-slate-850 dark:text-slate-100">
+                5
+              </span>
             </div>
             <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-950/10">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Pending</span>
-              <span className="text-base font-extrabold text-slate-850 dark:text-slate-100">7</span>
+              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                Pending
+              </span>
+              <span className="text-base font-extrabold text-slate-850 dark:text-slate-100">
+                7
+              </span>
             </div>
             <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-950/10">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Completion Rate</span>
-              <span className="text-base font-extrabold text-slate-850 dark:text-slate-100">42%</span>
+              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                Completion Rate
+              </span>
+              <span className="text-base font-extrabold text-slate-850 dark:text-slate-100">
+                42%
+              </span>
             </div>
           </div>
 
@@ -279,14 +317,22 @@ export default function LandingPage() {
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded border border-slate-200" />
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Finish Backend API</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Finish Backend API
+                  </span>
                 </div>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30">🔥 High</span>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30">
+                  🔥 High
+                </span>
               </div>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-3 ml-6 line-clamp-1">Implement jwt token authentication and database setup.</p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-3 ml-6 line-clamp-1">
+                Implement jwt token authentication and database setup.
+              </p>
               <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-550 border-t border-slate-50 dark:border-slate-800/50 pt-2 ml-6">
                 <span>📅 Jul 25, 2026</span>
-                <span className="text-indigo-650 dark:text-indigo-400 font-bold">View →</span>
+                <span className="text-indigo-650 dark:text-indigo-400 font-bold">
+                  View →
+                </span>
               </div>
             </div>
 
@@ -294,15 +340,25 @@ export default function LandingPage() {
             <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800/85 bg-white dark:bg-slate-900 shadow-sm opacity-70">
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-indigo-600 text-white flex items-center justify-center text-[8px]">✓</div>
-                  <span className="text-xs font-medium text-slate-550 dark:text-slate-400 line-through">Buy groceries</span>
+                  <div className="h-4 w-4 rounded bg-indigo-600 text-white flex items-center justify-center text-[8px]">
+                    ✓
+                  </div>
+                  <span className="text-xs font-medium text-slate-550 dark:text-slate-400 line-through">
+                    Buy groceries
+                  </span>
                 </div>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30">Low</span>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30">
+                  Low
+                </span>
               </div>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-3 ml-6 line-clamp-1">Milk, bread, eggs and fresh apples.</p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-3 ml-6 line-clamp-1">
+                Milk, bread, eggs and fresh apples.
+              </p>
               <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-550 border-t border-slate-50 dark:border-slate-800/50 pt-2 ml-6">
                 <span>📅 Jul 18, 2026</span>
-                <span className="text-indigo-650 dark:text-indigo-400 font-bold">View →</span>
+                <span className="text-indigo-650 dark:text-indigo-400 font-bold">
+                  View →
+                </span>
               </div>
             </div>
           </div>
@@ -316,8 +372,18 @@ export default function LandingPage() {
             &copy; {new Date().getFullYear()} TODO APP. All rights reserved.
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="hover:text-slate-600 dark:hover:text-slate-300">Login</Link>
-            <Link href="/register" className="hover:text-slate-600 dark:hover:text-slate-300">Register</Link>
+            <Link
+              href="/login"
+              className="hover:text-slate-600 dark:hover:text-slate-300"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="hover:text-slate-600 dark:hover:text-slate-300"
+            >
+              Register
+            </Link>
           </div>
         </div>
       </footer>
