@@ -62,7 +62,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-805 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300 dark:bg-slate-955 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
       {/* Navigation Header */}
       <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white/80 backdrop-blur-md dark:border-slate-900/55 dark:bg-slate-950/80">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
@@ -147,7 +147,7 @@ export default function LandingPage() {
             </Link>
             <a
               href="#preview"
-              className="w-full sm:w-auto inline-flex h-11 items-center justify-center rounded-xl border border-slate-200/80 bg-white px-6 font-bold text-slate-650 shadow-sm hover:bg-slate-50 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-850 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="w-full sm:w-auto inline-flex h-11 items-center justify-center rounded-xl border border-slate-200/80 bg-white px-6 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               Live Demo
             </a>
@@ -159,43 +159,47 @@ export default function LandingPage() {
           <div className="absolute -top-12 -left-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="relative rounded-2xl border border-slate-200/60 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-2xl p-4 overflow-hidden transform lg:rotate-2 hover:rotate-0 transition-transform duration-500">
+          <div className="relative rounded-2xl border border-slate-200/60 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-2xl p-6 overflow-hidden">
             {/* Mock Dashboard Top Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
-              <div className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-rose-455/80" />
-                <span className="h-3 w-3 rounded-full bg-amber-455/80" />
-                <span className="h-3 w-3 rounded-full bg-emerald-455/80" />
-              </div>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
+              <div className="w-6" /> {/* Spacer */}
               <div className="h-5 w-32 bg-slate-100 dark:bg-slate-800 rounded-full" />
               <div className="h-6 w-6 rounded-full bg-indigo-100 dark:bg-indigo-950" />
             </div>
 
             {/* Mock Dashboard Body */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               {/* Task Item 1 */}
-              <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20">
-                <div className="flex items-center gap-2">
-                  <div className="h-4.5 w-4.5 rounded border border-indigo-500/35" />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Finish Backend API</span>
+              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                <div className="flex items-center">
+                  <div className="h-5 w-5 rounded-md border border-slate-200 dark:border-slate-800 flex-shrink-0" />
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 ml-3">Finish Backend API</span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30">🔥 High</span>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30 flex items-center gap-1">
+                  <span>🔥</span> High
+                </span>
               </div>
+              
               {/* Task Item 2 */}
-              <div className="flex items-center justify-between p-3 rounded-xl border border-indigo-100/50 dark:border-indigo-900/30 bg-indigo-50/20 dark:bg-indigo-950/10">
-                <div className="flex items-center gap-2">
-                  <div className="h-4.5 w-4.5 rounded bg-indigo-600 text-white flex items-center justify-center text-[10px]">✓</div>
-                  <span className="text-xs font-medium text-slate-450 dark:text-slate-500 line-through">Buy groceries</span>
+              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                <div className="flex items-center">
+                  <div className="h-5 w-5 rounded-md bg-indigo-650 flex items-center justify-center text-white text-[10px] flex-shrink-0">✓</div>
+                  <span className="text-sm font-medium text-slate-300/40 dark:text-slate-700/40 line-through ml-3">Buy groceries</span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30">Low</span>
+                <span className="text-[10px] font-bold px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30">
+                  Low
+                </span>
               </div>
+              
               {/* Task Item 3 */}
-              <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20">
-                <div className="flex items-center gap-2">
-                  <div className="h-4.5 w-4.5 rounded border border-indigo-500/35" />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Design UI components</span>
+              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                <div className="flex items-center">
+                  <div className="h-5 w-5 rounded-md border border-slate-200 dark:border-slate-800 flex-shrink-0" />
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 ml-3">Design UI components</span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30">Medium</span>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30">
+                  Medium
+                </span>
               </div>
             </div>
           </div>
@@ -288,7 +292,7 @@ export default function LandingPage() {
           {/* Tasks listing mockup */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Card 1 */}
-            <div className="p-4 rounded-xl border border-slate-205 dark:border-slate-800/85 bg-white dark:bg-slate-900 shadow-sm">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800/85 bg-white dark:bg-slate-900 shadow-sm">
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded border border-slate-200" />
@@ -304,7 +308,7 @@ export default function LandingPage() {
             </div>
 
             {/* Card 2 */}
-            <div className="p-4 rounded-xl border border-slate-205 dark:border-slate-800/85 bg-white dark:bg-slate-900 shadow-sm opacity-70">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800/85 bg-white dark:bg-slate-900 shadow-sm opacity-70">
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded bg-indigo-600 text-white flex items-center justify-center text-[8px]">✓</div>
@@ -324,7 +328,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="mt-auto border-t border-slate-200/50 bg-white py-8 dark:border-slate-900 dark:bg-slate-950">
-        <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 dark:text-slate-555">
+        <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 dark:text-slate-500">
           <div>
             &copy; {new Date().getFullYear()} TODO APP. All rights reserved.
           </div>

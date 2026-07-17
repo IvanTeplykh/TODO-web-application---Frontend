@@ -136,44 +136,23 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                 Priority
               </label>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setPriority(3)}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
-                    priority <= 3
-                      ? "bg-emerald-50 border-emerald-300 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-400"
-                      : "bg-white border-slate-200/85 text-slate-600 hover:bg-slate-50 dark:bg-slate-800/40 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/80"
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Low
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPriority(5)}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
-                    priority > 3 && priority < 8
-                      ? "bg-amber-50 border-amber-300 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-400"
-                      : "bg-white border-slate-200/85 text-slate-600 hover:bg-slate-50 dark:bg-slate-800/40 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/80"
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  Medium
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPriority(9)}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
-                    priority >= 8
-                      ? "bg-rose-50 border-rose-300 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/30 dark:text-rose-400"
-                      : "bg-white border-slate-200/85 text-slate-600 hover:bg-slate-50 dark:bg-slate-800/40 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/80"
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-rose-500" />
-                  High
-                </button>
-              </div>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(Number(e.target.value))}
+                className="w-full rounded-xl border border-slate-200/80 bg-slate-50/30 px-4 py-2 text-sm text-slate-850 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100 dark:focus:border-indigo-500 dark:focus:bg-slate-950 cursor-pointer"
+              >
+                {[...Array(10)].map((_, i) => {
+                  const val = i + 1;
+                  let label = "Medium 🟡";
+                  if (val <= 3) label = "Low 🟢";
+                  if (val >= 8) label = "High 🔴";
+                  return (
+                    <option key={val} value={val} className="dark:bg-slate-900">
+                      {val} - {label}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
 
             {/* Due Date */}

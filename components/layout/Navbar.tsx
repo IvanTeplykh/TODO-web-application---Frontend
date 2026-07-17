@@ -6,16 +6,23 @@ import { useAuthStore } from "../../store/authStore";
 import { useTheme } from "../../context/ThemeContext";
 import { Bell, Sun, Moon, LogOut, User as UserIcon } from "lucide-react";
 import Link from "next/link";
+import { ConfirmLogoutModal } from "../auth/ConfirmLogoutModal";
 
 export function Navbar() {
   const { user, logout } = useAuthStore();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setShowDropdown(false);
+    setIsLogoutOpen(true);
+  };
+
+  const handleConfirmLogout = async () => {
     await logout();
-    router.push("/login");
+    router.push("/");
   };
 
   return (
@@ -43,20 +50,23 @@ export function Navbar() {
             )}
           </button>
 
-          <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200/60 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white">
-            <Bell className="h-[18px] w-[18px]" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500"></span>
-          </button>
-
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-2 rounded-lg border border-slate-200/60 p-1.5 pr-3 text-sm font-medium transition-all hover:bg-slate-55 dark:border-slate-800 dark:hover:bg-slate-900"
+              className="flex items-center gap-2 rounded-lg border border-slate-200/60 p-1.5 pr-3 text-sm font-medium transition-all hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
             >
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                <UserIcon className="h-3.5 w-3.5" />
-              </div>
-              <span className="text-slate-700 dark:text-slate-205 max-w-[100px] truncate">
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={user.username}
+                  className="h-6 w-6 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                  <UserIcon className="h-3.5 w-3.5" />
+                </div>
+              )}
+              <span className="text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
                 {user?.username || "Account"}
               </span>
             </button>
@@ -79,7 +89,7 @@ export function Navbar() {
                   Your Profile
                 </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={handleLogoutClick}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 transition-all hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/20"
                 >
                   <LogOut className="h-4 w-4" />
@@ -90,6 +100,12 @@ export function Navbar() {
           </div>
         </div>
       </div>
+      
+      <ConfirmLogoutModal 
+        isOpen={isLogoutOpen}
+        onClose={() => setIsLogoutOpen(false)}
+        onConfirm={handleConfirmLogout}
+      />
     </header>
   );
 }

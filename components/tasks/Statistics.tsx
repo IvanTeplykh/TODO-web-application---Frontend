@@ -22,7 +22,7 @@ export function Statistics() {
       try {
         const allRes = await tasksService.getTasks({ limit: 1, status: "all" });
         const doneRes = await tasksService.getTasks({ limit: 1, status: "done" });
-        const undoneRes = await tasksService.getTasks({ limit: 200, status: "undone" });
+        const undoneRes = await tasksService.getTasks({ limit: 100, status: "undone" });
         
         const tot = allRes.total;
         const comp = doneRes.total;
@@ -79,10 +79,6 @@ export function Statistics() {
     },
   ];
 
-  // Circular progress calculations
-  const radius = 18;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (stats.percent / 100) * circumference;
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -108,49 +104,6 @@ export function Statistics() {
           );
         })}
       </div>
-
-      {/* Completion rate card styled like the mockup (radial circle on the right) */}
-      <Card className="!p-4 border border-slate-205 dark:border-slate-800/80 shadow-sm bg-gradient-to-r from-indigo-50/20 to-cyan-50/10 dark:from-indigo-950/5 dark:to-cyan-950/5">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <h4 className="text-xs font-bold text-slate-500 dark:text-slate-450 uppercase tracking-wider">
-              Workspace Progress
-            </h4>
-            <p className="text-xs text-slate-400 dark:text-slate-500">
-              {stats.completed} of {stats.total} tasks completed
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-extrabold text-slate-800 dark:text-slate-150">
-              {stats.percent}%
-            </span>
-            <div className="relative h-12 w-12 flex items-center justify-center">
-              <svg className="absolute transform -rotate-95 w-full h-full">
-                <circle
-                  cx="24"
-                  cy="24"
-                  r={radius}
-                  className="stroke-slate-100 dark:stroke-slate-800"
-                  strokeWidth="3.5"
-                  fill="transparent"
-                />
-                <circle
-                  cx="24"
-                  cy="24"
-                  r={radius}
-                  className="stroke-indigo-600 dark:stroke-indigo-400 transition-all duration-500 ease-in-out"
-                  strokeWidth="3.5"
-                  fill="transparent"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={strokeDashoffset}
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </Card>
     </div>
   );
 }

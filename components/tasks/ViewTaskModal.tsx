@@ -8,6 +8,8 @@ import { X, Calendar, Clock, Trash2, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 
+import { ConfirmModal } from "../ui/ConfirmModal";
+
 interface ViewTaskModalProps {
   task: Task | null;
   isOpen: boolean;
@@ -18,21 +20,27 @@ interface ViewTaskModalProps {
 export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalProps) {
   const { deleteTask } = useTaskStore();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   if (!isOpen || !task) return null;
 
   const { title, description, dueDate } = getTaskFields(task);
   const overdue = isOverdue(dueDate, task.completed);
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this task?")) return;
+  const handleDeleteClick = () => {
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
       await deleteTask(task.id);
       toast.success("Task deleted successfully");
+      setIsDeleteConfirmOpen(false);
       onClose();
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to delete task");
+      setIsDeleteConfirmOpen(false);
     } finally {
       setIsDeleting(false);
     }
@@ -195,7 +203,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
             type="button"
             variant="outline"
             className="text-rose-600 border-rose-100 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:border-rose-950/30 dark:hover:bg-rose-950/20"
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             disabled={isDeleting}
             icon={<Trash2 className="h-4 w-4" />}
           >
@@ -221,6 +229,17 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

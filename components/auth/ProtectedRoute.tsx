@@ -17,7 +17,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (loading || !isAuthenticated) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-slate-955">
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <Spinner size="lg" />
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Verifying session...</p>

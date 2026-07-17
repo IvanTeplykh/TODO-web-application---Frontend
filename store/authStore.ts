@@ -4,6 +4,7 @@ import { User } from "../types/auth";
 import { authService } from "../services/auth";
 import { LoginInput, RegisterInput } from "../lib/validators";
 import { getToken, setToken, removeToken } from "../lib/auth";
+import { usersService } from "../services/users";
 
 interface AuthState {
   user: User | null;
@@ -14,6 +15,7 @@ interface AuthState {
   register: (data: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
+  updateProfile: (username: string, avatarUrl?: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -78,6 +80,20 @@ export const useAuthStore = create<AuthState>((set) => ({
     } finally {
       removeToken();
       set({ user: null, token: null, isAuthenticated: false, loading: false });
+    }
+  },
+
+  updateProfile: async (username: string, avatarUrl?: string) => {
+    set({ loading: true });
+    try {
+      const updatedUser = await usersService.updateProfile(username, avatarUrl);
+      set({ user: updatedUser, loading: false });
+    } catch (error) {
+      set({ loading: false });
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data?.detail || "Failed to update profile";
+      }
+      throw "Failed to update profile";
     }
   },
 }));

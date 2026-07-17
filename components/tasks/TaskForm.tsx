@@ -90,7 +90,7 @@ export function TaskForm({ taskToEdit, onCancelEdit }: TaskFormProps) {
                 type="range"
                 min="1"
                 max="10"
-                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-205 dark:bg-slate-800 accent-indigo-650 dark:accent-indigo-500"
+                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 dark:bg-slate-800 accent-indigo-600 dark:accent-indigo-500"
                 {...register("priority", { valueAsNumber: true })}
               />
               <span className="text-xs font-semibold text-slate-500 w-4 text-center">10</span>

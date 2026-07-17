@@ -111,7 +111,7 @@ export function Sidebar() {
               <span className="text-base">🎉</span>
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-205">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 Stay productive!
               </span>
               <span className="text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
