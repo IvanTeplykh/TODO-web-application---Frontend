@@ -9,11 +9,11 @@ export function proxy(request: NextRequest) {
   const isProtectedRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/profile");
 
   if (isAuthPage && token) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/dashboard", request.nextUrl));
   }
 
   if (isProtectedRoute && !token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.nextUrl));
   }
 
   return NextResponse.next();

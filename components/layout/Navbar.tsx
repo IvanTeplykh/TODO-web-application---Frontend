@@ -3,14 +3,12 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/authStore";
-import { useTheme } from "../../context/ThemeContext";
-import { Bell, Sun, Moon, LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { ConfirmLogoutModal } from "../auth/ConfirmLogoutModal";
 
 export function Navbar() {
   const { user, logout } = useAuthStore();
-  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
@@ -38,17 +36,6 @@ export function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <button
-            onClick={toggleTheme}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200/60 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white"
-            title="Toggle theme"
-          >
-            {theme === "light" ? (
-              <Moon className="h-[18px] w-[18px]" />
-            ) : (
-              <Sun className="h-[18px] w-[18px]" />
-            )}
-          </button>
 
           <div className="relative">
             <button

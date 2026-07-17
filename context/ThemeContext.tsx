@@ -12,26 +12,16 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme] = useState<Theme>("light");
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const activeTheme = savedTheme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    
-    document.documentElement.classList.toggle("dark", activeTheme === "dark");
-
-    const t = setTimeout(() => {
-      setTheme(activeTheme);
-    }, 0);
-
-    return () => clearTimeout(t);
+    // Force light theme on html element and disable any legacy theme choices
+    localStorage.setItem("theme", "light");
+    document.documentElement.classList.remove("dark");
   }, []);
 
   const toggleTheme = () => {
-    const nextTheme = theme === "light" ? "dark" : "light";
-    setTheme(nextTheme);
-    localStorage.setItem("theme", nextTheme);
-    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+    // No-op to disable dark mode toggling entirely
   };
 
   return (

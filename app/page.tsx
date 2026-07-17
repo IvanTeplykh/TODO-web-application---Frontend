@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import { useAuthStore } from "../store/authStore";
-import { useTheme } from "../context/ThemeContext";
 import { 
   CheckCircle2, 
   ListTodo, 
@@ -12,15 +11,12 @@ import {
   BarChart3, 
   Shield, 
   ArrowRight, 
-  Sun, 
-  Moon, 
   Zap, 
   Sparkles 
 } from "lucide-react";
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuthStore();
-  const { theme, toggleTheme } = useTheme();
 
   const features = [
     {
@@ -76,19 +72,6 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200/60 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white"
-              title="Toggle theme"
-            >
-              {theme === "light" ? (
-                <Moon className="h-[18px] w-[18px]" />
-              ) : (
-                <Sun className="h-[18px] w-[18px]" />
-              )}
-            </button>
-
             {loading ? (
               <div className="h-8 w-16 bg-slate-100 dark:bg-slate-900 rounded-lg animate-pulse" />
             ) : isAuthenticated ? (
