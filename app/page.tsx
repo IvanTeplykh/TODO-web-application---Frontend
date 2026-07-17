@@ -60,7 +60,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300 dark:bg-slate-955 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
       {/* Navigation Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white/80 backdrop-blur-md dark:border-slate-900/55 dark:bg-slate-950/80">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white dark:border-slate-900/55 dark:bg-slate-950">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-550 text-white shadow-md shadow-indigo-500/20">
