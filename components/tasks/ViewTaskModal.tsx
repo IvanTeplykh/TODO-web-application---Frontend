@@ -4,9 +4,10 @@ import React, { useState } from "react";
 import { Task } from "../../types/task";
 import { useTaskStore } from "../../store/taskStore";
 import { getTaskFields, formatDate, isOverdue } from "../../lib/taskHelpers";
-import { X, Calendar, Clock, Trash2, Edit2 } from "lucide-react";
+import { X, Calendar, Clock, Trash2, Edit2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
+import { Checkbox } from "../ui/Checkbox";
 
 import { ConfirmModal } from "../ui/ConfirmModal";
 
@@ -18,9 +19,22 @@ interface ViewTaskModalProps {
 }
 
 export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalProps) {
-  const { deleteTask } = useTaskStore();
+  const { deleteTask, toggleTask } = useTaskStore();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+
+  const handleToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!task) return;
+    setIsToggling(true);
+    try {
+      await toggleTask(task.id, e.target.checked);
+    } catch (error) {
+      toast.error(typeof error === "string" ? error : "Failed to toggle task status");
+    } finally {
+      setIsToggling(false);
+    }
+  };
 
   if (!isOpen || !task) return null;
 
@@ -120,17 +134,23 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
               <span className="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                 Status
               </span>
-              {task.completed ? (
-                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Completed
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-500">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  In Progress
-                </span>
-              )}
+              <div className="flex items-center gap-2 mt-1">
+                <Checkbox
+                  checked={task.completed}
+                  disabled={isToggling}
+                  onChange={handleToggle}
+                  id="modal-task-completed"
+                />
+                <label 
+                  htmlFor="modal-task-completed"
+                  className={`text-sm font-semibold cursor-pointer select-none ${
+                    task.completed ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-500"
+                  }`}
+                >
+                  {task.completed ? "Completed" : "In Progress"}
+                </label>
+                {isToggling && <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />}
+              </div>
             </div>
 
             {/* Due Date */}
