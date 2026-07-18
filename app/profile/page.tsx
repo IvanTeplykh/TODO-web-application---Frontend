@@ -337,12 +337,20 @@ export default function ProfilePage() {
                         required
                         icon={<UserIcon className="h-4 w-4 text-slate-400" />}
                         disabled={!isEditingUsername}
-                        className="w-full disabled:opacity-65 disabled:bg-slate-50/50 disabled:cursor-not-allowed dark:disabled:bg-slate-900/30"
+                        className={`w-full disabled:opacity-65 disabled:bg-slate-50/50 disabled:cursor-not-allowed dark:disabled:bg-slate-900/30 ${
+                          isEditingUsername
+                            ? "!border-yellow-500 focus:!ring-yellow-500/25 focus:!border-yellow-500 dark:!border-yellow-500"
+                            : ""
+                        }`}
                         rightElement={
                           <button
                             type="button"
                             onClick={() => setIsEditingUsername(!isEditingUsername)}
-                            className="p-1 rounded text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200 transition-colors focus:outline-none cursor-pointer"
+                            className={`p-1 rounded transition-colors focus:outline-none cursor-pointer ${
+                              isEditingUsername
+                                ? "text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300"
+                                : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200"
+                            }`}
                             title="Edit username"
                           >
                             <Edit2 className="h-4 w-4" />
@@ -387,7 +395,7 @@ export default function ProfilePage() {
                         type="submit"
                         variant="primary"
                         loading={isSaving}
-                        disabled={!isEditingUsername}
+                        disabled={!isEditingUsername || username.trim() === (user?.username || "")}
                         icon={<Save className="h-4.5 w-4.5" />}
                       >
                         Save Changes
