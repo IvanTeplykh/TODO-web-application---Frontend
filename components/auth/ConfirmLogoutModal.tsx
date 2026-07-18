@@ -23,7 +23,7 @@ export function ConfirmLogoutModal({ isOpen, onClose, onConfirm, isLoading = fal
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800/60">
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <LogOut className="h-4.5 w-4.5 text-rose-500" />
+            <LogOut className="h-4.5 w-4.5 text-red-500" />
             Confirm Logout
           </h2>
           <button 
@@ -56,7 +56,7 @@ export function ConfirmLogoutModal({ isOpen, onClose, onConfirm, isLoading = fal
           <Button
             type="button"
             variant="primary"
-            className="bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10"
+            className="bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-600/10"
             onClick={onConfirm}
             loading={isLoading}
             size="sm"

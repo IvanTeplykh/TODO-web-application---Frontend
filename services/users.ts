@@ -16,4 +16,10 @@ export const usersService = {
     });
     return response.data;
   },
+  verifyPassword: async (password: string): Promise<boolean> => {
+    const response = await api.post<{ valid: boolean }>("/users/verify-password", {
+      password,
+    });
+    return response.data.valid;
+  },
 };

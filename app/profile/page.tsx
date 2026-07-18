@@ -32,6 +32,9 @@ export default function ProfilePage() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [isCurrentPasswordCorrect, setIsCurrentPasswordCorrect] = useState(false);
+  const [currentPasswordError, setCurrentPasswordError] = useState("");
+  const [isCheckingPassword, setIsCheckingPassword] = useState(false);
 
   const getNewReqColor = (isMet: boolean) => {
     if (!newPassword) {
@@ -115,6 +118,34 @@ export default function ProfilePage() {
       setAvatar(user.avatar_url || "");
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!currentPassword) {
+      setIsCurrentPasswordCorrect(false);
+      setCurrentPasswordError("");
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsCheckingPassword(true);
+      try {
+        const isValid = await usersService.verifyPassword(currentPassword);
+        setIsCurrentPasswordCorrect(isValid);
+        if (!isValid) {
+          setCurrentPasswordError("Incorrect current password");
+        } else {
+          setCurrentPasswordError("");
+        }
+      } catch (error) {
+        setCurrentPasswordError("Failed to verify password");
+        setIsCurrentPasswordCorrect(false);
+      } finally {
+        setIsCheckingPassword(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [currentPassword]);
 
   const handleLogoutClick = () => {
     setIsLogoutOpen(true);
@@ -327,7 +358,7 @@ export default function ProfilePage() {
                       <Button
                         type="button"
                         variant="ghost"
-                        className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-955/20"
+                        className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20"
                         onClick={handleLogoutClick}
                         icon={<LogOut className="h-4.5 w-4.5" />}
                       >
@@ -365,6 +396,7 @@ export default function ProfilePage() {
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="••••••••"
                         icon={<Lock className="h-4 w-4 text-slate-400" />}
+                        error={currentPasswordError}
                         className="w-full"
                       />
                     </div>
@@ -385,7 +417,8 @@ export default function ProfilePage() {
                         placeholder="••••••••"
                         icon={<Lock className="h-4 w-4 text-slate-400" />}
                         error={newPasswordError}
-                        className="w-full"
+                        disabled={!isCurrentPasswordCorrect}
+                        className="w-full disabled:opacity-65 disabled:bg-slate-50/50 disabled:cursor-not-allowed dark:disabled:bg-slate-900/30"
                       />
                     </div>
 
@@ -405,7 +438,8 @@ export default function ProfilePage() {
                         placeholder="••••••••"
                         icon={<Lock className="h-4 w-4 text-slate-400" />}
                         error={confirmPasswordError}
-                        className="w-full"
+                        disabled={!isCurrentPasswordCorrect}
+                        className="w-full disabled:opacity-65 disabled:bg-slate-50/50 disabled:cursor-not-allowed dark:disabled:bg-slate-900/30"
                       />
                     </div>
 
@@ -440,6 +474,7 @@ export default function ProfilePage() {
                         type="submit"
                         variant="primary"
                         loading={isChangingPassword}
+                        disabled={!isCurrentPasswordCorrect}
                         icon={<Save className="h-4.5 w-4.5" />}
                       >
                         Update Password
