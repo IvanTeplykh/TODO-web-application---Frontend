@@ -11,7 +11,7 @@ import { DatePicker } from "../ui/DatePicker";
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmitOverride?: (e: React.FormEvent) => void;
+  onSubmitOverride?: (taskData: { title: string; priority: number; description?: string; dueDate?: string }) => void;
 }
 
 export function CreateTaskModal({ isOpen, onClose, onSubmitOverride }: CreateTaskModalProps) {
@@ -53,7 +53,12 @@ export function CreateTaskModal({ isOpen, onClose, onSubmitOverride }: CreateTas
     }
 
     if (onSubmitOverride) {
-      onSubmitOverride(e);
+      onSubmitOverride({
+        title: title.trim(),
+        priority,
+        description: description.trim() || undefined,
+        dueDate: dueDate || undefined,
+      });
       return;
     }
 

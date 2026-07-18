@@ -397,8 +397,9 @@ export default function LandingPage() {
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onSubmitOverride={() => {
+        onSubmitOverride={(taskData) => {
           setIsCreateModalOpen(false);
+          localStorage.setItem("pending_task", JSON.stringify(taskData));
           toast.info("Please register to save your tasks!");
           router.push("/register");
         }}

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { User, Mail, Lock, UserPlus } from "lucide-react";
 import { authService } from "../../services/auth";
+import { tasksService } from "../../services/tasks";
 
 export function RegisterForm() {
   const registerUser = useAuthStore((state) => state.register);
@@ -20,11 +21,22 @@ export function RegisterForm() {
   const loading = useAuthStore((state) => state.loading);
   const router = useRouter();
 
+  const [redirectAllowed, setRedirectAllowed] = React.useState(false);
+
   React.useEffect(() => {
-    if (!loading && isAuthenticated) {
+    if (typeof window !== "undefined") {
+      const hasPendingTask = !!localStorage.getItem("pending_task");
+      if (!hasPendingTask) {
+        setRedirectAllowed(true);
+      }
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!loading && isAuthenticated && redirectAllowed) {
       router.replace("/dashboard");
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, router, redirectAllowed]);
 
   const {
     register,
@@ -113,6 +125,25 @@ export function RegisterForm() {
         password: data.password,
         rememberMe: false,
       });
+
+      // Automatically create the pending task from localStorage
+      const pendingTaskStr = localStorage.getItem("pending_task");
+      if (pendingTaskStr) {
+        try {
+          const pendingTask = JSON.parse(pendingTaskStr);
+          await tasksService.createTask(
+            pendingTask.title,
+            pendingTask.priority,
+            pendingTask.description,
+            pendingTask.dueDate
+          );
+          localStorage.removeItem("pending_task");
+          toast.success("Your demo task has been saved to your workspace!");
+        } catch (taskErr) {
+          console.error("Failed to save pending task on registration:", taskErr);
+        }
+      }
+      setRedirectAllowed(true);
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Registration failed");
     }
