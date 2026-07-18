@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { ProtectedRoute } from "../../components/auth/ProtectedRoute";
 import { Navbar } from "../../components/layout/Navbar";
 import { Sidebar } from "../../components/layout/Sidebar";
@@ -20,7 +21,7 @@ import { Task } from "../../types/task";
 import { Plus } from "lucide-react";
 
 export default function DashboardPage() {
-  const { page, pages, setPage, fetchTasks } = useTaskStore();
+  const { page, pages, setPage, fetchTasks, createTask } = useTaskStore();
   
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -28,8 +29,29 @@ export default function DashboardPage() {
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    const handlePendingTask = async () => {
+      const pendingTaskStr = localStorage.getItem("pending_task");
+      if (pendingTaskStr) {
+        // Clear the item synchronously first to prevent React 18 Strict Mode double-execution
+        localStorage.removeItem("pending_task");
+        try {
+          const pendingTask = JSON.parse(pendingTaskStr);
+          await createTask(
+            pendingTask.title,
+            pendingTask.priority,
+            pendingTask.description,
+            pendingTask.dueDate
+          );
+          toast.success("Your demo task has been saved to your workspace!");
+        } catch (err) {
+          console.error("Failed to save pending task on dashboard mount:", err);
+        }
+      }
+      fetchTasks();
+    };
+
+    handlePendingTask();
+  }, [fetchTasks, createTask]);
 
   const handleOpenEdit = (task: Task) => {
     setActiveTaskForView(null);
