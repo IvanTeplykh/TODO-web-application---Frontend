@@ -14,6 +14,7 @@ import { User, Mail, Lock, UserPlus } from "lucide-react";
 
 export function RegisterForm() {
   const registerUser = useAuthStore((state) => state.register);
+  const login = useAuthStore((state) => state.login);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const loading = useAuthStore((state) => state.loading);
   const router = useRouter();
@@ -44,8 +45,12 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterInput) => {
     try {
       await registerUser(data);
-      toast.success("Account created successfully! Please sign in.");
-      router.push("/login");
+      toast.success("Account created successfully! Logging in...");
+      await login({
+        email: data.email,
+        password: data.password,
+        rememberMe: false,
+      });
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Registration failed");
     }

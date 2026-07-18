@@ -6,6 +6,7 @@ import { X, Calendar, AlertCircle, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
+import { DatePicker } from "../ui/DatePicker";
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -67,7 +68,7 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
       <div 
-        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200"
+        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl max-w-lg md:max-w-2xl w-full overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -108,9 +109,14 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-              Description (optional)
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Description (optional)
+              </label>
+              <span className={`text-[10px] ${description.length > 450 ? "text-amber-500 font-bold" : "text-slate-400"}`}>
+                {description.length}/500
+              </span>
+            </div>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -119,9 +125,6 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
               maxLength={500}
               className="w-full rounded-xl border border-slate-200/80 bg-slate-50/30 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100 dark:focus:border-indigo-500 dark:focus:bg-slate-950"
             />
-            <div className="flex justify-end text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-              {description.length}/500
-            </div>
           </div>
 
           {/* Priority and Due Date Row */}
@@ -179,15 +182,11 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                 Due Date
               </label>
-              <div className="relative flex items-center">
-                <input
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200/80 bg-slate-50/30 pl-4 pr-10 py-2 text-sm text-slate-800 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100 dark:focus:border-indigo-500 dark:focus:bg-slate-950 [color-scheme:light] dark:[color-scheme:dark]"
-                />
-                <Calendar className="absolute right-3 h-4 w-4 text-slate-400 pointer-events-none" />
-              </div>
+              <DatePicker
+                value={dueDate}
+                onChange={(val) => setDueDate(val)}
+                className="w-full"
+              />
             </div>
           </div>
 

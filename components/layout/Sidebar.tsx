@@ -63,12 +63,12 @@ export function Sidebar() {
   return (
     <aside
       className={`relative border-r border-slate-200/50 bg-slate-50/50 transition-all duration-300 dark:border-slate-800/50 dark:bg-slate-900/10 flex flex-col ${
-        collapsed ? "w-16" : "w-64"
+        collapsed ? "w-16" : "w-16 md:w-64"
       }`}
     >
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-6 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white z-20"
+        className="absolute -right-3 top-6 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-955 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white z-20"
       >
         {collapsed ? (
           <ChevronRight className="h-3 w-3" />
@@ -86,14 +86,14 @@ export function Sidebar() {
               onClick={item.onClick}
               className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative ${
                 item.active
-                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400"
+                  ? "bg-transparent text-slate-500 dark:text-slate-400 md:bg-indigo-50 md:text-indigo-700 md:dark:bg-indigo-950/20 md:dark:text-indigo-400"
                   : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200"
               }`}
             >
               <Icon className={`h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-105 ${
                 item.active ? "text-indigo-600 dark:text-indigo-400" : ""
               }`} />
-              {!collapsed && <span>{item.label}</span>}
+              {!collapsed && <span className="hidden md:inline">{item.label}</span>}
               {collapsed && (
                 <div className="absolute left-full ml-2.5 rounded-lg bg-slate-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap">
                   {item.label}
@@ -105,9 +105,9 @@ export function Sidebar() {
       </nav>
 
       {!collapsed && (
-        <div className="p-4 mt-auto">
+        <div className="p-4 mt-auto hidden md:block">
           <div className="rounded-2xl bg-indigo-50/50 p-4 border border-indigo-100/50 dark:bg-indigo-950/10 dark:border-indigo-900/20 text-center flex flex-col items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md dark:bg-indigo-500">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-650 text-white shadow-md dark:bg-indigo-500">
               <span className="text-base">🎉</span>
             </div>
             <div className="flex flex-col gap-0.5">
