@@ -68,6 +68,9 @@ export function RegisterForm() {
   const [isCheckingEmail, setIsCheckingEmail] = React.useState(false);
   const [emailExistsError, setEmailExistsError] = React.useState("");
 
+  const isEmailFormatValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+  const isEmailVerified = emailVal && isEmailFormatValid && !errors.email && !isCheckingEmail && !emailExistsError;
+
   React.useEffect(() => {
     if (!emailVal || errors.email) {
       setEmailExistsError("");
@@ -121,7 +124,7 @@ export function RegisterForm() {
         id="username"
         label="Username"
         type="text"
-        placeholder="johndoe"
+        placeholder="Enter your name"
         icon={<User className="h-4.5 w-4.5" />}
         error={(usernameVal || isSubmitted) ? errors.username?.message : undefined}
         maxLength={25}
@@ -130,9 +133,14 @@ export function RegisterForm() {
 
       <Input
         id="email"
-        label="Email Address"
+        label={
+          <span className="flex items-center gap-0.5">
+            Email Address
+            {isEmailVerified && <span className="text-emerald-500 font-black text-sm ml-0.5 leading-none animate-in fade-in zoom-in duration-200">*</span>}
+          </span>
+        }
         type="email"
-        placeholder="you@example.com"
+        placeholder="you@mail.com"
         icon={<Mail className="h-4.5 w-4.5" />}
         error={emailExistsError || ((emailVal || isSubmitted) ? errors.email?.message : undefined)}
         {...register("email")}
