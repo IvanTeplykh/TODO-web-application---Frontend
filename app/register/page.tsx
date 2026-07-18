@@ -3,14 +3,23 @@
 import React from "react";
 import { RegisterForm } from "../../components/auth/RegisterForm";
 import { Card } from "../../components/ui/Card";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
+
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 dark:bg-slate-950 p-6 relative overflow-hidden">
+    <div 
+      onClick={() => router.push("/")}
+      className="flex min-h-screen w-full items-center justify-center bg-slate-50 dark:bg-slate-950 p-6 relative overflow-hidden cursor-pointer"
+    >
       <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl dark:bg-indigo-500/5"></div>
       <div className="absolute -right-20 -bottom-20 h-80 w-80 rounded-full bg-cyan-500/10 blur-3xl dark:bg-cyan-500/5"></div>
 
-      <div className="w-full max-w-md relative z-10">
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md relative z-10 cursor-default"
+      >
         <div className="flex flex-col items-center gap-2 mb-8 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-550 to-cyan-500 text-white shadow-lg shadow-indigo-500/20">
             <span className="text-2xl font-bold">T</span>
