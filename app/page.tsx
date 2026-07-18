@@ -1,8 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useAuthStore } from "../store/authStore";
+import { CreateTaskModal } from "../components/tasks/CreateTaskModal";
 import {
   CheckCircle2,
   ListTodo,
@@ -13,10 +16,13 @@ import {
   ArrowRight,
   Zap,
   Sparkles,
+  Plus,
 } from "lucide-react";
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuthStore();
+  const router = useRouter();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const features = [
     {
@@ -62,7 +68,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300 dark:bg-slate-955 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-gradient-to-tr from-indigo-50/50 via-slate-50 to-cyan-50/50 text-slate-800 transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/30 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
       {/* Navigation Header */}
       <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white/80 backdrop-blur-md dark:border-slate-900/55 dark:bg-slate-950/80">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
@@ -133,21 +139,21 @@ export default function LandingPage() {
               <span>Get Started</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <a
-              href="#preview"
-              className="w-full sm:w-auto inline-flex h-11 items-center justify-center rounded-xl border border-slate-200/80 bg-white px-6 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="w-full sm:w-auto inline-flex h-11 items-center justify-center rounded-xl border border-indigo-200/80 bg-indigo-50/50 dark:border-indigo-900/40 dark:bg-indigo-950/20 px-6 font-bold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all gap-1.5 cursor-pointer"
             >
-              Live Demo
-            </a>
+              <Plus className="h-4 w-4" />
+              <span>Create Note</span>
+            </button>
           </div>
         </div>
 
         {/* Hero Dashboard Preview Mockup (Aesthetic CSS Representation) */}
-        <div className="lg:col-span-6 relative w-full overflow-hidden select-none">
-          <div className="absolute -top-12 -left-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="lg:col-span-6 relative w-full select-none py-16 md:py-20 flex items-center justify-center">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-tr from-indigo-500/15 to-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative rounded-2xl border border-slate-200/60 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-2xl p-6 overflow-hidden">
+          <div className="relative w-full max-w-[540px] rounded-2xl border border-slate-200/60 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-2xl p-7 md:p-8 overflow-hidden transform -rotate-[25deg] hover:-rotate-[20deg] transition-transform duration-500 ease-out">
             {/* Mock Dashboard Top Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
               <div className="w-6" /> {/* Spacer */}
@@ -387,6 +393,16 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <CreateTaskModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmitOverride={() => {
+          setIsCreateModalOpen(false);
+          toast.info("Please register to save your tasks!");
+          router.push("/register");
+        }}
+      />
     </div>
   );
 }

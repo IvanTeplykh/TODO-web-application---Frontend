@@ -11,9 +11,10 @@ import { DatePicker } from "../ui/DatePicker";
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubmitOverride?: (e: React.FormEvent) => void;
 }
 
-export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
+export function CreateTaskModal({ isOpen, onClose, onSubmitOverride }: CreateTaskModalProps) {
   const { createTask } = useTaskStore();
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState("");
@@ -48,6 +49,11 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
     }
     if (title.trim().length > 100) {
       setTitleError("Task title cannot exceed 100 characters");
+      return;
+    }
+
+    if (onSubmitOverride) {
+      onSubmitOverride(e);
       return;
     }
 
