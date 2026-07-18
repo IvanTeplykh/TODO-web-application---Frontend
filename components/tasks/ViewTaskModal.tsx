@@ -19,16 +19,18 @@ interface ViewTaskModalProps {
 }
 
 export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalProps) {
-  const { deleteTask, toggleTask } = useTaskStore();
+  const { deleteTask, toggleTask, tasks } = useTaskStore();
+  const currentTask = task ? (tasks.find((t) => t.id === task.id) || task) : null;
+
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
 
   const handleToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!task) return;
+    if (!currentTask) return;
     setIsToggling(true);
     try {
-      await toggleTask(task.id, e.target.checked);
+      await toggleTask(currentTask.id, e.target.checked);
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to toggle task status");
     } finally {
@@ -36,10 +38,10 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
     }
   };
 
-  if (!isOpen || !task) return null;
+  if (!isOpen || !currentTask) return null;
 
-  const { title, description, dueDate } = getTaskFields(task);
-  const overdue = isOverdue(dueDate, task.completed);
+  const { title, description, dueDate } = getTaskFields(currentTask);
+  const overdue = isOverdue(dueDate, currentTask.completed);
 
   const handleDeleteClick = () => {
     setIsDeleteConfirmOpen(true);
@@ -48,7 +50,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteTask(task.id);
+      await deleteTask(currentTask.id);
       toast.success("Task deleted successfully");
       setIsDeleteConfirmOpen(false);
       onClose();
@@ -64,11 +66,11 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
   let priorityLabel = "Low";
   let priorityColor = "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
   let priorityDot = "bg-emerald-500";
-  if (task.priority >= 8) {
+  if (currentTask.priority >= 8) {
     priorityLabel = "High";
     priorityColor = "bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20";
     priorityDot = "bg-rose-500";
-  } else if (task.priority >= 4) {
+  } else if (currentTask.priority >= 4) {
     priorityLabel = "Medium";
     priorityColor = "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
     priorityDot = "bg-amber-500";
@@ -77,7 +79,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
       <div 
-        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200"
+        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl max-w-lg md:max-w-2xl w-full overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -112,7 +114,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
               <span className="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Description
               </span>
-              <p className="text-sm text-slate-650 dark:text-slate-300 leading-relaxed whitespace-pre-wrap bg-slate-50/50 dark:bg-slate-950/20 p-3 rounded-xl border border-slate-100/50 dark:border-slate-800/40">
+              <p className="text-sm text-slate-650 dark:text-slate-300 leading-relaxed whitespace-pre-wrap bg-slate-50/50 dark:bg-slate-955/20 p-3 rounded-xl border border-slate-100/50 dark:border-slate-800/40">
                 {description}
               </p>
             </div>
@@ -121,7 +123,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
               <span className="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Description
               </span>
-              <p className="text-sm text-slate-400 dark:text-slate-500 italic">
+              <p className="text-sm text-slate-400 dark:text-slate-550 italic">
                 No description provided.
               </p>
             </div>
@@ -136,7 +138,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
               </span>
               <div className="flex items-center gap-2 mt-1">
                 <Checkbox
-                  checked={task.completed}
+                  checked={currentTask.completed}
                   disabled={isToggling}
                   onChange={handleToggle}
                   id="modal-task-completed"
@@ -144,10 +146,10 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
                 <label 
                   htmlFor="modal-task-completed"
                   className={`text-sm font-semibold cursor-pointer select-none ${
-                    task.completed ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-500"
+                    currentTask.completed ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-500"
                   }`}
                 >
-                  {task.completed ? "Completed" : "In Progress"}
+                  {currentTask.completed ? "Completed" : "In Progress"}
                 </label>
                 {isToggling && <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />}
               </div>
@@ -185,7 +187,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
               <div className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
                 <Clock className="h-4 w-4 text-slate-400" />
                 <span>
-                  {new Date(task.created_at).toLocaleDateString("en-US", {
+                  {new Date(currentTask.created_at).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
                     year: "numeric",
@@ -204,7 +206,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
               <div className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
                 <Clock className="h-4 w-4 text-slate-400" />
                 <span>
-                  {new Date(task.created_at).toLocaleDateString("en-US", {
+                  {new Date(currentTask.updated_at || currentTask.created_at).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
                     year: "numeric",
@@ -241,7 +243,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
             <Button
               type="button"
               variant="primary"
-              onClick={() => onEdit(task)}
+              onClick={() => onEdit(currentTask)}
               icon={<Edit2 className="h-4 w-4" />}
             >
               Edit Task

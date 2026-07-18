@@ -16,6 +16,7 @@ interface CreateTaskModalProps {
 export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
   const { createTask } = useTaskStore();
   const [title, setTitle] = useState("");
+  const [titleError, setTitleError] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<number>(5); // Default is Medium (5)
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
@@ -23,6 +24,15 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    setTitle("");
+    setTitleError("");
+    setDescription("");
+    setPriority(5);
+    setDueDate("");
+    onClose();
+  };
 
   const getPriorityText = (val: number) => {
     if (val <= 3) return "Low 🟢";
@@ -33,11 +43,11 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      toast.error("Task title is required");
+      setTitleError("Task title is required");
       return;
     }
     if (title.trim().length > 100) {
-      toast.error("Task title cannot exceed 100 characters");
+      setTitleError("Task title cannot exceed 100 characters");
       return;
     }
 
@@ -50,14 +60,7 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
         dueDate || undefined
       );
       toast.success("Task created successfully");
-      
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setPriority(5);
-      setDueDate("");
-      
-      onClose();
+      handleClose();
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to create task");
     } finally {
@@ -77,7 +80,7 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
             Create New Task
           </h2>
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
           >
             <X className="h-5 w-5" />
@@ -99,10 +102,13 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
             <Input
               id="task-title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (e.target.value.trim()) setTitleError("");
+              }}
               placeholder="What needs to be done? (max 100 chars)"
-              required
               maxLength={100}
+              error={titleError}
               className="w-full"
             />
           </div>
@@ -195,7 +201,7 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isSubmitting}
             >
               Cancel

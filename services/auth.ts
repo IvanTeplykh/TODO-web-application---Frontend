@@ -29,6 +29,13 @@ export const authService = {
     return response.data;
   },
 
+  checkEmail: async (email: string): Promise<{ exists: boolean }> => {
+    const response = await api.get<{ exists: boolean }>("/auth/check-email", {
+      params: { email },
+    });
+    return response.data;
+  },
+
   me: async (): Promise<User> => {
     const response = await api.get<User>("/auth/me");
     return response.data;

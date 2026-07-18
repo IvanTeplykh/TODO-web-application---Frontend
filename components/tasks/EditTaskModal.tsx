@@ -20,12 +20,18 @@ interface EditTaskModalProps {
 export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
   const { updateTask } = useTaskStore();
   const [title, setTitle] = useState("");
+  const [titleError, setTitleError] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<number>(5);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [dueDate, setDueDate] = useState("");
   const [completed, setCompleted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleClose = () => {
+    setTitleError("");
+    onClose();
+  };
 
   const getPriorityText = (val: number) => {
     if (val <= 3) return "Low 🟢";
@@ -42,6 +48,7 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
       setPriority(task.priority);
       setDueDate(parsed.dueDate || "");
       setCompleted(task.completed);
+      setTitleError("");
     }
   }, [task, isOpen]);
 
@@ -50,11 +57,11 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      toast.error("Task title is required");
+      setTitleError("Task title is required");
       return;
     }
     if (title.trim().length > 100) {
-      toast.error("Task title cannot exceed 100 characters");
+      setTitleError("Task title cannot exceed 100 characters");
       return;
     }
 
@@ -69,7 +76,7 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
         dueDate || undefined
       );
       toast.success("Task updated successfully");
-      onClose();
+      handleClose();
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to update task");
     } finally {
@@ -89,7 +96,7 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
             Edit Task
           </h2>
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
           >
             <X className="h-5 w-5" />
@@ -111,10 +118,13 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
             <Input
               id="edit-task-title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (e.target.value.trim()) setTitleError("");
+              }}
               placeholder="What needs to be done? (max 100 chars)"
-              required
               maxLength={100}
+              error={titleError}
               className="w-full"
             />
           </div>
@@ -222,7 +232,7 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isSubmitting}
             >
               Cancel
