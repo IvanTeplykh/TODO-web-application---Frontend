@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { User as UserIcon, Mail, LogOut, Camera, Trash2, Save, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmLogoutModal } from "../../components/auth/ConfirmLogoutModal";
+import { usersService } from "../../services/users";
 
 export default function ProfilePage() {
   const { user, logout, updateProfile } = useAuthStore();
@@ -24,6 +25,89 @@ export default function ProfilePage() {
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [newPasswordError, setNewPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
+  const getNewReqColor = (isMet: boolean) => {
+    if (!newPassword) {
+      return {
+        text: "text-slate-400 dark:text-slate-500",
+        dot: "bg-slate-300 dark:bg-slate-700",
+      };
+    }
+    return isMet
+      ? { text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" }
+      : { text: "text-rose-500/90 dark:text-rose-400/90", dot: "bg-rose-500" };
+  };
+
+  const reqLen = getNewReqColor(newPassword.length >= 8);
+  const reqUpper = getNewReqColor(/[A-Z]/.test(newPassword));
+  const reqNumber = getNewReqColor(/[0-9]/.test(newPassword));
+  const reqSpecial = getNewReqColor(/[^A-Za-z0-9]/.test(newPassword));
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNewPasswordError("");
+    setConfirmPasswordError("");
+
+    if (!currentPassword) {
+      toast.error("Current password is required");
+      return;
+    }
+
+    if (!newPassword) {
+      setNewPasswordError("New password is required");
+      return;
+    }
+
+    if (!/^[ -~]*$/.test(newPassword)) {
+      setNewPasswordError("Only English characters, numbers and standard symbols are allowed");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setNewPasswordError("Password must be at least 8 characters");
+      return;
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      setNewPasswordError("Password must contain at least one uppercase letter");
+      return;
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      setNewPasswordError("Password must contain at least one number");
+      return;
+    }
+
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      setNewPasswordError("Password must contain at least one special character");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setConfirmPasswordError("Passwords do not match");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await usersService.changePassword(currentPassword, newPassword);
+      toast.success("Password changed successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      toast.error(typeof error === "string" ? error : "Failed to change password");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -193,72 +277,177 @@ export default function ProfilePage() {
                 </p>
               </Card>
 
-              {/* Profile Details Form Card */}
-              <Card className="lg:col-span-2 border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-450 dark:text-slate-500 mb-6">
-                  Personal Details
-                </h3>
+              {/* Profile Details and Password Forms Column */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Profile Details Form Card */}
+                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500 mb-6">
+                    Personal Details
+                  </h3>
 
-                <form onSubmit={handleSave} className="space-y-5">
-                  {/* Username Input */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-                      Username
-                    </label>
-                    <Input
-                      id="profile-username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Enter your username"
-                      required
-                      icon={<UserIcon className="h-4 w-4 text-slate-400" />}
-                      className="w-full"
-                    />
-                  </div>
-
-                  {/* Email Read-only Input */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        Email Address
+                  <form onSubmit={handleSave} className="space-y-5">
+                    {/* Username Input */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        Username
                       </label>
-                      <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase">
-                        <Lock className="h-2.5 w-2.5" /> Read-only
-                      </span>
+                      <Input
+                        id="profile-username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Enter your username"
+                        required
+                        icon={<UserIcon className="h-4 w-4 text-slate-400" />}
+                        className="w-full"
+                      />
                     </div>
-                    <Input
-                      id="profile-email"
-                      value={user?.email || ""}
-                      readOnly
-                      disabled
-                      icon={<Mail className="h-4 w-4 text-slate-400" />}
-                      className="w-full opacity-65 bg-slate-50/50 cursor-not-allowed dark:bg-slate-900/30"
-                    />
-                  </div>
 
-                  {/* Save Profile Button */}
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/20"
-                      onClick={handleLogoutClick}
-                      icon={<LogOut className="h-4.5 w-4.5" />}
-                    >
-                      Log Out
-                    </Button>
+                    {/* Email Read-only Input */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          Email Address
+                        </label>
+                        <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase">
+                          <Lock className="h-2.5 w-2.5" /> Read-only
+                        </span>
+                      </div>
+                      <Input
+                        id="profile-email"
+                        value={user?.email || ""}
+                        readOnly
+                        disabled
+                        icon={<Mail className="h-4 w-4 text-slate-400" />}
+                        className="w-full opacity-65 bg-slate-50/50 cursor-not-allowed dark:bg-slate-900/30"
+                      />
+                    </div>
 
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      loading={isSaving}
-                      icon={<Save className="h-4.5 w-4.5" />}
-                    >
-                      Save Changes
-                    </Button>
-                  </div>
-                </form>
-              </Card>
+                    {/* Save Profile Button */}
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-955/20"
+                        onClick={handleLogoutClick}
+                        icon={<LogOut className="h-4.5 w-4.5" />}
+                      >
+                        Log Out
+                      </Button>
+
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        loading={isSaving}
+                        icon={<Save className="h-4.5 w-4.5" />}
+                      >
+                        Save Changes
+                      </Button>
+                    </div>
+                  </form>
+                </Card>
+
+                {/* Change Password Card */}
+                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500 mb-6">
+                    Change Password
+                  </h3>
+
+                  <form onSubmit={handlePasswordChange} className="space-y-5">
+                    {/* Current Password */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        Current Password
+                      </label>
+                      <Input
+                        id="current-password"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="••••••••"
+                        icon={<Lock className="h-4 w-4 text-slate-400" />}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* New Password */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        New Password
+                      </label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => {
+                          setNewPassword(e.target.value);
+                          if (e.target.value.trim()) setNewPasswordError("");
+                        }}
+                        placeholder="••••••••"
+                        icon={<Lock className="h-4 w-4 text-slate-400" />}
+                        error={newPasswordError}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Confirm New Password */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        Confirm New Password
+                      </label>
+                      <Input
+                        id="confirm-new-password"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                          if (e.target.value.trim()) setConfirmPasswordError("");
+                        }}
+                        placeholder="••••••••"
+                        icon={<Lock className="h-4 w-4 text-slate-400" />}
+                        error={confirmPasswordError}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Password requirements checklist */}
+                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900/60 p-3 border border-slate-100 dark:border-slate-800 space-y-1.5">
+                      <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                        Password must contain:
+                      </span>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] font-medium">
+                        <div className={`flex items-center gap-1.5 transition-colors duration-200 ${reqLen.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${reqLen.dot}`} />
+                          Min. 8 characters
+                        </div>
+                        <div className={`flex items-center gap-1.5 transition-colors duration-200 ${reqUpper.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${reqUpper.dot}`} />
+                          One uppercase letter
+                        </div>
+                        <div className={`flex items-center gap-1.5 transition-colors duration-200 ${reqNumber.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${reqNumber.dot}`} />
+                          One number
+                        </div>
+                        <div className={`flex items-center gap-1.5 transition-colors duration-200 ${reqSpecial.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${reqSpecial.dot}`} />
+                          One special char
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="flex items-center justify-end pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        loading={isChangingPassword}
+                        icon={<Save className="h-4.5 w-4.5" />}
+                      >
+                        Update Password
+                      </Button>
+                    </div>
+                  </form>
+                </Card>
+              </div>
             </div>
           </main>
         </div>
