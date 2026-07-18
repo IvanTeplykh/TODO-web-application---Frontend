@@ -10,7 +10,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { useAuthStore } from "../../store/authStore";
 import { useRouter } from "next/navigation";
-import { User as UserIcon, Mail, LogOut, Camera, Trash2, Save, Lock } from "lucide-react";
+import { User as UserIcon, Mail, LogOut, Camera, Trash2, Save, Lock, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmLogoutModal } from "../../components/auth/ConfirmLogoutModal";
 import { usersService } from "../../services/users";
@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [username, setUsername] = useState("");
   const [avatar, setAvatar] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,6 +66,11 @@ export default function ProfilePage() {
 
     if (!newPassword) {
       setNewPasswordError("New password is required");
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      setNewPasswordError("New password must be different from current password");
       return;
     }
 
@@ -208,6 +214,7 @@ export default function ProfilePage() {
     try {
       await updateProfile(username.trim(), avatar || undefined);
       toast.success("Profile updated successfully!");
+      setIsEditingUsername(false);
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to update profile");
     } finally {
@@ -329,7 +336,18 @@ export default function ProfilePage() {
                         placeholder="Enter your username"
                         required
                         icon={<UserIcon className="h-4 w-4 text-slate-400" />}
-                        className="w-full"
+                        disabled={!isEditingUsername}
+                        className="w-full disabled:opacity-65 disabled:bg-slate-50/50 disabled:cursor-not-allowed dark:disabled:bg-slate-900/30"
+                        rightElement={
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingUsername(!isEditingUsername)}
+                            className="p-1 rounded text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200 transition-colors focus:outline-none cursor-pointer"
+                            title="Edit username"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </button>
+                        }
                       />
                     </div>
 
@@ -369,6 +387,7 @@ export default function ProfilePage() {
                         type="submit"
                         variant="primary"
                         loading={isSaving}
+                        disabled={!isEditingUsername}
                         icon={<Save className="h-4.5 w-4.5" />}
                       >
                         Save Changes
@@ -411,8 +430,15 @@ export default function ProfilePage() {
                         type="password"
                         value={newPassword}
                         onChange={(e) => {
-                          setNewPassword(e.target.value);
-                          if (e.target.value.trim()) setNewPasswordError("");
+                          const val = e.target.value;
+                          setNewPassword(val);
+                          if (val.trim()) {
+                            if (val === currentPassword) {
+                              setNewPasswordError("New password must be different from current password");
+                            } else {
+                              setNewPasswordError("");
+                            }
+                          }
                         }}
                         placeholder="••••••••"
                         icon={<Lock className="h-4 w-4 text-slate-400" />}
