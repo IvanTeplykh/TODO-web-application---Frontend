@@ -337,7 +337,7 @@ export default function ProfilePage() {
                         type="button"
                         variant="primary"
                         size="sm"
-                        className="w-full text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                        className="w-full h-9 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
                         onClick={handleSavePhoto}
                         loading={isSavingPhoto}
                         icon={<Save className="h-3.5 w-3.5" />}
@@ -348,7 +348,7 @@ export default function ProfilePage() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="w-full text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        className="w-full h-9 text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                         onClick={handleCancelPhotoChange}
                         disabled={isSavingPhoto}
                       >
@@ -361,10 +361,11 @@ export default function ProfilePage() {
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="w-full text-xs font-semibold"
+                        className="w-full h-9 text-xs font-semibold"
                         onClick={triggerFileInput}
+                        icon={<Camera className="h-3.5 w-3.5" />}
                       >
-                        Upload Photo
+                        {avatar ? "Change Photo" : "Upload Photo"}
                       </Button>
                       
                       {avatar && (
@@ -372,7 +373,7 @@ export default function ProfilePage() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="w-full text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                          className="w-full h-9 text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
                           onClick={handleRemovePhotoClick}
                           icon={<Trash2 className="h-3.5 w-3.5" />}
                         >
