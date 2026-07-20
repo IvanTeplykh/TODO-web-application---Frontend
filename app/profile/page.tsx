@@ -22,10 +22,13 @@ export default function ProfilePage() {
   const [username, setUsername] = useState("");
   const [avatar, setAvatar] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingPhoto, setIsSavingPhoto] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isPhotoChanged = avatar !== (user?.avatar_url || "");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -181,7 +184,7 @@ export default function ProfilePage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatar(reader.result as string);
-        toast.success("Photo selected");
+        toast.info("Photo selected. Click 'Save Changes' to update profile photo.");
       };
       reader.readAsDataURL(file);
     }
@@ -196,7 +199,29 @@ export default function ProfilePage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-    toast.info("Profile photo cleared");
+    toast.info("Photo cleared. Click 'Save Changes' to apply.");
+  };
+
+  const handleCancelPhotoChange = () => {
+    setAvatar(user?.avatar_url || "");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSavePhoto = async () => {
+    setIsSavingPhoto(true);
+    try {
+      await updateProfile(user?.username || username, avatar || undefined);
+      toast.success("Profile photo updated successfully!");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      toast.error(typeof error === "string" ? error : "Failed to update profile photo");
+    } finally {
+      setIsSavingPhoto(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -286,27 +311,55 @@ export default function ProfilePage() {
                 />
 
                 <div className="flex flex-col gap-2 w-full mt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs font-semibold"
-                    onClick={triggerFileInput}
-                  >
-                    Upload Photo
-                  </Button>
-                  
-                  {avatar && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="w-full text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
-                      onClick={handleRemoveAvatar}
-                      icon={<Trash2 className="h-3.5 w-3.5" />}
-                    >
-                      Remove Photo
-                    </Button>
+                  {isPhotoChanged ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="primary"
+                        size="sm"
+                        className="w-full text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                        onClick={handleSavePhoto}
+                        loading={isSavingPhoto}
+                        icon={<Save className="h-3.5 w-3.5" />}
+                      >
+                        Save Changes
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        onClick={handleCancelPhotoChange}
+                        disabled={isSavingPhoto}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs font-semibold"
+                        onClick={triggerFileInput}
+                      >
+                        Upload Photo
+                      </Button>
+                      
+                      {avatar && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="w-full text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                          onClick={handleRemoveAvatar}
+                          icon={<Trash2 className="h-3.5 w-3.5" />}
+                        >
+                          Remove Photo
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
                 
