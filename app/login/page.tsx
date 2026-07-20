@@ -8,6 +8,16 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const router = useRouter();
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        router.push("/");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [router]);
+
   return (
     <div 
       onClick={() => router.push("/")}
