@@ -10,7 +10,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { useAuthStore } from "../../store/authStore";
 import { useRouter } from "next/navigation";
-import { User as UserIcon, Mail, LogOut, Camera, Trash2, Save, Lock, Edit2, Loader2 } from "lucide-react";
+import { User as UserIcon, Mail, LogOut, Camera, Trash2, Save, Lock, Edit2, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmLogoutModal } from "../../components/auth/ConfirmLogoutModal";
 import { usersService } from "../../services/users";
@@ -429,12 +429,16 @@ export default function ProfilePage() {
                             onClick={() => setIsEditingUsername(!isEditingUsername)}
                             className={`p-1.5 rounded-md transition-all duration-200 focus:outline-none cursor-pointer flex items-center justify-center font-medium ${
                               isEditingUsername
-                                ? "bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700 shadow-sm focus:ring-2 focus:ring-amber-500/30"
+                                ? "bg-rose-500 hover:bg-rose-600 text-white dark:bg-rose-600 dark:hover:bg-rose-700 focus:ring-2 focus:ring-rose-500/30"
                                 : "bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-md shadow-indigo-600/30 focus:ring-2 focus:ring-indigo-500/40"
                             }`}
                             title={isEditingUsername ? "Cancel editing username" : "Click here to edit username"}
                           >
-                            <Edit2 className="h-3.5 w-3.5" />
+                            {isEditingUsername ? (
+                              <X className="h-3.5 w-3.5" />
+                            ) : (
+                              <Edit2 className="h-3.5 w-3.5" />
+                            )}
                           </button>
                         }
                       />
