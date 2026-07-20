@@ -75,7 +75,6 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
         description.trim() || undefined,
         dueDate || undefined
       );
-      toast.success("Task updated successfully");
       handleClose();
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to update task");

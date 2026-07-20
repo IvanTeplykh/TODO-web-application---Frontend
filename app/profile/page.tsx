@@ -166,7 +166,6 @@ export default function ProfilePage() {
     setIsLoggingOut(true);
     try {
       await logout();
-      toast.success("Successfully logged out");
       router.push("/");
     } catch {
       toast.error("Logout failed");
@@ -186,7 +185,6 @@ export default function ProfilePage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatar(reader.result as string);
-        toast.info("Photo selected. Click 'Save Changes' to update profile photo.");
       };
       reader.readAsDataURL(file);
     }
@@ -208,7 +206,6 @@ export default function ProfilePage() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      toast.success("Profile photo removed successfully!");
       setIsDeletePhotoOpen(false);
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to remove profile photo");
@@ -228,7 +225,6 @@ export default function ProfilePage() {
     setIsSavingPhoto(true);
     try {
       await updateProfile(user?.username || username, avatar || undefined);
-      toast.success("Profile photo updated successfully!");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -253,7 +249,6 @@ export default function ProfilePage() {
     setIsSaving(true);
     try {
       await updateProfile(username.trim(), avatar || undefined);
-      toast.success("Profile updated successfully!");
       setIsEditingUsername(false);
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to update profile");

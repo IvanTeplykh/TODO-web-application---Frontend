@@ -33,7 +33,6 @@ export function TaskItem({ task, onEdit }: TaskItemProps) {
     setIsDeleting(true);
     try {
       await deleteTask(task.id);
-      toast.success("Task deleted successfully");
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to delete task");
       setIsDeleting(false);

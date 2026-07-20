@@ -70,7 +70,6 @@ export function CreateTaskModal({ isOpen, onClose, onSubmitOverride }: CreateTas
         description.trim() || undefined,
         dueDate || undefined
       );
-      toast.success("Task created successfully");
       handleClose();
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Failed to create task");

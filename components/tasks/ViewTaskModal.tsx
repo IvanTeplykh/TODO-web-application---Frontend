@@ -51,7 +51,6 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
     setIsDeleting(true);
     try {
       await deleteTask(currentTask.id);
-      toast.success("Task deleted successfully");
       setIsDeleteConfirmOpen(false);
       onClose();
     } catch (error) {
