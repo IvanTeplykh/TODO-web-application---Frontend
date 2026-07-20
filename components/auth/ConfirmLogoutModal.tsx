@@ -9,9 +9,22 @@ interface ConfirmLogoutModalProps {
   onClose: () => void;
   onConfirm: () => void;
   isLoading?: boolean;
+  title?: string;
+  description?: string;
+  confirmText?: string;
+  icon?: React.ReactNode;
 }
 
-export function ConfirmLogoutModal({ isOpen, onClose, onConfirm, isLoading = false }: ConfirmLogoutModalProps) {
+export function ConfirmLogoutModal({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  isLoading = false,
+  title = "Confirm Logout",
+  description = "Are you sure you want to log out of your account? Any unsaved changes may be lost.",
+  confirmText = "Log Out",
+  icon = <LogOut className="h-4.5 w-4.5 text-red-500" />,
+}: ConfirmLogoutModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -23,8 +36,8 @@ export function ConfirmLogoutModal({ isOpen, onClose, onConfirm, isLoading = fal
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800/60">
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <LogOut className="h-4.5 w-4.5 text-red-500" />
-            Confirm Logout
+            {icon}
+            {title}
           </h2>
           <button 
             onClick={onClose}
@@ -37,8 +50,8 @@ export function ConfirmLogoutModal({ isOpen, onClose, onConfirm, isLoading = fal
 
         {/* Body */}
         <div className="p-6">
-          <p className="text-xs text-slate-550 dark:text-slate-400 leading-relaxed font-medium">
-            Are you sure you want to log out of your account? Any unsaved changes may be lost.
+          <p className="text-xs text-slate-555 dark:text-slate-400 leading-relaxed font-medium">
+            {description}
           </p>
         </div>
 
@@ -61,7 +74,7 @@ export function ConfirmLogoutModal({ isOpen, onClose, onConfirm, isLoading = fal
             loading={isLoading}
             size="sm"
           >
-            Log Out
+            {confirmText}
           </Button>
         </div>
       </div>

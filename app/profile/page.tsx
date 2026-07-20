@@ -26,6 +26,8 @@ export default function ProfilePage() {
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isDeletePhotoOpen, setIsDeletePhotoOpen] = useState(false);
+  const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isPhotoChanged = avatar !== (user?.avatar_url || "");
@@ -194,12 +196,25 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   };
 
-  const handleRemoveAvatar = () => {
-    setAvatar("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  const handleRemovePhotoClick = () => {
+    setIsDeletePhotoOpen(true);
+  };
+
+  const handleConfirmRemovePhoto = async () => {
+    setIsDeletingPhoto(true);
+    try {
+      await updateProfile(user?.username || username, undefined);
+      setAvatar("");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      toast.success("Profile photo removed successfully!");
+      setIsDeletePhotoOpen(false);
+    } catch (error) {
+      toast.error(typeof error === "string" ? error : "Failed to remove profile photo");
+    } finally {
+      setIsDeletingPhoto(false);
     }
-    toast.info("Photo cleared. Click 'Save Changes' to apply.");
   };
 
   const handleCancelPhotoChange = () => {
@@ -353,7 +368,7 @@ export default function ProfilePage() {
                           variant="ghost"
                           size="sm"
                           className="w-full text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
-                          onClick={handleRemoveAvatar}
+                          onClick={handleRemovePhotoClick}
                           icon={<Trash2 className="h-3.5 w-3.5" />}
                         >
                           Remove Photo
@@ -610,6 +625,17 @@ export default function ProfilePage() {
         onClose={() => setIsLogoutOpen(false)}
         onConfirm={handleConfirmLogout}
         isLoading={isLoggingOut}
+      />
+
+      <ConfirmLogoutModal
+        isOpen={isDeletePhotoOpen}
+        onClose={() => setIsDeletePhotoOpen(false)}
+        onConfirm={handleConfirmRemovePhoto}
+        isLoading={isDeletingPhoto}
+        title="Remove Profile Photo"
+        description="Are you sure you want to remove your profile photo? This action will immediately delete your picture."
+        confirmText="Remove Photo"
+        icon={<Trash2 className="h-4.5 w-4.5 text-red-500" />}
       />
     </ProtectedRoute>
   );
