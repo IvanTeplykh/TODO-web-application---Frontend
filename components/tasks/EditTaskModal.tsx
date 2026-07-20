@@ -144,7 +144,7 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
               placeholder="Add more details about this task..."
               rows={5}
               maxLength={500}
-              className="w-full rounded-xl border border-slate-200/80 bg-slate-50/30 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100 dark:focus:border-indigo-500 dark:focus:bg-slate-950"
+              className="w-full resize-none rounded-xl border border-slate-200/80 bg-slate-50/30 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100 dark:focus:border-indigo-500 dark:focus:bg-slate-950"
             />
           </div>
 
@@ -171,7 +171,7 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
                       className="fixed inset-0 z-10" 
                       onClick={() => setIsPriorityOpen(false)} 
                     />
-                    <div className="absolute left-0 z-20 mt-1 w-full rounded-b-xl bg-white shadow-xl dark:bg-slate-900 overflow-hidden max-h-60 overflow-y-auto border-none outline-none">
+                    <div className="absolute left-0 z-20 mt-1 w-full rounded-xl bg-white shadow-xl dark:bg-slate-900 overflow-hidden max-h-[108px] overflow-y-auto border border-slate-100 dark:border-slate-800 outline-none">
                       {[...Array(10)].map((_, i) => {
                         const val = i + 1;
                         return (
