@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { ProtectedRoute } from "../../components/auth/ProtectedRoute";
 import { Navbar } from "../../components/layout/Navbar";
 import { Sidebar } from "../../components/layout/Sidebar";
@@ -42,7 +41,6 @@ export default function DashboardPage() {
             pendingTask.description,
             pendingTask.dueDate
           );
-          toast.success("Your demo task has been saved to your workspace!");
         } catch (err) {
           console.error("Failed to save pending task on dashboard mount:", err);
         }

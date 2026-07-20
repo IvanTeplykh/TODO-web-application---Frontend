@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { useAuthStore } from "../store/authStore";
 import { CreateTaskModal } from "../components/tasks/CreateTaskModal";
 import {
@@ -400,7 +399,6 @@ export default function LandingPage() {
         onSubmitOverride={(taskData) => {
           setIsCreateModalOpen(false);
           localStorage.setItem("pending_task", JSON.stringify(taskData));
-          toast.info("Please register to save your tasks!");
           router.push("/register");
         }}
       />
