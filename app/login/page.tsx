@@ -4,6 +4,7 @@ import React from "react";
 import { LoginForm } from "../../components/auth/LoginForm";
 import { Card } from "../../components/ui/Card";
 import { useRouter } from "next/navigation";
+import { X } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,9 +38,16 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <Card className="border border-slate-200/50 dark:border-slate-800/80 shadow-2xl !p-8">
+        <Card className="border border-slate-200/50 dark:border-slate-800/80 shadow-2xl !p-8 relative">
+          <button
+            onClick={() => router.push("/")}
+            className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-5">
-            Welcome Back 👋
+            Welcome Back
           </h3>
           <LoginForm />
         </Card>
