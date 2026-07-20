@@ -70,9 +70,6 @@ export default function DashboardPage() {
               <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100">
                 Workspace
               </h1>
-              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-                Manage your daily goals, priorities, and monitor performance stats.
-              </p>
             </div>
 
             {/* Quick stats at the top */}

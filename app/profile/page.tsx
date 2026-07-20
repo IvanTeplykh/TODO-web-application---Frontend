@@ -286,9 +286,6 @@ export default function ProfilePage() {
               <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100">
                 Account Settings
               </h1>
-              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-                Manage your public profile identity, picture, and session.
-              </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
