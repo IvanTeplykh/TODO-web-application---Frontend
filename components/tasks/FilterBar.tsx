@@ -7,10 +7,11 @@ import { Button } from "../ui/Button";
 export function FilterBar() {
   const { status, setFilters } = useTaskStore();
 
-  const filters: { label: string; value: "all" | "done" | "undone" }[] = [
+  const filters: { label: string; value: "all" | "done" | "undone" | "overdue" }[] = [
     { label: "All", value: "all" },
     { label: "Done", value: "done" },
     { label: "Undone", value: "undone" },
+    { label: "Overdue", value: "overdue" },
   ];
 
   return (

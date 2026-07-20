@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/authStore";
 import { LogOut, User as UserIcon } from "lucide-react";
@@ -12,6 +12,23 @@ export function Navbar() {
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const handleLogoutClick = () => {
     setShowDropdown(false);
@@ -37,7 +54,7 @@ export function Navbar() {
           </Link>
 
           <div className="flex items-center gap-4">
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-slate-250/80 bg-slate-50 transition-all hover:bg-slate-100 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-slate-900"

@@ -4,7 +4,7 @@ import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTaskStore } from "../../store/taskStore";
 import { tasksService } from "../../services/tasks";
-import { LayoutDashboard, CheckCircle2, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, CheckCircle2, Clock, AlertCircle, User, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -26,7 +26,7 @@ export function Sidebar() {
     fetchCompletedCount();
   }, [tasks]);
 
-  const handleFilterClick = (newStatus: "all" | "done" | "undone") => {
+  const handleFilterClick = (newStatus: "all" | "done" | "undone" | "overdue") => {
     setFilters({ status: newStatus });
     if (pathname !== "/dashboard") {
       router.push("/dashboard");
@@ -51,6 +51,12 @@ export function Sidebar() {
       icon: Clock,
       active: pathname === "/dashboard" && status === "undone",
       onClick: () => handleFilterClick("undone"),
+    },
+    {
+      label: "Overdue",
+      icon: AlertCircle,
+      active: pathname === "/dashboard" && status === "overdue",
+      onClick: () => handleFilterClick("overdue"),
     },
     {
       label: "Profile",

@@ -104,7 +104,7 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="flex flex-col p-6 space-y-4 overflow-y-auto max-h-[75vh]">
+        <form onSubmit={handleSubmit} className="flex flex-col p-6 space-y-5 overflow-y-auto max-h-[90vh]">
           {/* Title */}
           <div>
             <div className="flex justify-between items-center mb-1.5">
@@ -143,7 +143,7 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add more details about this task..."
-              rows={3}
+              rows={5}
               maxLength={500}
               className="w-full rounded-xl border border-slate-200/80 bg-slate-50/30 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100 dark:focus:border-indigo-500 dark:focus:bg-slate-950"
             />

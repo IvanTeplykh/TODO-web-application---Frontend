@@ -31,13 +31,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
           Next
         </Button>
       </div>
-      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Showing Page <span className="font-semibold text-slate-700 dark:text-slate-200">{currentPage}</span> of{" "}
-            <span className="font-semibold text-slate-700 dark:text-slate-200">{totalPages}</span>
-          </p>
-        </div>
+      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-end">
         <div>
           <nav
             className="isolate inline-flex -space-x-px rounded-md gap-1"

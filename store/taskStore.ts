@@ -10,7 +10,7 @@ interface TaskState {
   page: number;
   pages: number;
   limit: number;
-  status: "all" | "done" | "undone";
+  status: "all" | "done" | "undone" | "overdue";
   search: string;
   sort: string;
   order: "asc" | "desc";

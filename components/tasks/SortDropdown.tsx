@@ -11,6 +11,8 @@ export function SortDropdown() {
   const options = [
     { label: "Date: Latest First", sort: "created_at", order: "desc" as const },
     { label: "Date: Oldest First", sort: "created_at", order: "asc" as const },
+    { label: "Overdue / Soonest Due", sort: "due_date", order: "asc" as const },
+    { label: "Due Date: Latest First", sort: "due_date", order: "desc" as const },
     { label: "Priority ↑ (1-10)", sort: "priority", order: "asc" as const },
     { label: "Priority ↓ (10-1)", sort: "priority", order: "desc" as const },
     { label: "Title: A-Z", sort: "title", order: "asc" as const },

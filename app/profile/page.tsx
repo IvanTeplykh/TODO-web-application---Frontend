@@ -326,9 +326,16 @@ export default function ProfilePage() {
                   <form onSubmit={handleSave} className="space-y-5">
                     {/* Username Input */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-                        Username
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          Username
+                        </label>
+                        {!isEditingUsername && (
+                          <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                            Click button to edit
+                          </span>
+                        )}
+                      </div>
                       <Input
                         id="profile-username"
                         value={username}
@@ -339,21 +346,21 @@ export default function ProfilePage() {
                         disabled={!isEditingUsername}
                         className={`w-full disabled:opacity-65 disabled:bg-slate-50/50 disabled:cursor-not-allowed dark:disabled:bg-slate-900/30 ${
                           isEditingUsername
-                            ? "!border-yellow-500 focus:!ring-yellow-500/25 focus:!border-yellow-500 dark:!border-yellow-500"
+                            ? "!border-indigo-500 focus:!ring-indigo-500/25 focus:!border-indigo-500 dark:!border-indigo-500"
                             : ""
                         }`}
                         rightElement={
                           <button
                             type="button"
                             onClick={() => setIsEditingUsername(!isEditingUsername)}
-                            className={`p-1 rounded transition-colors focus:outline-none cursor-pointer ${
+                            className={`p-1.5 rounded-md transition-all duration-200 focus:outline-none cursor-pointer flex items-center justify-center font-medium ${
                               isEditingUsername
-                                ? "text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300"
-                                : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200"
+                                ? "bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700 shadow-sm focus:ring-2 focus:ring-amber-500/30"
+                                : "bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-md shadow-indigo-600/30 focus:ring-2 focus:ring-indigo-500/40 animate-pulse hover:animate-none"
                             }`}
-                            title="Edit username"
+                            title={isEditingUsername ? "Cancel editing username" : "Click here to edit username"}
                           >
-                            <Edit2 className="h-4 w-4" />
+                            <Edit2 className="h-3.5 w-3.5" />
                           </button>
                         }
                       />
@@ -369,27 +376,29 @@ export default function ProfilePage() {
                           <Lock className="h-2.5 w-2.5" /> Read-only
                         </span>
                       </div>
-                      <Input
-                        id="profile-email"
-                        value={user?.email || ""}
-                        readOnly
-                        disabled
-                        icon={<Mail className="h-4 w-4 text-slate-400" />}
-                        className="w-full opacity-65 bg-slate-50/50 cursor-not-allowed dark:bg-slate-900/30"
-                      />
+                      <div className="relative w-full">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                          <Mail className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <p
+                          id="profile-email"
+                          className="w-full rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2 pl-10 text-sm text-slate-900 dark:text-slate-100 bg-slate-50/50 dark:bg-slate-900/30 opacity-65 flex items-center min-h-[38px] truncate"
+                        >
+                          {user?.email || ""}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Save Profile Button */}
                     <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
-                      <Button
+                      <button
                         type="button"
-                        variant="ghost"
-                        className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20"
                         onClick={handleLogoutClick}
-                        icon={<LogOut className="h-4.5 w-4.5" />}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 focus:outline-none cursor-pointer"
                       >
-                        Log Out
-                      </Button>
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </button>
 
                       <Button
                         type="submit"
@@ -413,18 +422,37 @@ export default function ProfilePage() {
                   <form onSubmit={handlePasswordChange} className="space-y-5">
                     {/* Current Password */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-                        Current Password
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          Current Password
+                        </label>
+                        {!isCurrentPasswordCorrect && (
+                          <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                            Enter to unlock
+                          </span>
+                        )}
+                      </div>
                       <Input
                         id="current-password"
                         type="password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="••••••••"
-                        icon={<Lock className="h-4 w-4 text-slate-400" />}
+                        icon={
+                          <Lock
+                            className={`h-4 w-4 transition-colors ${
+                              isCurrentPasswordCorrect
+                                ? "text-emerald-500"
+                                : "text-indigo-600 dark:text-indigo-400"
+                            }`}
+                          />
+                        }
                         error={currentPasswordError}
-                        className="w-full"
+                        className={`w-full transition-all ${
+                          isCurrentPasswordCorrect
+                            ? "!border-emerald-500 focus:!ring-emerald-500/25"
+                            : "!border-indigo-500/60 dark:!border-indigo-500/60 focus:!ring-indigo-500/25 focus:!border-indigo-600 shadow-xs"
+                        }`}
                       />
                     </div>
 
