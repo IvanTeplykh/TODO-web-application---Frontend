@@ -177,6 +177,14 @@ export default function ProfilePage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!allowedTypes.includes(file.type)) {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+
       if (file.size > 2 * 1024 * 1024) {
         toast.error("Image size must be less than 2MB");
         return;
@@ -316,7 +324,7 @@ export default function ProfilePage() {
                   type="file" 
                   ref={fileInputRef}
                   onChange={handleFileChange}
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/jpg"
                   className="hidden"
                 />
 
@@ -374,7 +382,7 @@ export default function ProfilePage() {
                 </div>
                 
                 <p className="text-[10px] text-slate-400 dark:text-slate-655 mt-4 leading-normal">
-                  JPG, PNG or GIF. Max size 2MB.
+                  JPG or PNG. Max size 2MB.
                 </p>
               </Card>
 
