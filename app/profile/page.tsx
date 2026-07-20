@@ -10,7 +10,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { useAuthStore } from "../../store/authStore";
 import { useRouter } from "next/navigation";
-import { User as UserIcon, Mail, LogOut, Camera, Trash2, Save, Lock, Edit2 } from "lucide-react";
+import { User as UserIcon, Mail, LogOut, Camera, Trash2, Save, Lock, Edit2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmLogoutModal } from "../../components/auth/ConfirmLogoutModal";
 import { usersService } from "../../services/users";
@@ -134,11 +134,13 @@ export default function ProfilePage() {
     if (!currentPassword) {
       setIsCurrentPasswordCorrect(false);
       setCurrentPasswordError("");
+      setIsCheckingPassword(false);
       return;
     }
 
+    setIsCheckingPassword(true);
+
     const timer = setTimeout(async () => {
-      setIsCheckingPassword(true);
       try {
         const isValid = await usersService.verifyPassword(currentPassword);
         setIsCurrentPasswordCorrect(isValid);
@@ -495,7 +497,7 @@ export default function ProfilePage() {
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          Current Password
+                          Enter current password
                         </label>
                         {!isCurrentPasswordCorrect && (
                           <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
@@ -517,6 +519,11 @@ export default function ProfilePage() {
                                 : "text-indigo-600 dark:text-indigo-400"
                             }`}
                           />
+                        }
+                        rightElement={
+                          isCheckingPassword ? (
+                            <Loader2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400 animate-spin" />
+                          ) : null
                         }
                         error={currentPasswordError}
                         className={`w-full transition-all ${
@@ -636,7 +643,7 @@ export default function ProfilePage() {
         onConfirm={handleConfirmRemovePhoto}
         isLoading={isDeletingPhoto}
         title="Remove Profile Photo"
-        description="Are you sure you want to remove your profile photo? This action will immediately delete your picture."
+        description="Are you sure you want to remove your profile photo? This action is irreversible."
         confirmText="Remove Photo"
         icon={<Trash2 className="h-4.5 w-4.5 text-red-500" />}
       />
