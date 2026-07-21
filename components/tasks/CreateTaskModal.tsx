@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { DatePicker } from "../ui/DatePicker";
+import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ interface CreateTaskModalProps {
 }
 
 export function CreateTaskModal({ isOpen, onClose, onSubmitOverride }: CreateTaskModalProps) {
+  useLockBodyScroll(isOpen);
+
   const { createTask } = useTaskStore();
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState("");

@@ -10,6 +10,7 @@ import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Checkbox } from "../ui/Checkbox";
 import { DatePicker } from "../ui/DatePicker";
+import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 
 interface EditTaskModalProps {
   task: Task | null;
@@ -18,6 +19,8 @@ interface EditTaskModalProps {
 }
 
 export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
+  useLockBodyScroll(isOpen);
+
   const { updateTask } = useTaskStore();
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState("");

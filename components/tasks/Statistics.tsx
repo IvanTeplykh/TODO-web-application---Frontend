@@ -95,7 +95,7 @@ export function Statistics() {
             <Card
               key={idx}
               onClick={() => setFilters({ status: c.filterValue })}
-              className={`!p-4 border transition-all cursor-pointer flex items-center justify-between hover:shadow-md ${
+              className={`!p-4 border transition-all cursor-pointer flex items-center justify-between hover:shadow-md min-h-[74px] ${
                 isActive
                   ? "border-indigo-500/60 ring-2 ring-indigo-500/20 dark:border-indigo-500/50"
                   : "border-slate-200/50 dark:border-slate-800/80"

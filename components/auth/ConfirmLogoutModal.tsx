@@ -3,6 +3,7 @@
 import React from "react";
 import { X, LogOut } from "lucide-react";
 import { Button } from "../ui/Button";
+import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 
 interface ConfirmLogoutModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export function ConfirmLogoutModal({
   confirmText = "Log Out",
   icon = <LogOut className="h-4.5 w-4.5 text-red-500" />,
 }: ConfirmLogoutModalProps) {
+  useLockBodyScroll(isOpen);
+
   if (!isOpen) return null;
 
   return (

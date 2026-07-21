@@ -3,6 +3,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import { Button } from "./Button";
+import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -27,6 +28,8 @@ export function ConfirmModal({
   isLoading = false,
   variant = "primary"
 }: ConfirmModalProps) {
+  useLockBodyScroll(isOpen);
+
   if (!isOpen) return null;
 
   let confirmButtonClass = "bg-indigo-650 hover:bg-indigo-750 text-white shadow-md shadow-indigo-600/10";

@@ -10,6 +10,7 @@ import { Button } from "../ui/Button";
 import { Checkbox } from "../ui/Checkbox";
 
 import { ConfirmModal } from "../ui/ConfirmModal";
+import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 
 interface ViewTaskModalProps {
   task: Task | null;
@@ -19,6 +20,8 @@ interface ViewTaskModalProps {
 }
 
 export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalProps) {
+  useLockBodyScroll(isOpen);
+
   const { deleteTask, toggleTask, tasks } = useTaskStore();
   const currentTask = task ? (tasks.find((t) => t.id === task.id) || task) : null;
 
