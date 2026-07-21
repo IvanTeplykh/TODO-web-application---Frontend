@@ -16,11 +16,11 @@ export function TaskList({ onViewTask }: TaskListProps) {
 
   if (loading && tasks.length === 0) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[360px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start min-h-[360px]">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="h-[162px] rounded-2xl border border-slate-200/50 bg-slate-100/50 dark:border-slate-800/60 dark:bg-slate-900/40 animate-pulse p-5"
+            className="h-[160px] rounded-2xl border border-slate-200/50 bg-slate-100/50 dark:border-slate-800/60 dark:bg-slate-900/40 animate-pulse p-5"
           />
         ))}
       </div>
@@ -40,7 +40,7 @@ export function TaskList({ onViewTask }: TaskListProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[360px]">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start min-h-[360px]">
       {tasks.map((task) => (
         <TaskCard key={task.id} task={task} onView={onViewTask} />
       ))}
