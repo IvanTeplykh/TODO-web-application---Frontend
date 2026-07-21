@@ -3,7 +3,6 @@
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTaskStore } from "../../store/taskStore";
-import { tasksService } from "../../services/tasks";
 import { LayoutDashboard, CheckCircle2, Clock, AlertCircle, User, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function Sidebar() {
@@ -11,20 +10,6 @@ export function Sidebar() {
   const router = useRouter();
   const { status, setFilters } = useTaskStore();
   const [collapsed, setCollapsed] = React.useState(false);
-  const { tasks } = useTaskStore();
-  const [completedCount, setCompletedCount] = React.useState(0);
-
-  React.useEffect(() => {
-    const fetchCompletedCount = async () => {
-      try {
-        const res = await tasksService.getTasks({ limit: 1, status: "done" });
-        setCompletedCount(res.total);
-      } catch {
-        // Silently ignore
-      }
-    };
-    fetchCompletedCount();
-  }, [tasks]);
 
   const handleFilterClick = (newStatus: "all" | "done" | "undone" | "overdue") => {
     setFilters({ status: newStatus });
@@ -111,24 +96,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-
-      {!collapsed && (
-        <div className="p-4 mt-auto hidden md:block">
-          <div className="rounded-2xl bg-indigo-50/50 p-4 border border-indigo-100/50 dark:bg-indigo-950/10 dark:border-indigo-900/20 text-center flex flex-col items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-650 text-white shadow-md dark:bg-indigo-500">
-              <span className="text-base">🎉</span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                Stay productive!
-              </span>
-              <span className="text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
-                You&apos;ve completed {completedCount} task{completedCount === 1 ? "" : "s"} today. Keep it up!
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
     </aside>
   );
 }
