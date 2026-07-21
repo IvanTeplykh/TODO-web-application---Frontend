@@ -18,6 +18,8 @@ import {
   Plus,
 } from "lucide-react";
 
+import { ThemeToggle } from "../components/ui/ThemeToggle";
+
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuthStore();
   const router = useRouter();
@@ -80,7 +82,8 @@ export default function LandingPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             {loading ? (
               <div className="h-8 w-16 bg-slate-100 dark:bg-slate-900 rounded-lg animate-pulse" />
             ) : isAuthenticated ? (

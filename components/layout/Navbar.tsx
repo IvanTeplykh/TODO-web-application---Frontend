@@ -6,6 +6,7 @@ import { useAuthStore } from "../../store/authStore";
 import { LogOut, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { ConfirmLogoutModal } from "../auth/ConfirmLogoutModal";
+import { ThemeToggle } from "../ui/ThemeToggle";
 
 export function Navbar() {
   const { user, logout } = useAuthStore();
@@ -53,7 +54,9 @@ export function Navbar() {
             </span>
           </Link>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
