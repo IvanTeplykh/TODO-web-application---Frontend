@@ -1,74 +1,99 @@
 # TODO Web Application - Frontend
 
-Цей проект є клієнтською частиною (Frontend) веб-додатку для планування робочого часу та керування завданнями (TODO). Дизайн виконано у сучасному мінімалістичному стилі, наближеному до Notion, Todoist та TickTick.
+This project is the client-side (Frontend) part of a web application designed for task management and personal schedule planning. The interface is built in a modern minimalist style with support for dark and light themes, responsive design, and smooth interactivity.
 
 ---
 
-## 🛠️ Стек технологій (Tech Stack)
+## Tech Stack
 
-*   **Фреймворк**: **Next.js 16** (App Router, Turbopack) — для швидкої статичної генерації та оптимального рендерингу.
-*   **Бібліотека рендерингу**: **React 19**
-*   **Типізація**: **TypeScript** — надійна типізація даних та моделей.
-*   **Стилізація (CSS)**:
-    *   **TailwindCSS v4** — для побудови адаптивного інтерфейсу та швидкої розробки.
-    *   **PostCSS** — обробка стилів.
-*   **Управління станом (State Management)**: **Zustand** — мінімалістичний та реактивний клієнтський стейт для управління задачами та автентифікацією.
-*   **Мережеві запити**: **Axios** — клієнт для взаємодії з REST API із вбудованими Request Interceptors для автоматичного додавання JWT токенів.
-*   **Форми та валідація**:
-    *   **React Hook Form** — оптимізована робота з полями введення без зайвих ререндерів.
-    *   **Zod** & **@hookform/resolvers** — валідація даних форми на клієнті (наприклад, перевірка довжини назви задачі до 100 символів, коректність паролів).
-*   **Анімації**: **Framer Motion** — плавні переходи сторінок та модальних вікон.
-*   **Іконки**: **Lucide React** — сучасні векторні іконки.
-*   **Сповіщення**: **Sonner** — красиві спливаючі тости після завершення операцій (створення, зміна статусу, оновлення, видалення).
-
----
-
-## 🚀 Особливості інтерфейсу (UI Features)
-
-1.  **Public Landing Page (`/`)**:
-    *   Сучасна презентаційна сторінка для неавторизованих користувачів.
-    *   Адаптивна інтерактивна CSS-ілюстрація інтерфейсу (Dashboard Preview).
-    *   Швидкі переходи до реєстрації чи входу.
-2.  **Dashboard Workspace (`/dashboard`)**:
-    *   **Модальне створення та редагування**: Форма винесена у спливаючі модальні вікна.
-    *   **Візуалізація картками**: Замість таблиць кожна задача представлена інформативною карткою.
-    *   **Швидка статистика**: Total, Completed, Pending та Overdue показники, а також Progress Ring виконання задач.
-    *   **Пріоритети та підсвічування простроченості**: Бейджі Low 🟢, Medium 🟡, High 🔴, а також підсвічування прострочених задач червоною рамкою та бейджем "Overdue".
-    *   **Швидкий контроль**: Миттєвий пошук завдань за назвою та фільтри статусів.
-3.  **Темна та світла теми**:
-    *   Повна сумісність інтерфейсу з перемикачем теми в навігаційній панелі.
-4.  **Маршрутизація та авторизація**:
-    *   Автоматичний захист сторінок (`/dashboard`, `/profile`) за допомогою захищеного роута (`ProtectedRoute`).
-    *   **Збереження сесії (Remember me)**: Опція на сторінці входу дозволяє продовжити час дії JWT-токена в cookie-файлах з 1 дня до 30 днів, забезпечуючи тривалий доступ без повторного введення пароля.
+- **Framework**: Next.js 16 (App Router) - Server and client-side rendering, optimized routing, and bundling.
+- **Rendering Library**: React 19 - Modern hooks and reactive UI management.
+- **Programming Language**: TypeScript - Complete type safety for data, models, and components.
+- **Styling**:
+  - TailwindCSS v4 - Utility-first CSS framework for rapid responsive design development.
+  - PostCSS - CSS processing and optimization.
+- **State Management**: Zustand - Lightweight, reactive client state for tasks and authentication.
+- **Network Requests**: Axios - HTTP client configured with Request Interceptors for automatic JWT token injection into authorization headers.
+- **Forms and Validation**:
+  - React Hook Form - Optimized form state management avoiding unnecessary re-renders.
+  - Zod & @hookform/resolvers - Strict client-side data schema validation.
+- **Animations**: Framer Motion - Smooth page transitions and modal window animations.
+- **Components and Icons**: Lucide React - A comprehensive set of modern vector icons.
+- **Notifications**: Sonner - Toast notifications for user feedback on actions.
 
 ---
 
-## ⚙️ Налаштування оточення (Environment Variables)
+## Features and Functionality
 
-Для локальної розробки або деплою створіть файл `.env.local` в корені фронтенду:
+### 1. Landing Page (`/`)
+- Presentation landing page for unauthenticated visitors.
+- Interactive workspace preview (Dashboard Preview).
+- Overview of key system advantages with quick links to register or log in.
+
+### 2. Authentication and Authorization (`/login`, `/register`)
+- Real-time interactive form field validation.
+- Email availability check prior to form submission.
+- "Remember me" functionality: extends the JWT access token lifetime in cookies from 1 day to 30 days.
+- Protected Routes (`ProtectedRoute`): automatic redirection of unauthenticated users to the login page.
+
+### 3. Workspace (`/dashboard`)
+- **Analytics Panel**: Circular progress indicator (Progress Ring) displaying percentage completed, alongside task counters (Total, Completed, Pending, Overdue).
+- **Task Card Layout**: Each task is presented as an informative card containing detailed metadata.
+- **Priority System**: Visual priority badges (Low, Medium, High) derived from a 1-10 numerical scale.
+- **Deadline Tracking**: Automatic overdue detection highlighting past-due tasks with a red border and an "Overdue" status badge.
+- **Modal Windows**: Task creation and editing within pop-up modals without full page reloads.
+- **Search & Filtering**: Search bar with auto-debounce filtering by task title, status filters (All, Completed, Pending, Overdue), and sorting by date or priority.
+- **Pagination**: Page switching for managing large volumes of tasks.
+
+### 4. User Profile (`/profile`)
+- Overview of current user information (Username, Email, Avatar URL).
+- Profile updates (modifying username and avatar link).
+- Password change with current password verification.
+- User logout action.
+
+### 5. Overall UI/UX
+- Dark and Light themes with automatic system preference detection.
+- Collapsible Sidebar menu to maximize active workspace area.
+- Toast notifications providing instant feedback upon task creation, update, status toggle, or deletion.
+
+---
+
+## Environment Variables
+
+For local development or deployment, create a `.env.local` file in the root directory of the frontend project:
 
 ```env
 NEXT_PUBLIC_API_URL=https://todo-web-application-backend-3xoh.onrender.com/api/v1
 ```
-*Якщо ви хочете запустити локальний бекенд, змініть адресу на `http://localhost:8000/api/v1`.*
+
+For connecting to a locally running backend server:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+```
 
 ---
 
-## 🏁 Швидкий старт (Quick Start)
+## Quick Start
 
-### 1. Встановлення залежностей
+### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 2. Запуск у режимі розробки
+### 2. Run Development Server
 ```bash
 npm run dev
 ```
-Додаток відкриється за адресою `http://localhost:3000`.
+The application will be accessible at `http://localhost:3000`.
 
-### 3. Збірка для продакшену
+### 3. Linting
+```bash
+npm run lint
+```
+
+### 4. Production Build
 ```bash
 npm run build
+npm run start
 ```
-Команда компілює TypeScript, перевіряє код лінтером і створює оптимізовану версію Next.js додатку.
