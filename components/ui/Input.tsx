@@ -22,14 +22,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5"
+            className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-1.5"
           >
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-400">
               {icon}
             </div>
           )}
@@ -37,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={id}
             ref={ref}
             type={inputType}
-            className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 transition-all duration-200 outline-none placeholder:text-slate-400 focus:ring-2 dark:text-slate-100 dark:placeholder:text-slate-650 ${
+            className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 transition-all duration-200 outline-none placeholder:text-slate-400 focus:ring-2 dark:text-white dark:placeholder:text-slate-400 ${
               icon ? "pl-10" : ""
             } ${
               isPassword && rightElement

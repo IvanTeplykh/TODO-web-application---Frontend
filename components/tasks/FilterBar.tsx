@@ -27,7 +27,7 @@ export function FilterBar() {
             className={`!py-1.5 px-4 rounded-lg text-xs font-semibold ${
               isActive 
                 ? "shadow-sm shadow-indigo-600/20" 
-                : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                : "text-slate-500 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white"
             }`}
           >
             {f.label}

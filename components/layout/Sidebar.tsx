@@ -80,7 +80,7 @@ export function Sidebar() {
               } ${
                 item.active
                   ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 font-semibold"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200"
+                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/50 dark:hover:text-white"
               }`}
             >
               <Icon className={`h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-105 ${

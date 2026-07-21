@@ -67,7 +67,7 @@ export function TaskCard({ task, onView }: TaskCardProps) {
             onChange={handleToggle}
             className="mt-1 flex-shrink-0"
           />
-          <h3 className={`text-base font-bold text-slate-800 dark:text-slate-150 break-words leading-snug line-clamp-1 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors ${
+          <h3 className={`text-base font-bold text-slate-800 dark:text-slate-100 break-words leading-snug line-clamp-1 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors ${
             task.completed ? "line-through text-slate-400 dark:text-slate-500 font-medium" : ""
           }`}>
             {title}
@@ -83,25 +83,25 @@ export function TaskCard({ task, onView }: TaskCardProps) {
       {/* Body: Description snippet */}
       <div className="pl-8 mb-4 min-h-[40px]">
         {description ? (
-          <p className={`text-xs text-slate-500 dark:text-slate-405 line-clamp-2 leading-relaxed ${
+          <p className={`text-xs text-slate-500 dark:text-slate-300 line-clamp-2 leading-relaxed ${
             task.completed ? "line-through text-slate-400 dark:text-slate-500" : ""
           }`}>
             {description}
           </p>
         ) : (
-          <p className="text-xs text-slate-400 dark:text-slate-600 italic">
+          <p className="text-xs text-slate-400 dark:text-slate-400 italic">
             No description provided.
           </p>
         )}
       </div>
 
       {/* Footer: Due date and indicator */}
-      <div className="pl-8 flex items-center justify-between border-t border-slate-50 dark:border-slate-800/50 pt-3 text-[11px] font-medium text-slate-400 dark:text-slate-550">
+      <div className="pl-8 flex items-center justify-between border-t border-slate-50 dark:border-slate-800/50 pt-3 text-[11px] font-medium text-slate-400 dark:text-slate-300">
         <div>
           {dueDate ? (
             <div className="flex items-center gap-1.5">
-              <Calendar className={`h-3.5 w-3.5 ${overdue ? "text-rose-500" : "text-slate-400"}`} />
-              <span className={overdue ? "text-rose-600 dark:text-rose-450 font-bold" : "text-slate-500 dark:text-slate-400"}>
+              <Calendar className={`h-3.5 w-3.5 ${overdue ? "text-rose-500" : "text-slate-400 dark:text-slate-300"}`} />
+              <span className={overdue ? "text-rose-600 dark:text-rose-400 font-bold" : "text-slate-500 dark:text-slate-300"}>
                 {formatDate(dueDate)}
               </span>
               {overdue && (

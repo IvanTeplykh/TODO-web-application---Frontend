@@ -60,12 +60,12 @@ export function TaskItem({ task, onEdit }: TaskItemProps) {
           className="flex-shrink-0"
         />
         <div className="flex flex-col min-w-0">
-          <span className={`text-sm font-semibold text-slate-700 dark:text-slate-200 truncate ${
+          <span className={`text-sm font-semibold text-slate-700 dark:text-slate-100 truncate ${
             task.completed ? "line-through text-slate-400 dark:text-slate-500 font-normal" : ""
           }`}>
             {task.title}
           </span>
-          <span className="text-[10px] text-slate-400 dark:text-slate-500">
+          <span className="text-[10px] text-slate-400 dark:text-slate-300">
             {new Date(task.created_at).toLocaleDateString()}
           </span>
         </div>

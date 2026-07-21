@@ -31,9 +31,9 @@ export function Button({
     danger:
       "bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 focus:ring-rose-500 dark:bg-rose-500 dark:hover:bg-rose-600",
     outline:
-      "border border-slate-300 hover:bg-slate-55 text-slate-705 focus:ring-indigo-500 dark:border-slate-700 dark:hover:bg-slate-800 dark:text-slate-300",
+      "border border-slate-300 hover:bg-slate-55 text-slate-705 focus:ring-indigo-500 dark:border-slate-700 dark:hover:bg-slate-800 dark:text-slate-100",
     ghost:
-      "hover:bg-slate-100 text-slate-600 focus:ring-slate-400 dark:hover:bg-slate-800 dark:text-slate-400",
+      "hover:bg-slate-100 text-slate-600 focus:ring-slate-400 dark:hover:bg-slate-800 dark:text-slate-200",
   };
 
   const sizes = {

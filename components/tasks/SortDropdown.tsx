@@ -30,11 +30,11 @@ export function SortDropdown() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg border border-slate-200/60 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-350 dark:hover:bg-slate-850"
+        className="flex items-center gap-2 rounded-lg border border-slate-200/60 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
       >
         <ArrowUpDown className="h-3.5 w-3.5" />
         <span>{currentOption.label}</span>
-        <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+        <ChevronDown className="h-3.5 w-3.5 text-slate-400 dark:text-slate-300" />
       </button>
 
       {isOpen && (
@@ -48,7 +48,7 @@ export function SortDropdown() {
                 className={`flex w-full items-center rounded-lg px-3 py-2 text-left text-xs font-medium transition-all ${
                   opt.sort === sort && opt.order === order
                     ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400"
-                    : "text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/60"
+                    : "text-slate-600 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/60"
                 }`}
               >
                 {opt.label}

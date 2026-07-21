@@ -106,10 +106,10 @@ export function Statistics() {
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-450 dark:text-slate-300">
                     {c.label}
                   </span>
-                  <span className="text-xl font-extrabold text-slate-800 dark:text-slate-100 truncate">
+                  <span className="text-xl font-extrabold text-slate-800 dark:text-white truncate">
                     {c.value}
                   </span>
                 </div>
