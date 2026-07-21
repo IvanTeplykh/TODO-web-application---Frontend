@@ -8,13 +8,19 @@ export const getToken = (): string | null => {
   if (tokenCookie) {
     return decodeURIComponent(tokenCookie.split("=")[1]);
   }
-  return localStorage.getItem(TOKEN_KEY);
+  return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
 };
 
 export const setToken = (token: string, rememberMe?: boolean) => {
   if (typeof window === "undefined") return;
 
-  localStorage.setItem(TOKEN_KEY, token);
+  if (rememberMe) {
+    localStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.removeItem(TOKEN_KEY);
+  } else {
+    sessionStorage.setItem(TOKEN_KEY, token);
+    localStorage.removeItem(TOKEN_KEY);
+  }
 
   const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 1 day
   document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; SameSite=Lax`;
@@ -23,5 +29,6 @@ export const setToken = (token: string, rememberMe?: boolean) => {
 export const removeToken = () => {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
   document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
 };

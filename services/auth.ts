@@ -16,6 +16,7 @@ export const authService = {
     const response = await api.post<TokenResponse>("/auth/login", {
       email: data.email,
       password: data.password,
+      remember_me: data.rememberMe,
     });
     return response.data;
   },
