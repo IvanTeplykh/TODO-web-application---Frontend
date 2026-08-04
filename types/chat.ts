@@ -14,6 +14,7 @@ export interface ChatMessage {
   sender_avatar?: string | null;
   recipient_id: string;
   content: string;
+  content_hash?: string;
   created_at: string;
   is_edited?: boolean;
   updated_at?: string | null;

@@ -95,7 +95,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   fetchMessages: async (recipientId: string) => {
-    set({ loading: true });
+    set({ loading: true, messages: [] });
     try {
       const messages = await chatService.getMessages(recipientId);
       set({ messages, loading: false });
@@ -137,7 +137,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   setActiveRecipient: (recipient: ChatRecipient) => {
-    set({ activeRecipient: recipient });
+    set({ activeRecipient: recipient, messages: [] });
     get().fetchMessages(recipient.id);
   },
 

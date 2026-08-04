@@ -26,6 +26,7 @@ import {
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import { ConfirmModal } from "../../components/ui/ConfirmModal";
+import { Pagination } from "../../components/ui/Pagination";
 import { toast } from "sonner";
 
 export default function ChatPage() {
@@ -63,6 +64,10 @@ export default function ChatPage() {
   // Message delete modal state
   const [msgToDeleteId, setMsgToDeleteId] = useState<string | null>(null);
   const [isDeletingMsg, setIsDeletingMsg] = useState(false);
+
+  // Discover tab pagination state
+  const [discoverPage, setDiscoverPage] = useState(1);
+  const USERS_PER_PAGE = 10;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -180,6 +185,12 @@ export default function ChatPage() {
       u.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const totalDiscoverPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
+  const paginatedDiscoverUsers = filteredUsers.slice(
+    (discoverPage - 1) * USERS_PER_PAGE,
+    discoverPage * USERS_PER_PAGE
+  );
+
   const getInitials = (name: string) => {
     if (!name) return "U";
     return name.trim().substring(0, 2).toUpperCase();
@@ -215,17 +226,6 @@ export default function ChatPage() {
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Private messaging with channel approval, edit & delete capabilities
                 </p>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs font-semibold">
-                <span
-                  className={`h-2.5 w-2.5 rounded-full ${
-                    connected ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
-                  }`}
-                />
-                <span className="text-slate-600 dark:text-slate-300">
-                  {connected ? "Connected" : "Reconnecting..."}
-                </span>
               </div>
             </div>
 
@@ -318,7 +318,7 @@ export default function ChatPage() {
                       {/* Direct Messages Section (Accepted Connections) */}
                       <div>
                         <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                          Approved Direct Chats ({acceptedUsers.length})
+                          Contacts ({acceptedUsers.length})
                         </span>
                         <div className="space-y-1 mt-1">
                           {acceptedUsers.length === 0 ? (
@@ -480,7 +480,7 @@ export default function ChatPage() {
                         Other Registered Users ({filteredUsers.length})
                       </span>
                       <div className="space-y-1.5 mt-2">
-                        {filteredUsers.map((u) => {
+                        {paginatedDiscoverUsers.map((u) => {
                           const status = u.connection_status || "none";
 
                           return (
@@ -536,6 +536,16 @@ export default function ChatPage() {
                           );
                         })}
                       </div>
+
+                      {totalDiscoverPages > 1 && (
+                        <div className="mt-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <Pagination
+                            currentPage={discoverPage}
+                            totalPages={totalDiscoverPages}
+                            onPageChange={setDiscoverPage}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
