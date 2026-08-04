@@ -3,13 +3,21 @@
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTaskStore } from "../../store/taskStore";
+import { useUIStore } from "../../store/uiStore";
 import { LayoutDashboard, CheckCircle2, Clock, AlertCircle, User, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { status, setFilters } = useTaskStore();
-  const [collapsed, setCollapsed] = React.useState(false);
+  const { isSidebarCollapsed, toggleSidebar } = useUIStore();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const collapsed = mounted ? isSidebarCollapsed : false;
 
   const handleFilterClick = (newStatus: "all" | "done" | "undone" | "overdue") => {
     setFilters({ status: newStatus });
@@ -58,7 +66,7 @@ export function Sidebar() {
       }`}
     >
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={toggleSidebar}
         className="absolute -right-3 top-6 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-955 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white z-20"
       >
         {collapsed ? (

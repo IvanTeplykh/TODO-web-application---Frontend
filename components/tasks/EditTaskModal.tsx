@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Task } from "../../types/task";
 import { useTaskStore } from "../../store/taskStore";
 import { getTaskFields } from "../../lib/taskHelpers";
-import { X, Calendar, ChevronDown } from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";

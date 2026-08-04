@@ -59,13 +59,46 @@ export default function ProfilePage() {
   const reqNumber = getNewReqColor(/[0-9]/.test(newPassword));
   const reqSpecial = getNewReqColor(/[^A-Za-z0-9]/.test(newPassword));
 
+  // Real-time validation for newPassword and confirmPassword
+  useEffect(() => {
+    if (newPassword) {
+      if (currentPassword && newPassword === currentPassword) {
+        setNewPasswordError("New password must be different from current password");
+      } else if (!/^[ -~]*$/.test(newPassword)) {
+        setNewPasswordError("Only English characters, numbers and standard symbols are allowed");
+      } else if (newPassword.length < 8) {
+        setNewPasswordError("Password must be at least 8 characters");
+      } else if (!/[A-Z]/.test(newPassword)) {
+        setNewPasswordError("Password must contain at least one uppercase letter");
+      } else if (!/[0-9]/.test(newPassword)) {
+        setNewPasswordError("Password must contain at least one number");
+      } else if (!/[^A-Za-z0-9]/.test(newPassword)) {
+        setNewPasswordError("Password must contain at least one special character");
+      } else {
+        setNewPasswordError("");
+      }
+    } else {
+      setNewPasswordError("");
+    }
+
+    if (confirmPassword) {
+      if (confirmPassword !== newPassword) {
+        setConfirmPasswordError("Passwords do not match");
+      } else {
+        setConfirmPasswordError("");
+      }
+    } else {
+      setConfirmPasswordError("");
+    }
+  }, [newPassword, confirmPassword, currentPassword]);
+
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setNewPasswordError("");
     setConfirmPasswordError("");
 
-    if (!currentPassword) {
-      toast.error("Current password is required");
+    if (!currentPassword || !isCurrentPasswordCorrect) {
+      toast.error("Valid current password is required");
       return;
     }
 
@@ -101,6 +134,11 @@ export default function ProfilePage() {
 
     if (!/[^A-Za-z0-9]/.test(newPassword)) {
       setNewPasswordError("Password must contain at least one special character");
+      return;
+    }
+
+    if (!confirmPassword) {
+      setConfirmPasswordError("Confirm password is required");
       return;
     }
 
@@ -545,17 +583,7 @@ export default function ProfilePage() {
                         id="new-password"
                         type="password"
                         value={newPassword}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setNewPassword(val);
-                          if (val.trim()) {
-                            if (val === currentPassword) {
-                              setNewPasswordError("New password must be different from current password");
-                            } else {
-                              setNewPasswordError("");
-                            }
-                          }
-                        }}
+                        onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="••••••••"
                         icon={<Lock className="h-4 w-4 text-slate-400" />}
                         error={newPasswordError}
@@ -573,10 +601,7 @@ export default function ProfilePage() {
                         id="confirm-new-password"
                         type="password"
                         value={confirmPassword}
-                        onChange={(e) => {
-                          setConfirmPassword(e.target.value);
-                          if (e.target.value.trim()) setConfirmPasswordError("");
-                        }}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="••••••••"
                         icon={<Lock className="h-4 w-4 text-slate-400" />}
                         error={confirmPasswordError}

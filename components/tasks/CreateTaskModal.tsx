@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useTaskStore } from "../../store/taskStore";
-import { X, Calendar, AlertCircle, ChevronDown } from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";

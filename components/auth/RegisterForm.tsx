@@ -30,6 +30,7 @@ export function RegisterForm() {
     register,
     handleSubmit,
     watch,
+    trigger,
     formState: { errors, isSubmitting, isSubmitted },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -47,6 +48,12 @@ export function RegisterForm() {
   const emailVal = watchedValues[1] || "";
   const passwordVal = watchedValues[2] || "";
   const confirmPasswordVal = watchedValues[3] || "";
+
+  React.useEffect(() => {
+    if (confirmPasswordVal) {
+      trigger("confirmPassword");
+    }
+  }, [passwordVal, confirmPasswordVal, trigger]);
 
   const getReqColor = (isMet: boolean) => {
     if (!passwordVal) {

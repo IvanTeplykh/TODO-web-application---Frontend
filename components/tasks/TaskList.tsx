@@ -3,7 +3,6 @@
 import React from "react";
 import { useTaskStore } from "../../store/taskStore";
 import { TaskCard } from "./TaskCard";
-import { Spinner } from "../ui/Spinner";
 import { FolderOpen } from "lucide-react";
 import { Task } from "../../types/task";
 
