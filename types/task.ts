@@ -3,7 +3,9 @@ export interface Task {
   title: string;
   title_hash?: string;
   completed: boolean;
+  completed_hash?: string;
   priority: number;
+  priority_hash?: string;
   description?: string;
   description_hash?: string | null;
   due_date?: string;
