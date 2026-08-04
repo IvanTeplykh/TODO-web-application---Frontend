@@ -215,6 +215,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       ws.onclose = () => {
         if (pingInterval) clearInterval(pingInterval);
         set({ connected: false, ws: null });
+
+        // Auto-reconnect after 3 seconds if not explicitly disconnected
+        setTimeout(() => {
+          get().connectWS();
+        }, 3000);
       };
 
       ws.onerror = (err) => {
