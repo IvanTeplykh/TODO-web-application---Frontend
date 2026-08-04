@@ -248,6 +248,21 @@ export const useChatStore = create<ChatState>((set, get) => ({
             set((state) => ({
               users: state.users.map((u) => (u.id === user_id ? { ...u, is_online } : u)),
             }));
+          } else if (payload.type === "user_profile_updated") {
+            const { user_id, username, avatar_url } = payload;
+            set((state) => ({
+              users: state.users.map((u) =>
+                u.id === user_id ? { ...u, username, avatar_url } : u
+              ),
+              messages: state.messages.map((m) =>
+                m.sender_id === user_id ? { ...m, sender_name: username, sender_avatar: avatar_url } : m
+              ),
+              activeRecipient:
+                state.activeRecipient.id === user_id
+                  ? { ...state.activeRecipient, name: username, avatar_url }
+                  : state.activeRecipient,
+            }));
+            get().fetchUsers();
           } else if (payload.type === "chat_request_received" || payload.type === "chat_request_updated") {
             get().fetchRequests();
             get().fetchUsers();

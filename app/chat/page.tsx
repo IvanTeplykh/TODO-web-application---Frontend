@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
+import { ConfirmModal } from "../../components/ui/ConfirmModal";
 import { toast } from "sonner";
 
 export default function ChatPage() {
@@ -58,6 +59,10 @@ export default function ChatPage() {
   // Message edit state
   const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+
+  // Message delete modal state
+  const [msgToDeleteId, setMsgToDeleteId] = useState<string | null>(null);
+  const [isDeletingMsg, setIsDeletingMsg] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -115,14 +120,22 @@ export default function ChatPage() {
     }
   };
 
-  const handleDeleteMsg = async (msgId: string) => {
-    if (!confirm("Are you sure you want to delete this message?")) return;
+  const handleDeleteMsg = (msgId: string) => {
+    setMsgToDeleteId(msgId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!msgToDeleteId) return;
+    setIsDeletingMsg(true);
     try {
-      await deleteMessage(msgId);
+      await deleteMessage(msgToDeleteId);
       toast.success("Message deleted");
+      setMsgToDeleteId(null);
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
       toast.error(msg || "Failed to delete message");
+    } finally {
+      setIsDeletingMsg(false);
     }
   };
 
@@ -797,6 +810,19 @@ export default function ChatPage() {
 
         <Footer />
       </div>
+
+      {/* Delete Message Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!msgToDeleteId}
+        onClose={() => setMsgToDeleteId(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Message"
+        message="Are you sure you want to delete this message? This action cannot be undone."
+        confirmText="Delete Message"
+        cancelText="Cancel"
+        isLoading={isDeletingMsg}
+        variant="danger"
+      />
     </ProtectedRoute>
   );
 }
