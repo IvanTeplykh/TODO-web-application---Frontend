@@ -4,7 +4,7 @@ import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTaskStore } from "../../store/taskStore";
 import { useUIStore } from "../../store/uiStore";
-import { LayoutDashboard, CheckCircle2, Clock, AlertCircle, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, CheckCircle2, Clock, AlertCircle, MessageSquare, User, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -44,6 +44,12 @@ export function Sidebar() {
       icon: AlertCircle,
       active: pathname === "/dashboard" && status === "overdue",
       onClick: () => handleFilterClick("overdue"),
+    },
+    {
+      label: "Team Chat",
+      icon: MessageSquare,
+      active: pathname === "/chat",
+      onClick: () => router.push("/chat"),
     },
     {
       label: "Profile",
