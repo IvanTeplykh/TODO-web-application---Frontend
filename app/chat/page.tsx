@@ -20,6 +20,8 @@ import {
   Clock,
   ShieldAlert,
   UserCheck,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
@@ -38,6 +40,8 @@ export default function ChatPage() {
     fetchUsers,
     fetchRequests,
     fetchMessages,
+    editMessage,
+    deleteMessage,
     sendChatRequest,
     respondChatRequest,
     setActiveRecipient,
@@ -50,6 +54,11 @@ export default function ChatPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"chats" | "requests" | "discover">("chats");
   const [isSendingReq, setIsSendingReq] = useState<string | null>(null);
+  
+  // Message edit state
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,6 +89,40 @@ export default function ChatPage() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleStartEdit = (msgId: string, currentContent: string) => {
+    setEditingMsgId(msgId);
+    setEditContent(currentContent);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMsgId(null);
+    setEditContent("");
+  };
+
+  const handleSaveEdit = async (msgId: string) => {
+    if (!editContent.trim()) return;
+    try {
+      await editMessage(msgId, editContent.trim());
+      setEditingMsgId(null);
+      setEditContent("");
+      toast.success("Message updated");
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      toast.error(msg || "Failed to edit message");
+    }
+  };
+
+  const handleDeleteMsg = async (msgId: string) => {
+    if (!confirm("Are you sure you want to delete this message?")) return;
+    try {
+      await deleteMessage(msgId);
+      toast.success("Message deleted");
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      toast.error(msg || "Failed to delete message");
     }
   };
 
@@ -157,7 +200,7 @@ export default function ChatPage() {
                   Team Chat & Direct Channels
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Private messaging with channel approval & team collaboration
+                  Private messaging with channel approval, edit & delete capabilities
                 </p>
               </div>
 
@@ -552,11 +595,12 @@ export default function ChatPage() {
                   ) : (
                     messages.map((msg) => {
                       const isMe = msg.sender_id === user?.id;
+                      const isEditingThis = editingMsgId === msg.id;
 
                       return (
                         <div
                           key={msg.id}
-                          className={`flex gap-3 max-w-[85%] ${
+                          className={`flex gap-3 max-w-[85%] group ${
                             isMe ? "ml-auto flex-row-reverse" : "mr-auto"
                           }`}
                         >
@@ -583,17 +627,75 @@ export default function ChatPage() {
                               </span>
                               <span>•</span>
                               <span>{formatTime(msg.created_at)}</span>
+                              {msg.is_edited && (
+                                <span className="text-[9px] font-semibold text-slate-400 italic">
+                                  (edited)
+                                </span>
+                              )}
                             </div>
 
-                            <div
-                              className={`rounded-2xl px-4 py-2.5 text-xs leading-relaxed break-words shadow-xs ${
-                                isMe
-                                  ? "bg-indigo-600 text-white rounded-tr-none"
-                                  : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200/60 dark:border-slate-700/60"
-                              }`}
-                            >
-                              {msg.content}
-                            </div>
+                            {/* Message Content or Edit Input */}
+                            {isEditingThis ? (
+                              <div className="flex flex-col gap-2 w-full min-w-[200px] bg-slate-100 dark:bg-slate-800 p-2 rounded-xl border border-indigo-300 dark:border-indigo-700">
+                                <Input
+                                  id={`edit-input-${msg.id}`}
+                                  value={editContent}
+                                  onChange={(e) => setEditContent(e.target.value)}
+                                  className="text-xs h-8 bg-white dark:bg-slate-900"
+                                  autoFocus
+                                />
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 text-[10px] px-2 py-0"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="primary"
+                                    className="h-6 text-[10px] px-2 py-0 bg-indigo-600"
+                                    onClick={() => handleSaveEdit(msg.id)}
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="relative group/bubble flex items-center gap-1.5">
+                                {/* Hover Action Buttons for Own Messages */}
+                                {isMe && (
+                                  <div className="opacity-0 group-hover/bubble:opacity-100 transition-opacity flex items-center gap-1">
+                                    <button
+                                      onClick={() => handleStartEdit(msg.id, msg.content)}
+                                      title="Edit message"
+                                      className="p-1 rounded-md text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    >
+                                      <Pencil className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteMsg(msg.id)}
+                                      title="Delete message"
+                                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                )}
+
+                                <div
+                                  className={`rounded-2xl px-4 py-2.5 text-xs leading-relaxed break-words shadow-xs ${
+                                    isMe
+                                      ? "bg-indigo-600 text-white rounded-tr-none"
+                                      : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200/60 dark:border-slate-700/60"
+                                  }`}
+                                >
+                                  {msg.content}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );

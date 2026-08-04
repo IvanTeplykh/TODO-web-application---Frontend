@@ -14,6 +14,18 @@ export const chatService = {
     return response.data;
   },
 
+  editMessage: async (messageId: string, content: string): Promise<ChatMessage> => {
+    const response = await api.patch<ChatMessage>(`/chat/messages/${messageId}`, {
+      content,
+    });
+    return response.data;
+  },
+
+  deleteMessage: async (messageId: string): Promise<{ message: string; id: string }> => {
+    const response = await api.delete<{ message: string; id: string }>(`/chat/messages/${messageId}`);
+    return response.data;
+  },
+
   sendRequest: async (recipientId: string): Promise<ChatRequest> => {
     const response = await api.post<ChatRequest>("/chat/requests", {
       recipient_id: recipientId,

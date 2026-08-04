@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { ChatUser, ChatMessage, ChatRecipient, ChatRequest } from "../types/chat";
 import { chatService } from "../services/chat";
 import { getToken } from "../lib/auth";
+import { useAuthStore } from "./authStore";
 
 interface ChatState {
   users: ChatUser[];
@@ -16,6 +17,8 @@ interface ChatState {
   fetchUsers: () => Promise<void>;
   fetchRequests: () => Promise<void>;
   fetchMessages: (recipientId: string) => Promise<void>;
+  editMessage: (messageId: string, content: string) => Promise<void>;
+  deleteMessage: (messageId: string) => Promise<void>;
   sendChatRequest: (recipientId: string) => Promise<void>;
   respondChatRequest: (requestId: string, action: "accept" | "decline") => Promise<void>;
   setActiveRecipient: (recipient: ChatRecipient) => void;
@@ -109,6 +112,30 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
+  editMessage: async (messageId: string, content: string) => {
+    try {
+      const updated = await chatService.editMessage(messageId, content);
+      set((state) => ({
+        messages: state.messages.map((m) => (m.id === updated.id ? updated : m)),
+      }));
+    } catch (error) {
+      console.error("Failed to edit message", error);
+      throw error;
+    }
+  },
+
+  deleteMessage: async (messageId: string) => {
+    try {
+      await chatService.deleteMessage(messageId);
+      set((state) => ({
+        messages: state.messages.filter((m) => m.id !== messageId),
+      }));
+    } catch (error) {
+      console.error("Failed to delete message", error);
+      throw error;
+    }
+  },
+
   setActiveRecipient: (recipient: ChatRecipient) => {
     set({ activeRecipient: recipient });
     get().fetchMessages(recipient.id);
@@ -180,17 +207,22 @@ export const useChatStore = create<ChatState>((set, get) => ({
           if (payload.type === "new_message") {
             const msg: ChatMessage = payload.message;
             const currentRecipient = get().activeRecipient;
+            const currentUserId = useAuthStore.getState().user?.id;
 
-            // Check if message belongs to current active conversation
+            // Check if message strictly belongs to current active conversation
             const isForActiveConversation =
               (currentRecipient.is_global && msg.recipient_id === "global") ||
               (!currentRecipient.is_global &&
-                (msg.sender_id === currentRecipient.id || msg.recipient_id === currentRecipient.id));
+                ((msg.sender_id === currentUserId && msg.recipient_id === currentRecipient.id) ||
+                  (msg.sender_id === currentRecipient.id && msg.recipient_id === currentUserId)));
 
             if (isForActiveConversation) {
-              set((state) => ({
-                messages: [...state.messages, msg],
-              }));
+              set((state) => {
+                if (state.messages.some((m) => m.id === msg.id)) {
+                  return state;
+                }
+                return { messages: [...state.messages, msg] };
+              });
             } else {
               // Increment unread count for sender or global
               const key = msg.recipient_id === "global" ? "global" : msg.sender_id;
@@ -201,6 +233,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 },
               }));
             }
+          } else if (payload.type === "message_edited") {
+            const updatedMsg: ChatMessage = payload.message;
+            set((state) => ({
+              messages: state.messages.map((m) => (m.id === updatedMsg.id ? updatedMsg : m)),
+            }));
+          } else if (payload.type === "message_deleted") {
+            const deletedId: string = payload.message_id;
+            set((state) => ({
+              messages: state.messages.filter((m) => m.id !== deletedId),
+            }));
           } else if (payload.type === "user_status") {
             const { user_id, is_online } = payload;
             set((state) => ({

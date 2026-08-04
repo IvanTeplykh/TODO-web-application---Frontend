@@ -15,6 +15,8 @@ export interface ChatMessage {
   recipient_id: string;
   content: string;
   created_at: string;
+  is_edited?: boolean;
+  updated_at?: string | null;
 }
 
 export interface ChatRequest {
