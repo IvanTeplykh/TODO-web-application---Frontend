@@ -11,13 +11,7 @@ export function Sidebar() {
   const router = useRouter();
   const { status, setFilters } = useTaskStore();
   const { isSidebarCollapsed, toggleSidebar } = useUIStore();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const collapsed = mounted ? isSidebarCollapsed : false;
+  const collapsed = isSidebarCollapsed;
 
   const handleFilterClick = (newStatus: "all" | "done" | "undone" | "overdue") => {
     setFilters({ status: newStatus });
