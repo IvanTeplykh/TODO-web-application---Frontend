@@ -1,28 +1,45 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
 import { ProtectedRoute } from "../../components/auth/ProtectedRoute";
 import { Navbar } from "../../components/layout/Navbar";
 import { Sidebar } from "../../components/layout/Sidebar";
 import { Footer } from "../../components/layout/Footer";
 import { useAuthStore } from "../../store/authStore";
 import { useChatStore, DEFAULT_RECIPIENT } from "../../store/chatStore";
-import { ChatUser, ChatRecipient } from "../../types/chat";
-import { MessageSquare, Send, Users, Search, Circle, User as UserIcon, Hash, Loader2 } from "lucide-react";
+import {
+  MessageSquare,
+  Send,
+  Search,
+  Hash,
+  Loader2,
+  UserPlus,
+  Check,
+  X,
+  Clock,
+  ShieldAlert,
+  UserCheck,
+} from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
+import { toast } from "sonner";
 
 export default function ChatPage() {
   const { user } = useAuthStore();
   const {
     users,
+    chatRequests,
     activeRecipient,
     messages,
     unreadCounts,
     loading,
     connected,
     fetchUsers,
+    fetchRequests,
     fetchMessages,
+    sendChatRequest,
+    respondChatRequest,
     setActiveRecipient,
     sendMessage,
     connectWS,
@@ -31,17 +48,20 @@ export default function ChatPage() {
 
   const [inputContent, setInputContent] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<"chats" | "requests" | "discover">("chats");
+  const [isSendingReq, setIsSendingReq] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchUsers();
+    fetchRequests();
     fetchMessages(activeRecipient.id);
     connectWS();
 
     return () => {
       disconnectWS();
     };
-  }, []);
+  }, [activeRecipient.id, connectWS, disconnectWS, fetchMessages, fetchRequests, fetchUsers]);
 
   // Auto-scroll messages to bottom when new messages arrive
   useEffect(() => {
@@ -63,6 +83,41 @@ export default function ChatPage() {
     }
   };
 
+  const handleSendRequestClick = async (recipientId: string) => {
+    setIsSendingReq(recipientId);
+    try {
+      await sendChatRequest(recipientId);
+      toast.success("Chat request sent!");
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      toast.error(msg || "Failed to send chat request");
+    } finally {
+      setIsSendingReq(null);
+    }
+  };
+
+  const handleRespondRequestClick = async (requestId: string, action: "accept" | "decline") => {
+    try {
+      await respondChatRequest(requestId, action);
+      if (action === "accept") {
+        toast.success("Chat request accepted!");
+      } else {
+        toast.info("Chat request declined");
+      }
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      toast.error(msg || "Failed to respond to request");
+    }
+  };
+
+  const acceptedUsers = users.filter((u) => u.connection_status === "accepted");
+  const pendingIncoming = chatRequests.filter(
+    (r) => r.recipient_id === user?.id && r.status === "pending"
+  );
+  const pendingOutgoing = chatRequests.filter(
+    (r) => r.requester_id === user?.id && r.status === "pending"
+  );
+
   const filteredUsers = users.filter(
     (u) =>
       u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -83,6 +138,9 @@ export default function ChatPage() {
     }
   };
 
+  // Find request ID for active recipient if pending
+  const incomingReqForActive = pendingIncoming.find((r) => r.requester_id === activeRecipient.id);
+
   return (
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -96,10 +154,10 @@ export default function ChatPage() {
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                  Team Chat
+                  Team Chat & Direct Channels
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Real-time communication & team collaboration
+                  Private messaging with channel approval & team collaboration
                 </p>
               </div>
 
@@ -117,10 +175,10 @@ export default function ChatPage() {
 
             {/* Main Chat Interface Container */}
             <div className="flex-1 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden min-h-0">
-              {/* Left Column: Channels & User List */}
+              {/* Left Column: Navigation Tabs & Users */}
               <div className="border-r border-slate-200/80 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-slate-900/40">
                 {/* Search Header */}
-                <div className="p-3 border-b border-slate-200/60 dark:border-slate-800">
+                <div className="p-3 border-b border-slate-200/60 dark:border-slate-800 space-y-2">
                   <Input
                     id="chat-user-search"
                     placeholder="Search users..."
@@ -129,68 +187,253 @@ export default function ChatPage() {
                     icon={<Search className="h-4 w-4 text-slate-400" />}
                     className="h-9 text-xs"
                   />
-                </div>
 
-                {/* Channels & User Items */}
-                <div className="flex-1 overflow-y-auto p-2 space-y-3">
-                  {/* General Channel Section */}
-                  <div>
-                    <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                      Channels
-                    </span>
+                  {/* Left Column Tabs */}
+                  <div className="grid grid-cols-3 gap-1 bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-xl text-[11px] font-semibold">
                     <button
-                      onClick={() => setActiveRecipient(DEFAULT_RECIPIENT)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors mt-1 ${
-                        activeRecipient.id === "global"
-                          ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
-                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                      onClick={() => setActiveTab("chats")}
+                      className={`py-1 rounded-lg transition-colors ${
+                        activeTab === "chats"
+                          ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs font-bold"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 truncate">
-                        <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
-                          <Hash className="h-4 w-4" />
-                        </div>
-                        <span className="truncate">General Channel</span>
-                      </div>
-                      {unreadCounts["global"] ? (
-                        <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
-                          {unreadCounts["global"]}
+                      Chats
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("requests")}
+                      className={`py-1 rounded-lg transition-colors relative ${
+                        activeTab === "requests"
+                          ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs font-bold"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      Requests
+                      {pendingIncoming.length > 0 && (
+                        <span className="absolute -top-1 -right-1 h-3.5 min-w-3.5 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
+                          {pendingIncoming.length}
                         </span>
-                      ) : null}
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("discover")}
+                      className={`py-1 rounded-lg transition-colors ${
+                        activeTab === "discover"
+                          ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs font-bold"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      Discover
                     </button>
                   </div>
+                </div>
 
-                  {/* Direct Messages Section */}
-                  <div>
-                    <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                      Direct Messages ({filteredUsers.length})
-                    </span>
-                    <div className="space-y-1 mt-1">
-                      {filteredUsers.map((u) => {
-                        const isSelected = activeRecipient.id === u.id;
-                        const unread = unreadCounts[u.id];
+                {/* Tab Content */}
+                <div className="flex-1 overflow-y-auto p-2 space-y-3">
+                  {activeTab === "chats" && (
+                    <>
+                      {/* General Channel Section */}
+                      <div>
+                        <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          Channels
+                        </span>
+                        <button
+                          onClick={() => setActiveRecipient(DEFAULT_RECIPIENT)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors mt-1 ${
+                            activeRecipient.id === "global"
+                              ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
+                              : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 truncate">
+                            <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                              <Hash className="h-4 w-4" />
+                            </div>
+                            <span className="truncate">General Channel</span>
+                          </div>
+                          {unreadCounts["global"] ? (
+                            <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                              {unreadCounts["global"]}
+                            </span>
+                          ) : null}
+                        </button>
+                      </div>
 
-                        return (
-                          <button
-                            key={u.id}
-                            onClick={() =>
-                              setActiveRecipient({
-                                id: u.id,
-                                name: u.username,
-                                avatar_url: u.avatar_url,
-                                is_online: u.is_online,
-                              })
-                            }
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors ${
-                              isSelected
-                                ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
-                                : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2.5 truncate">
-                              {/* User Avatar & Status indicator */}
-                              <div className="relative flex-shrink-0">
-                                <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                      {/* Direct Messages Section (Accepted Connections) */}
+                      <div>
+                        <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          Approved Direct Chats ({acceptedUsers.length})
+                        </span>
+                        <div className="space-y-1 mt-1">
+                          {acceptedUsers.length === 0 ? (
+                            <p className="px-2 text-[11px] text-slate-400 dark:text-slate-500 italic">
+                              No approved chats yet. Send or accept a chat request!
+                            </p>
+                          ) : (
+                            acceptedUsers.map((u) => {
+                              const isSelected = activeRecipient.id === u.id;
+                              const unread = unreadCounts[u.id];
+
+                              return (
+                                <button
+                                  key={u.id}
+                                  onClick={() =>
+                                    setActiveRecipient({
+                                      id: u.id,
+                                      name: u.username,
+                                      avatar_url: u.avatar_url,
+                                      is_online: u.is_online,
+                                      connection_status: "accepted",
+                                    })
+                                  }
+                                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors ${
+                                    isSelected
+                                      ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
+                                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2.5 truncate">
+                                    <div className="relative flex-shrink-0">
+                                      <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                                        {u.avatar_url ? (
+                                          <img
+                                            src={u.avatar_url}
+                                            alt={u.username}
+                                            className="h-full w-full object-cover"
+                                          />
+                                        ) : (
+                                          getInitials(u.username)
+                                        )}
+                                      </div>
+                                      <span
+                                        className={`absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-white dark:ring-slate-900 ${
+                                          u.is_online ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
+                                        }`}
+                                      />
+                                    </div>
+
+                                    <span className="truncate">{u.username}</span>
+                                  </div>
+
+                                  {unread ? (
+                                    <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                      {unread}
+                                    </span>
+                                  ) : null}
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {activeTab === "requests" && (
+                    <div className="space-y-3">
+                      {/* Incoming Requests */}
+                      <div>
+                        <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          Incoming Requests ({pendingIncoming.length})
+                        </span>
+                        <div className="space-y-2 mt-1">
+                          {pendingIncoming.length === 0 ? (
+                            <p className="px-2 text-[11px] text-slate-400 dark:text-slate-500 italic">
+                              No pending incoming requests.
+                            </p>
+                          ) : (
+                            pendingIncoming.map((req) => (
+                              <div
+                                key={req.id}
+                                className="p-2.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 space-y-2"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden font-bold text-xs">
+                                    {req.requester_avatar ? (
+                                      <img
+                                        src={req.requester_avatar}
+                                        alt={req.requester_name}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    ) : (
+                                      getInitials(req.requester_name)
+                                    )}
+                                  </div>
+                                  <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                                    {req.requester_name}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5">
+                                  <Button
+                                    size="sm"
+                                    variant="primary"
+                                    className="h-7 text-[10px] py-0 px-2.5 flex-1 bg-emerald-600 hover:bg-emerald-700"
+                                    onClick={() => handleRespondRequestClick(req.id, "accept")}
+                                    icon={<Check className="h-3 w-3" />}
+                                  >
+                                    Accept
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7 text-[10px] py-0 px-2.5 text-rose-500 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                    onClick={() => handleRespondRequestClick(req.id, "decline")}
+                                    icon={<X className="h-3 w-3" />}
+                                  >
+                                    Decline
+                                  </Button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Outgoing Pending Requests */}
+                      <div>
+                        <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          Sent Pending ({pendingOutgoing.length})
+                        </span>
+                        <div className="space-y-1 mt-1">
+                          {pendingOutgoing.length === 0 ? (
+                            <p className="px-2 text-[11px] text-slate-400 dark:text-slate-500 italic">
+                              No outgoing pending requests.
+                            </p>
+                          ) : (
+                            pendingOutgoing.map((req) => (
+                              <div
+                                key={req.id}
+                                className="flex items-center justify-between px-3 py-2 rounded-xl text-xs bg-slate-100/70 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400"
+                              >
+                                <span className="truncate font-medium">{req.recipient_name}</span>
+                                <span className="flex items-center gap-1 text-[10px] text-amber-500 font-semibold">
+                                  <Clock className="h-3 w-3" /> Pending
+                                </span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "discover" && (
+                    <div>
+                      <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                        Other Registered Users ({filteredUsers.length})
+                      </span>
+                      <div className="space-y-1.5 mt-2">
+                        {filteredUsers.map((u) => {
+                          const status = u.connection_status || "none";
+
+                          return (
+                            <div
+                              key={u.id}
+                              className="flex items-center justify-between p-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800"
+                            >
+                              <div className="flex items-center gap-2.5 truncate">
+                                <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden font-bold text-[11px]">
                                   {u.avatar_url ? (
                                     <img
                                       src={u.avatar_url}
@@ -201,30 +444,48 @@ export default function ChatPage() {
                                     getInitials(u.username)
                                   )}
                                 </div>
-                                <span
-                                  className={`absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-white dark:ring-slate-900 ${
-                                    u.is_online ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
-                                  }`}
-                                />
+                                <div className="truncate">
+                                  <span className="block font-bold text-slate-800 dark:text-slate-200 truncate">
+                                    {u.username}
+                                  </span>
+                                  <span className="block text-[10px] text-slate-400 truncate">{u.email}</span>
+                                </div>
                               </div>
 
-                              <span className="truncate">{u.username}</span>
+                              {status === "accepted" ? (
+                                <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
+                                  <UserCheck className="h-3 w-3" /> Connected
+                                </span>
+                              ) : status === "pending_sent" ? (
+                                <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md">
+                                  <Clock className="h-3 w-3" /> Sent
+                                </span>
+                              ) : status === "pending_received" ? (
+                                <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-md">
+                                  Request received
+                                </span>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-[10px] py-0 px-2 font-semibold"
+                                  loading={isSendingReq === u.id}
+                                  onClick={() => handleSendRequestClick(u.id)}
+                                  icon={<UserPlus className="h-3 w-3" />}
+                                >
+                                  Connect
+                                </Button>
+                              )}
                             </div>
-
-                            {unread ? (
-                              <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
-                                {unread}
-                              </span>
-                            ) : null}
-                          </button>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
-              {/* Right Column: Chat Log & Input */}
+              {/* Right Column: Active Chat Area */}
               <div className="md:col-span-2 lg:col-span-3 flex flex-col min-h-0 bg-white dark:bg-slate-900">
                 {/* Active Chat Header */}
                 <div className="p-3.5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between bg-slate-50/30 dark:bg-slate-900/30">
@@ -299,7 +560,6 @@ export default function ChatPage() {
                             isMe ? "ml-auto flex-row-reverse" : "mr-auto"
                           }`}
                         >
-                          {/* Sender Avatar */}
                           <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden flex-shrink-0 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-xs">
                             {msg.sender_avatar ? (
                               <img
@@ -312,7 +572,6 @@ export default function ChatPage() {
                             )}
                           </div>
 
-                          {/* Message Content Bubble */}
                           <div
                             className={`flex flex-col space-y-1 ${
                               isMe ? "items-end" : "items-start"
@@ -343,32 +602,92 @@ export default function ChatPage() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Message Input Box */}
-                <form
-                  onSubmit={handleSend}
-                  className="p-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 bg-slate-50/40 dark:bg-slate-900/40"
-                >
-                  <Input
-                    id="chat-message-input"
-                    placeholder={`Message ${activeRecipient.name}...`}
-                    value={inputContent}
-                    onChange={(e) => setInputContent(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="flex-1 text-xs h-10"
-                    autoComplete="off"
-                  />
-
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="sm"
-                    disabled={!inputContent.trim() || !connected}
-                    icon={<Send className="h-4 w-4" />}
-                    className="h-10 px-4"
+                {/* Channel Protection Guard & Input Box */}
+                {!activeRecipient.is_global && activeRecipient.connection_status !== "accepted" ? (
+                  <div className="p-4 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 text-center space-y-2">
+                    {activeRecipient.connection_status === "pending_sent" ? (
+                      <div className="flex flex-col items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                        <Clock className="h-5 w-5 animate-pulse" />
+                        <span className="font-bold">Chat Request Sent</span>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          Waiting for {activeRecipient.name} to accept your request before sending messages.
+                        </p>
+                      </div>
+                    ) : activeRecipient.connection_status === "pending_received" && incomingReqForActive ? (
+                      <div className="flex flex-col items-center gap-2 text-xs">
+                        <div className="flex items-center gap-1.5 font-bold text-indigo-600 dark:text-indigo-400">
+                          <MessageSquare className="h-5 w-5" />
+                          <span>{activeRecipient.name} wants to start a private chat with you!</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            className="bg-emerald-600 hover:bg-emerald-700"
+                            onClick={() => handleRespondRequestClick(incomingReqForActive.id, "accept")}
+                            icon={<Check className="h-4 w-4" />}
+                          >
+                            Accept Chat Request
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-rose-500 border-rose-200 hover:bg-rose-50"
+                            onClick={() => handleRespondRequestClick(incomingReqForActive.id, "decline")}
+                            icon={<X className="h-4 w-4" />}
+                          >
+                            Decline
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-xs">
+                        <div className="flex items-center gap-1.5 font-semibold text-slate-600 dark:text-slate-300">
+                          <ShieldAlert className="h-5 w-5 text-indigo-500" />
+                          <span>Private chat connection required</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 max-w-sm">
+                          Send a chat request to {activeRecipient.name}. Once accepted, you can exchange private messages!
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          loading={isSendingReq === activeRecipient.id}
+                          onClick={() => handleSendRequestClick(activeRecipient.id)}
+                          icon={<UserPlus className="h-4 w-4" />}
+                        >
+                          Send Chat Request
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={handleSend}
+                    className="p-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 bg-slate-50/40 dark:bg-slate-900/40"
                   >
-                    Send
-                  </Button>
-                </form>
+                    <Input
+                      id="chat-message-input"
+                      placeholder={`Message ${activeRecipient.name}...`}
+                      value={inputContent}
+                      onChange={(e) => setInputContent(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className="flex-1 text-xs h-10"
+                      autoComplete="off"
+                    />
+
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="sm"
+                      disabled={!inputContent.trim() || !connected}
+                      icon={<Send className="h-4 w-4" />}
+                      className="h-10 px-4"
+                    >
+                      Send
+                    </Button>
+                  </form>
+                )}
               </div>
             </div>
           </main>
