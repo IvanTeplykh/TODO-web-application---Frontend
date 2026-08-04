@@ -3,12 +3,19 @@ const TOKEN_KEY = "todo_auth_token";
 export const getToken = (): string | null => {
   if (typeof window === "undefined") return null;
   
+  const fromLocal = localStorage.getItem(TOKEN_KEY);
+  if (fromLocal) return fromLocal;
+
+  const fromSession = sessionStorage.getItem(TOKEN_KEY);
+  if (fromSession) return fromSession;
+
   const cookies = document.cookie.split("; ");
   const tokenCookie = cookies.find((row) => row.startsWith(`${TOKEN_KEY}=`));
   if (tokenCookie) {
-    return decodeURIComponent(tokenCookie.split("=")[1]);
+    const val = tokenCookie.split("=")[1];
+    if (val) return decodeURIComponent(val);
   }
-  return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
+  return null;
 };
 
 export const setToken = (token: string, rememberMe?: boolean) => {

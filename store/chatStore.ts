@@ -141,10 +141,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     // Determine WS scheme (ws:// or wss://) based on API URL
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-    const cleanUrl = apiUrl.replace(/\/+$/, "");
+    let cleanUrl = apiUrl.replace(/\/+$/, "");
+    if (!cleanUrl.includes("/api/v1")) {
+      cleanUrl = `${cleanUrl}/api/v1`;
+    }
     const wsScheme = cleanUrl.startsWith("https") ? "wss" : "ws";
     const hostAndPath = cleanUrl.replace(/^https?:\/\//, "");
-    const wsUrl = `${wsScheme}://${hostAndPath}/chat/ws?token=${token}`;
+    const wsUrl = `${wsScheme}://${hostAndPath}/chat/ws?token=${encodeURIComponent(token)}`;
 
     try {
       const ws = new WebSocket(wsUrl);
