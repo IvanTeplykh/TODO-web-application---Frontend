@@ -24,6 +24,8 @@ import {
   Trash2,
   Plus,
   Settings,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
@@ -65,6 +67,10 @@ export default function ChatPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"chats" | "requests" | "discover">("chats");
   const [isSendingReq, setIsSendingReq] = useState<string | null>(null);
+
+  // Collapse states for sidebar sections
+  const [isChannelsCollapsed, setIsChannelsCollapsed] = useState(false);
+  const [isContactsCollapsed, setIsContactsCollapsed] = useState(false);
 
   // Channel modals state
   const [isCreateChannelOpen, setIsCreateChannelOpen] = useState(false);
@@ -317,9 +323,17 @@ export default function ChatPage() {
                       {/* Channels Section */}
                       <div>
                         <div className="flex items-center justify-between px-2 mb-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          <button
+                            onClick={() => setIsChannelsCollapsed((prev) => !prev)}
+                            className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                          >
+                            {isChannelsCollapsed ? (
+                              <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                            ) : (
+                              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                            )}
                             Channels ({channels.length + 1})
-                          </span>
+                          </button>
                           <button
                             onClick={() => setIsCreateChannelOpen(true)}
                             title="Create new channel"
@@ -329,130 +343,64 @@ export default function ChatPage() {
                           </button>
                         </div>
 
-                        <div className="space-y-1">
-                          {/* Public Channel */}
-                          <button
-                            onClick={() => setActiveRecipient(DEFAULT_RECIPIENT)}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                              activeRecipient.id === "global"
-                                ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
-                                : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2.5 truncate">
-                              <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
-                                <Hash className="h-4 w-4" />
-                              </div>
-                              <span className="truncate">Public Channel</span>
-                            </div>
-                            {unreadCounts["global"] ? (
-                              <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
-                                {unreadCounts["global"]}
-                              </span>
-                            ) : null}
-                          </button>
-
-                          {/* Custom Channels */}
-                          {channels.map((ch) => {
-                            const isSelected = activeRecipient.id === ch.id;
-                            const unread = unreadCounts[ch.id];
-
-                            return (
-                              <button
-                                key={ch.id}
-                                onClick={() =>
-                                  setActiveRecipient({
-                                    id: ch.id,
-                                    name: ch.name,
-                                    avatar_url: ch.avatar_url,
-                                    description: ch.description,
-                                    is_channel: true,
-                                    my_role: ch.my_role,
-                                    members_count: ch.members_count,
-                                  })
-                                }
-                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                                  isSelected
-                                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
-                                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
-                                }`}
-                              >
-                                <div className="flex items-center gap-2.5 truncate">
-                                  <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 overflow-hidden font-bold text-[11px]">
-                                    {ch.avatar_url ? (
-                                      <img src={ch.avatar_url} alt={ch.name} className="h-full w-full object-cover" />
-                                    ) : (
-                                      <Hash className="h-4 w-4" />
-                                    )}
-                                  </div>
-                                  <span className="truncate">#{ch.name}</span>
+                        {!isChannelsCollapsed && (
+                          <div className="space-y-1">
+                            {/* Public Channel */}
+                            <button
+                              onClick={() => setActiveRecipient(DEFAULT_RECIPIENT)}
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                                activeRecipient.id === "global"
+                                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
+                                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 truncate">
+                                <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                                  <Hash className="h-4 w-4" />
                                 </div>
+                                <span className="truncate">Public Channel</span>
+                              </div>
+                              {unreadCounts["global"] ? (
+                                <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                  {unreadCounts["global"]}
+                                </span>
+                              ) : null}
+                            </button>
 
-                                {unread ? (
-                                  <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
-                                    {unread}
-                                  </span>
-                                ) : null}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Direct Messages Section (Accepted Connections) */}
-                      <div>
-                        <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                          Contacts ({acceptedUsers.length})
-                        </span>
-                        <div className="space-y-1 mt-1">
-                          {acceptedUsers.length === 0 ? (
-                            <p className="px-2 text-[11px] text-slate-400 dark:text-slate-500 italic">
-                              No approved chats yet. Send or accept a chat request!
-                            </p>
-                          ) : (
-                            acceptedUsers.map((u) => {
-                              const isSelected = activeRecipient.id === u.id;
-                              const unread = unreadCounts[u.id];
+                            {/* Custom Channels */}
+                            {channels.map((ch) => {
+                              const isSelected = activeRecipient.id === ch.id;
+                              const unread = unreadCounts[ch.id];
 
                               return (
                                 <button
-                                  key={u.id}
+                                  key={ch.id}
                                   onClick={() =>
                                     setActiveRecipient({
-                                      id: u.id,
-                                      name: u.username,
-                                      avatar_url: u.avatar_url,
-                                      is_online: u.is_online,
-                                      connection_status: "accepted",
+                                      id: ch.id,
+                                      name: ch.name,
+                                      avatar_url: ch.avatar_url,
+                                      description: ch.description,
+                                      is_channel: true,
+                                      my_role: ch.my_role,
+                                      members_count: ch.members_count,
                                     })
                                   }
-                                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors ${
+                                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
                                     isSelected
                                       ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
                                       : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                                   }`}
                                 >
                                   <div className="flex items-center gap-2.5 truncate">
-                                    <div className="relative flex-shrink-0">
-                                      <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden text-slate-700 dark:text-slate-300 font-bold text-[11px]">
-                                        {u.avatar_url ? (
-                                          <img
-                                            src={u.avatar_url}
-                                            alt={u.username}
-                                            className="h-full w-full object-cover"
-                                          />
-                                        ) : (
-                                          getInitials(u.username)
-                                        )}
-                                      </div>
-                                      <span
-                                        className={`absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-white dark:ring-slate-900 ${
-                                          u.is_online ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
-                                        }`}
-                                      />
+                                    <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 overflow-hidden font-bold text-[11px]">
+                                      {ch.avatar_url ? (
+                                        <img src={ch.avatar_url} alt={ch.name} className="h-full w-full object-cover" />
+                                      ) : (
+                                        <Hash className="h-4 w-4" />
+                                      )}
                                     </div>
-
-                                    <span className="truncate">{u.username}</span>
+                                    <span className="truncate">#{ch.name}</span>
                                   </div>
 
                                   {unread ? (
@@ -462,9 +410,90 @@ export default function ChatPage() {
                                   ) : null}
                                 </button>
                               );
-                            })
-                          )}
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Direct Messages Section (Accepted Connections) */}
+                      <div>
+                        <div className="flex items-center justify-between px-2 mb-1">
+                          <button
+                            onClick={() => setIsContactsCollapsed((prev) => !prev)}
+                            className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                          >
+                            {isContactsCollapsed ? (
+                              <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                            ) : (
+                              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                            )}
+                            Contacts ({acceptedUsers.length})
+                          </button>
                         </div>
+
+                        {!isContactsCollapsed && (
+                          <div className="space-y-1 mt-1">
+                            {acceptedUsers.length === 0 ? (
+                              <p className="px-2 text-[11px] text-slate-400 dark:text-slate-500 italic">
+                                No approved chats yet. Send or accept a chat request!
+                              </p>
+                            ) : (
+                              acceptedUsers.map((u) => {
+                                const isSelected = activeRecipient.id === u.id;
+                                const unread = unreadCounts[u.id];
+
+                                return (
+                                  <button
+                                    key={u.id}
+                                    onClick={() =>
+                                      setActiveRecipient({
+                                        id: u.id,
+                                        name: u.username,
+                                        avatar_url: u.avatar_url,
+                                        is_online: u.is_online,
+                                        connection_status: "accepted",
+                                      })
+                                    }
+                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors ${
+                                      isSelected
+                                        ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
+                                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2.5 truncate">
+                                      <div className="relative flex-shrink-0">
+                                        <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                                          {u.avatar_url ? (
+                                            <img
+                                              src={u.avatar_url}
+                                              alt={u.username}
+                                              className="h-full w-full object-cover"
+                                            />
+                                          ) : (
+                                            getInitials(u.username)
+                                          )}
+                                        </div>
+                                        <span
+                                          className={`absolute bottom-0 right-0 h-2 w-2 rounded-full ring-2 ring-white dark:ring-slate-900 ${
+                                            u.is_online ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
+                                          }`}
+                                        />
+                                      </div>
+
+                                      <span className="truncate">{u.username}</span>
+                                    </div>
+
+                                    {unread ? (
+                                      <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                        {unread}
+                                      </span>
+                                    ) : null}
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
@@ -854,7 +883,6 @@ export default function ChatPage() {
                                     {isMe && (
                                       <button
                                         onClick={() => handleStartEdit(msg.id, msg.content)}
-                                        title="Edit message"
                                         className="p-1 rounded-md text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                                       >
                                         <Pencil className="h-3.5 w-3.5" />
@@ -862,7 +890,6 @@ export default function ChatPage() {
                                     )}
                                     <button
                                       onClick={() => handleDeleteMsg(msg.id)}
-                                      title="Delete message"
                                       className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800"
                                     >
                                       <Trash2 className="h-3.5 w-3.5" />
