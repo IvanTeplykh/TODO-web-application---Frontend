@@ -1,7 +1,6 @@
 export interface ChatUser {
   id: string;
   username: string;
-  email: string;
   avatar_url?: string | null;
   is_online: boolean;
   connection_status?: "accepted" | "pending_sent" | "pending_received" | "none";
