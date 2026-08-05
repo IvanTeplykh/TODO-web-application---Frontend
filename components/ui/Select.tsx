@@ -55,7 +55,7 @@ export function Select({
   };
 
   return (
-    <div className="w-full relative" ref={containerRef}>
+    <div className={`w-full relative ${isOpen ? "z-50" : "z-0"}`} ref={containerRef}>
       {label && (
         <label
           htmlFor={id}

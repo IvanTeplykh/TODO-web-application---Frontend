@@ -545,7 +545,7 @@ export default function ProfilePage() {
                 </Card>
 
                 {/* Chat Settings Card */}
-                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6">
+                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6 relative z-20">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500 mb-6 flex items-center gap-2">
                     <MessageSquare className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                     Chat Settings
@@ -581,7 +581,7 @@ export default function ProfilePage() {
                 </Card>
 
                 {/* Change Password Card */}
-                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6">
+                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6 relative z-10">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500 mb-6">
                     Change Password
                   </h3>
