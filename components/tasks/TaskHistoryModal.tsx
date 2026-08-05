@@ -42,7 +42,7 @@ export function TaskHistoryModal({ isOpen, onClose, taskId, taskTitle }: TaskHis
   const formatDate = (isoString: string) => {
     try {
       const date = new Date(isoString);
-      return date.toLocaleString([], {
+      return date.toLocaleString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
