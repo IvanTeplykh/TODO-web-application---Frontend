@@ -29,7 +29,7 @@ interface ChatState {
 
 export const DEFAULT_RECIPIENT: ChatRecipient = {
   id: "global",
-  name: "General Channel",
+  name: "Public Channel",
   is_global: true,
   connection_status: "accepted",
 };

@@ -221,7 +221,7 @@ export default function ChatPage() {
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                  Team Chat & Direct Channels
+                  Chat
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Private messaging with channel approval, edit & delete capabilities
@@ -305,7 +305,7 @@ export default function ChatPage() {
                             <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
                               <Hash className="h-4 w-4" />
                             </div>
-                            <span className="truncate">General Channel</span>
+                            <span className="truncate">Public Channel</span>
                           </div>
                           {unreadCounts["global"] ? (
                             <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
@@ -587,7 +587,7 @@ export default function ChatPage() {
                       </h2>
                       <p className="text-[11px] text-slate-400 dark:text-slate-500">
                         {activeRecipient.is_global
-                          ? "Public group channel for all team members"
+                          ? "Public group channel. Messages are automatically deleted after 180 days."
                           : activeRecipient.is_online
                           ? "Online"
                           : "Offline"}
