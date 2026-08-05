@@ -116,8 +116,8 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
     try {
       await updateChannel(channelId, {
         name: trimmedName,
-        description: description.trim() || undefined,
-        avatar_url: avatarUrl.trim() || undefined,
+        description: description.trim(),
+        avatar_url: avatarUrl.trim(),
       });
       toast.success("Channel settings updated");
     } catch (err: any) {

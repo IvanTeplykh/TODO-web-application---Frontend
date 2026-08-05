@@ -121,12 +121,6 @@ export function AvatarPicker({
               {fallbackText.substring(0, 2).toUpperCase()}
             </span>
           )}
-
-          {/* Camera Hover Overlay */}
-          <div className="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <Camera className="h-4 w-4 mb-0.5" />
-            <span className="text-[9px] font-bold uppercase tracking-wider">Change</span>
-          </div>
         </div>
 
         <input
