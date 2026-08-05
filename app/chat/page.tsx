@@ -22,18 +22,23 @@ import {
   UserCheck,
   Pencil,
   Trash2,
+  Plus,
+  Settings,
 } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import { ConfirmModal } from "../../components/ui/ConfirmModal";
 import { Pagination } from "../../components/ui/Pagination";
 import { toast } from "sonner";
+import { CreateChannelModal } from "../../components/chat/CreateChannelModal";
+import { ChannelSettingsModal } from "../../components/chat/ChannelSettingsModal";
 
 export default function ChatPage() {
   const { user } = useAuthStore();
   const {
     users,
     chatRequests,
+    channels,
     activeRecipient,
     messages,
     unreadCounts,
@@ -41,6 +46,7 @@ export default function ChatPage() {
     connected,
     fetchUsers,
     fetchRequests,
+    fetchChannels,
     fetchMessages,
     editMessage,
     deleteMessage,
@@ -56,6 +62,10 @@ export default function ChatPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"chats" | "requests" | "discover">("chats");
   const [isSendingReq, setIsSendingReq] = useState<string | null>(null);
+
+  // Channel modals state
+  const [isCreateChannelOpen, setIsCreateChannelOpen] = useState(false);
+  const [isChannelSettingsOpen, setIsChannelSettingsOpen] = useState(false);
   
   // Message edit state
   const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
@@ -74,13 +84,14 @@ export default function ChatPage() {
   useEffect(() => {
     fetchUsers();
     fetchRequests();
+    fetchChannels();
     fetchMessages(activeRecipient.id);
     connectWS();
 
     return () => {
       disconnectWS();
     };
-  }, [activeRecipient.id, connectWS, disconnectWS, fetchMessages, fetchRequests, fetchUsers]);
+  }, [activeRecipient.id, connectWS, disconnectWS, fetchChannels, fetchMessages, fetchRequests, fetchUsers]);
 
   // Auto-scroll messages to bottom when new messages arrive
   useEffect(() => {
@@ -285,31 +296,89 @@ export default function ChatPage() {
                 <div className="flex-1 overflow-y-auto p-2 space-y-3">
                   {activeTab === "chats" && (
                     <>
-                      {/* General Channel Section */}
+                      {/* Channels Section */}
                       <div>
-                        <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                          Channels
-                        </span>
-                        <button
-                          onClick={() => setActiveRecipient(DEFAULT_RECIPIENT)}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors mt-1 ${
-                            activeRecipient.id === "global"
-                              ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
-                              : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5 truncate">
-                            <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
-                              <Hash className="h-4 w-4" />
+                        <div className="flex items-center justify-between px-2 mb-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                            Channels ({channels.length + 1})
+                          </span>
+                          <button
+                            onClick={() => setIsCreateChannelOpen(true)}
+                            title="Create new channel"
+                            className="p-0.5 rounded-md text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-colors"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        <div className="space-y-1">
+                          {/* Public Channel */}
+                          <button
+                            onClick={() => setActiveRecipient(DEFAULT_RECIPIENT)}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                              activeRecipient.id === "global"
+                                ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
+                                : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 truncate">
+                              <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                                <Hash className="h-4 w-4" />
+                              </div>
+                              <span className="truncate">Public Channel</span>
                             </div>
-                            <span className="truncate">Public Channel</span>
-                          </div>
-                          {unreadCounts["global"] ? (
-                            <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
-                              {unreadCounts["global"]}
-                            </span>
-                          ) : null}
-                        </button>
+                            {unreadCounts["global"] ? (
+                              <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                {unreadCounts["global"]}
+                              </span>
+                            ) : null}
+                          </button>
+
+                          {/* Custom Channels */}
+                          {channels.map((ch) => {
+                            const isSelected = activeRecipient.id === ch.id;
+                            const unread = unreadCounts[ch.id];
+
+                            return (
+                              <button
+                                key={ch.id}
+                                onClick={() =>
+                                  setActiveRecipient({
+                                    id: ch.id,
+                                    name: ch.name,
+                                    avatar_url: ch.avatar_url,
+                                    description: ch.description,
+                                    is_channel: true,
+                                    my_role: ch.my_role,
+                                    members_count: ch.members_count,
+                                  })
+                                }
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                                  isSelected
+                                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold"
+                                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5 truncate">
+                                  <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 overflow-hidden font-bold text-[11px]">
+                                    {ch.avatar_url ? (
+                                      <img src={ch.avatar_url} alt={ch.name} className="h-full w-full object-cover" />
+                                    ) : (
+                                      <Hash className="h-4 w-4" />
+                                    )}
+                                  </div>
+                                  <span className="truncate">#{ch.name}</span>
+                                </div>
+
+                                {unread ? (
+                                  <span className="h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                    {unread}
+                                  </span>
+                                ) : null}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
 
                       {/* Direct Messages Section (Accepted Connections) */}
@@ -554,9 +623,13 @@ export default function ChatPage() {
                 {/* Active Chat Header */}
                 <div className="p-3.5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between bg-slate-50/30 dark:bg-slate-900/30">
                   <div className="flex items-center gap-3">
-                    {activeRecipient.is_global ? (
-                      <div className="h-9 w-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
-                        <Hash className="h-5 w-5" />
+                    {activeRecipient.is_global || activeRecipient.is_channel ? (
+                      <div className="h-9 w-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold overflow-hidden flex-shrink-0">
+                        {activeRecipient.avatar_url ? (
+                          <img src={activeRecipient.avatar_url} alt={activeRecipient.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <Hash className="h-5 w-5" />
+                        )}
                       </div>
                     ) : (
                       <div className="relative">
@@ -581,17 +654,31 @@ export default function ChatPage() {
 
                     <div>
                       <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
-                        {activeRecipient.name}
+                        {activeRecipient.is_channel ? `#${activeRecipient.name}` : activeRecipient.name}
                       </h2>
                       <p className="text-[11px] text-slate-400 dark:text-slate-500">
                         {activeRecipient.is_global
                           ? "Public group channel. Messages are automatically deleted after 180 days."
+                          : activeRecipient.is_channel
+                          ? activeRecipient.description || `${activeRecipient.members_count || 1} members`
                           : activeRecipient.is_online
                           ? "Online"
                           : "Offline"}
                       </p>
                     </div>
                   </div>
+
+                  {activeRecipient.is_channel && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs px-2.5 font-semibold"
+                      onClick={() => setIsChannelSettingsOpen(true)}
+                      icon={<Settings className="h-4 w-4" />}
+                    >
+                      Settings
+                    </Button>
+                  )}
                 </div>
 
                 {/* Message Log */}
@@ -686,16 +773,18 @@ export default function ChatPage() {
                               </div>
                             ) : (
                               <div className="relative group/bubble flex items-center gap-1.5">
-                                {/* Hover Action Buttons for Own Messages */}
-                                {isMe && (
+                                {/* Hover Action Buttons */}
+                                {(isMe || (activeRecipient.is_channel && (activeRecipient.my_role === "owner" || activeRecipient.my_role === "admin"))) && (
                                   <div className="opacity-0 group-hover/bubble:opacity-100 transition-opacity flex items-center gap-1">
-                                    <button
-                                      onClick={() => handleStartEdit(msg.id, msg.content)}
-                                      title="Edit message"
-                                      className="p-1 rounded-md text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                    >
-                                      <Pencil className="h-3.5 w-3.5" />
-                                    </button>
+                                    {isMe && (
+                                      <button
+                                        onClick={() => handleStartEdit(msg.id, msg.content)}
+                                        title="Edit message"
+                                        className="p-1 rounded-md text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                      >
+                                        <Pencil className="h-3.5 w-3.5" />
+                                      </button>
+                                    )}
                                     <button
                                       onClick={() => handleDeleteMsg(msg.id)}
                                       title="Delete message"
@@ -831,6 +920,21 @@ export default function ChatPage() {
         isLoading={isDeletingMsg}
         variant="danger"
       />
+
+      {/* Create Channel Modal */}
+      <CreateChannelModal
+        isOpen={isCreateChannelOpen}
+        onClose={() => setIsCreateChannelOpen(false)}
+      />
+
+      {/* Channel Settings & Admin Modal */}
+      {isChannelSettingsOpen && activeRecipient.is_channel && (
+        <ChannelSettingsModal
+          isOpen={isChannelSettingsOpen}
+          onClose={() => setIsChannelSettingsOpen(false)}
+          channelId={activeRecipient.id}
+        />
+      )}
     </ProtectedRoute>
   );
 }

@@ -31,11 +31,35 @@ export interface ChatRequest {
   created_at: string;
 }
 
+export interface Channel {
+  id: string;
+  name: string;
+  description?: string | null;
+  avatar_url?: string | null;
+  owner_id: string;
+  created_at: string;
+  my_role?: "owner" | "admin" | "member" | string;
+  members_count: number;
+}
+
+export interface ChannelMember {
+  id: string;
+  user_id: string;
+  username: string;
+  avatar_url?: string | null;
+  role: "owner" | "admin" | "member" | string;
+  joined_at: string;
+}
+
 export type ChatRecipient = {
-  id: string; // user UUID or 'global'
+  id: string; // user UUID, 'global', or channel UUID
   name: string;
   avatar_url?: string | null;
   is_global?: boolean;
+  is_channel?: boolean;
+  description?: string | null;
+  my_role?: string | null;
+  members_count?: number;
   is_online?: boolean;
   connection_status?: "accepted" | "pending_sent" | "pending_received" | "none";
 };
