@@ -223,9 +223,6 @@ export default function ChatPage() {
                   <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                   Chat
                 </h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Private messaging with channel approval, edit & delete capabilities
-                </p>
               </div>
             </div>
 
