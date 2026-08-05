@@ -4,20 +4,25 @@ import React, { useState } from "react";
 import { Task } from "../../types/task";
 import { useTaskStore } from "../../store/taskStore";
 import { Checkbox } from "../ui/Checkbox";
-import { Trash2, Edit3, Loader2 } from "lucide-react";
+import { Trash2, Edit3, Loader2, History, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmModal } from "../ui/ConfirmModal";
 
 interface TaskItemProps {
   task: Task;
   onEdit?: (task: Task) => void;
+  onShare?: (task: Task) => void;
+  onHistory?: (task: Task) => void;
 }
 
-export function TaskItem({ task, onEdit }: TaskItemProps) {
+export function TaskItem({ task, onEdit, onShare, onHistory }: TaskItemProps) {
   const { toggleTask, deleteTask } = useTaskStore();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+
+  const isOwner = task.my_access_level === "owner" || !task.my_access_level;
+  const canEdit = isOwner || task.my_access_level === "full_access";
 
   const handleToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsToggling(true);
@@ -62,7 +67,7 @@ export function TaskItem({ task, onEdit }: TaskItemProps) {
           ? "bg-slate-50/30 opacity-70" 
           : "hover:bg-slate-50/50 dark:hover:bg-slate-800/20"
       }`}>
-        <div className="col-span-6 md:col-span-8 flex items-center gap-3 min-w-0">
+        <div className="col-span-5 md:col-span-6 flex items-center gap-3 min-w-0">
           <Checkbox
             checked={task.completed}
             disabled={isToggling}
@@ -75,9 +80,20 @@ export function TaskItem({ task, onEdit }: TaskItemProps) {
             }`}>
               {task.title}
             </span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-300">
-              {new Date(task.created_at).toLocaleDateString()}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-400 dark:text-slate-300">
+                {new Date(task.created_at).toLocaleDateString()}
+              </span>
+              {task.my_access_level && task.my_access_level !== "owner" && (
+                <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md border ${
+                  task.my_access_level === "full_access"
+                    ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-400 dark:border-indigo-800"
+                    : "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800"
+                }`}>
+                  {task.my_access_level === "full_access" ? "Co-owner" : "Status Only"}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -101,28 +117,51 @@ export function TaskItem({ task, onEdit }: TaskItemProps) {
           )}
         </div>
 
-        <div className="col-span-2 md:col-span-1 flex items-center justify-end gap-1">
-          {onEdit && (
+        <div className="col-span-3 md:col-span-3 flex items-center justify-end gap-1">
+          {onHistory && (
+            <button
+              onClick={() => onHistory(task)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/20 transition-all"
+              title="Global History"
+            >
+              <History className="h-4 w-4" />
+            </button>
+          )}
+
+          {isOwner && onShare && (
+            <button
+              onClick={() => onShare(task)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/20 transition-all"
+              title="Share Task"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
+          )}
+
+          {canEdit && onEdit && (
             <button
               onClick={() => onEdit(task)}
-              className="p-1.5 rounded-lg text-slate-405 hover:text-indigo-600 hover:bg-indigo-50 dark:text-slate-500 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/20 transition-all"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/20 transition-all"
               title="Edit Task"
             >
               <Edit3 className="h-4 w-4" />
             </button>
           )}
-          <button
-            onClick={handleDeleteClick}
-            disabled={isDeleting}
-            className="p-1.5 rounded-lg text-slate-405 hover:text-rose-600 hover:bg-rose-50 dark:text-slate-500 dark:hover:text-rose-400 dark:hover:bg-rose-950/20 transition-all"
-            title="Delete Task"
-          >
-            {isDeleting ? (
-              <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
-          </button>
+
+          {isOwner && (
+            <button
+              onClick={handleDeleteClick}
+              disabled={isDeleting}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:text-rose-400 dark:hover:bg-rose-950/20 transition-all"
+              title="Delete Task"
+            >
+              {isDeleting ? (
+                <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </button>
+          )}
         </div>
       </div>
 

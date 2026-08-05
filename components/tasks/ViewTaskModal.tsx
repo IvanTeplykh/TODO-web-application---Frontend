@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Task } from "../../types/task";
 import { useTaskStore } from "../../store/taskStore";
 import { getTaskFields, formatDate, isOverdue } from "../../lib/taskHelpers";
-import { X, Calendar, Clock, Trash2, Edit2, Loader2 } from "lucide-react";
+import { X, Calendar, Clock, Trash2, Edit2, Loader2, History, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Checkbox } from "../ui/Checkbox";
@@ -17,9 +17,11 @@ interface ViewTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit: (task: Task) => void;
+  onShare?: (task: Task) => void;
+  onHistory?: (task: Task) => void;
 }
 
-export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalProps) {
+export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistory }: ViewTaskModalProps) {
   useLockBodyScroll(isOpen);
 
   const { deleteTask, toggleTask, tasks } = useTaskStore();
@@ -28,6 +30,11 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+
+  if (!isOpen || !currentTask) return null;
+
+  const isOwner = currentTask.my_access_level === "owner" || !currentTask.my_access_level;
+  const canEdit = isOwner || currentTask.my_access_level === "full_access";
 
   const handleToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!currentTask) return;
@@ -40,8 +47,6 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
       setIsToggling(false);
     }
   };
-
-  if (!isOpen || !currentTask) return null;
 
   const { title, description, dueDate } = getTaskFields(currentTask);
   const overdue = isOverdue(dueDate, currentTask.completed);
@@ -86,9 +91,20 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800/60">
-          <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">
-            Task Details
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">
+              Task Details
+            </h2>
+            {currentTask.my_access_level && currentTask.my_access_level !== "owner" && (
+              <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${
+                currentTask.my_access_level === "full_access"
+                  ? "bg-indigo-100 text-indigo-600 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-400"
+                  : "bg-emerald-100 text-emerald-600 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400"
+              }`}>
+                {currentTask.my_access_level === "full_access" ? "Co-owner" : "Status Only"}
+              </span>
+            )}
+          </div>
           <button 
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
@@ -181,6 +197,16 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
               )}
             </div>
 
+            {/* Owner & Created At */}
+            <div>
+              <span className="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                Owner
+              </span>
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                @{currentTask.owner_username || "Owner"}
+              </span>
+            </div>
+
             {/* Created At */}
             <div>
               <span className="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
@@ -199,57 +225,59 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit }: ViewTaskModalPr
                 </span>
               </div>
             </div>
-
-            {/* Last Updated At */}
-            <div>
-              <span className="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
-                Last Updated
-              </span>
-              <div className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
-                <Clock className="h-4 w-4 text-slate-400" />
-                <span>
-                  {new Date(currentTask.updated_at || currentTask.created_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  })}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30">
-          <Button
-            type="button"
-            variant="outline"
-            className="text-rose-600 border-rose-100 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:border-rose-950/30 dark:hover:bg-rose-950/20"
-            onClick={handleDeleteClick}
-            disabled={isDeleting}
-            icon={<Trash2 className="h-4 w-4" />}
-          >
-            Delete Task
-          </Button>
+          <div>
+            {isOwner && (
+              <Button
+                type="button"
+                variant="outline"
+                className="text-rose-600 border-rose-100 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:border-rose-950/30 dark:hover:bg-rose-950/20"
+                onClick={handleDeleteClick}
+                disabled={isDeleting}
+                icon={<Trash2 className="h-4 w-4" />}
+              >
+                Delete Task
+              </Button>
+            )}
+          </div>
 
-          <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-            >
-              Close
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              onClick={() => onEdit(currentTask)}
-              icon={<Edit2 className="h-4 w-4" />}
-            >
-              Edit Task
-            </Button>
+          <div className="flex items-center gap-2">
+            {onHistory && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onHistory(currentTask)}
+                icon={<History className="h-4 w-4" />}
+              >
+                History
+              </Button>
+            )}
+
+            {isOwner && onShare && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onShare(currentTask)}
+                icon={<Share2 className="h-4 w-4" />}
+              >
+                Share
+              </Button>
+            )}
+
+            {canEdit && (
+              <Button
+                type="button"
+                variant="primary"
+                onClick={() => onEdit(currentTask)}
+                icon={<Edit2 className="h-4 w-4" />}
+              >
+                Edit Task
+              </Button>
+            )}
           </div>
         </div>
       </div>

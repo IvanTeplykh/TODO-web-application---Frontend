@@ -1,5 +1,5 @@
 import api from "./api";
-import { Task } from "../types/task";
+import { Task, TaskShareRequest, TaskHistoryItem } from "../types/task";
 import { PaginatedResponse } from "../types/api";
 
 export interface GetTasksParams {
@@ -56,6 +56,41 @@ export const tasksService = {
 
   toggleStatus: async (id: string, completed: boolean): Promise<Task> => {
     const response = await api.patch<Task>(`/tasks/${id}/status`, { completed });
+    return response.data;
+  },
+
+  shareTask: async (
+    taskId: string,
+    payload: { target_username: string; access_level: "transfer" | "status_only" | "full_access" }
+  ): Promise<TaskShareRequest> => {
+    const response = await api.post<TaskShareRequest>(`/tasks/${taskId}/share`, payload);
+    return response.data;
+  },
+
+  getPendingShares: async (): Promise<TaskShareRequest[]> => {
+    const response = await api.get<TaskShareRequest[]>("/tasks/shares/pending");
+    return response.data;
+  },
+
+  respondShare: async (
+    requestId: string,
+    passcode: string,
+    action: "accept" | "decline"
+  ): Promise<{ message: string; status: string; task_id?: string }> => {
+    const response = await api.post<{ message: string; status: string; task_id?: string }>(
+      `/tasks/shares/${requestId}/respond`,
+      { passcode, action }
+    );
+    return response.data;
+  },
+
+  getHistory: async (taskId: string): Promise<TaskHistoryItem[]> => {
+    const response = await api.get<TaskHistoryItem[]>(`/tasks/${taskId}/history`);
+    return response.data;
+  },
+
+  removeCollaborator: async (taskId: string, targetUserId: string): Promise<{ message: string }> => {
+    const response = await api.delete<{ message: string }>(`/tasks/${taskId}/collaborators/${targetUserId}`);
     return response.data;
   },
 };

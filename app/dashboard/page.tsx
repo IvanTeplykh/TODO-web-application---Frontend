@@ -15,23 +15,28 @@ import { Button } from "../../components/ui/Button";
 import { CreateTaskModal } from "../../components/tasks/CreateTaskModal";
 import { ViewTaskModal } from "../../components/tasks/ViewTaskModal";
 import { EditTaskModal } from "../../components/tasks/EditTaskModal";
+import { ShareTaskModal } from "../../components/tasks/ShareTaskModal";
+import { TaskSharesModal } from "../../components/tasks/TaskSharesModal";
+import { TaskHistoryModal } from "../../components/tasks/TaskHistoryModal";
 import { useTaskStore } from "../../store/taskStore";
 import { Task } from "../../types/task";
-import { Plus } from "lucide-react";
+import { Plus, Mail } from "lucide-react";
 
 export default function DashboardPage() {
-  const { page, pages, setPage, fetchTasks, createTask } = useTaskStore();
+  const { page, pages, setPage, fetchTasks, createTask, pendingTaskShares, fetchPendingShares } = useTaskStore();
   
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [activeTaskForView, setActiveTaskForView] = useState<Task | null>(null);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
+  const [taskToShare, setTaskToShare] = useState<Task | null>(null);
+  const [taskForHistory, setTaskForHistory] = useState<Task | null>(null);
+  const [isSharesModalOpen, setIsSharesModalOpen] = useState(false);
 
   useEffect(() => {
     const handlePendingTask = async () => {
       const pendingTaskStr = localStorage.getItem("pending_task");
       if (pendingTaskStr) {
-        // Clear the item synchronously first to prevent React 18 Strict Mode double-execution
         localStorage.removeItem("pending_task");
         try {
           const pendingTask = JSON.parse(pendingTaskStr);
@@ -46,14 +51,25 @@ export default function DashboardPage() {
         }
       }
       fetchTasks();
+      fetchPendingShares();
     };
 
     handlePendingTask();
-  }, [fetchTasks, createTask]);
+  }, [fetchTasks, createTask, fetchPendingShares]);
 
   const handleOpenEdit = (task: Task) => {
     setActiveTaskForView(null);
     setTaskToEdit(task);
+  };
+
+  const handleOpenShare = (task: Task) => {
+    setActiveTaskForView(null);
+    setTaskToShare(task);
+  };
+
+  const handleOpenHistory = (task: Task) => {
+    setActiveTaskForView(null);
+    setTaskForHistory(task);
   };
 
   return (
@@ -65,11 +81,26 @@ export default function DashboardPage() {
           <Sidebar />
           
           <main className="flex-1 p-6 md:p-8 space-y-6 max-w-6xl mx-auto w-full">
-            {/* Page Title */}
-            <div>
+            {/* Page Title & Task Invitations Alert Button */}
+            <div className="flex items-center justify-between">
               <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100">
                 Workspace
               </h1>
+
+              {pendingTaskShares.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="relative rounded-xl border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold hover:bg-amber-100 transition-all gap-2"
+                  onClick={() => setIsSharesModalOpen(true)}
+                  icon={<Mail className="h-4 w-4 text-amber-600" />}
+                >
+                  <span>Task Invitations</span>
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-black text-white shadow-xs">
+                    {pendingTaskShares.length}
+                  </span>
+                </Button>
+              )}
             </div>
 
             {/* Quick stats at the top */}
@@ -122,12 +153,37 @@ export default function DashboardPage() {
           isOpen={activeTaskForView !== null}
           onClose={() => setActiveTaskForView(null)}
           onEdit={handleOpenEdit}
+          onShare={handleOpenShare}
+          onHistory={handleOpenHistory}
         />
         
         <EditTaskModal
           task={taskToEdit}
           isOpen={taskToEdit !== null}
           onClose={() => setTaskToEdit(null)}
+        />
+
+        {taskToShare && (
+          <ShareTaskModal
+            isOpen={taskToShare !== null}
+            onClose={() => setTaskToShare(null)}
+            taskId={taskToShare.id}
+            taskTitle={taskToShare.title}
+          />
+        )}
+
+        {taskForHistory && (
+          <TaskHistoryModal
+            isOpen={taskForHistory !== null}
+            onClose={() => setTaskForHistory(null)}
+            taskId={taskForHistory.id}
+            taskTitle={taskForHistory.title}
+          />
+        )}
+
+        <TaskSharesModal
+          isOpen={isSharesModalOpen}
+          onClose={() => setIsSharesModalOpen(false)}
         />
 
         <Footer />
