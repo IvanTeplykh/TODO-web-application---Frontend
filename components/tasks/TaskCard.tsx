@@ -5,7 +5,7 @@ import { Task } from "../../types/task";
 import { useTaskStore } from "../../store/taskStore";
 import { getTaskFields, formatDate, isOverdue } from "../../lib/taskHelpers";
 import { Checkbox } from "../ui/Checkbox";
-import { Calendar, ArrowRight, AlertCircle } from "lucide-react";
+import { Calendar, ArrowRight, AlertCircle, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
 interface TaskCardProps {
@@ -75,6 +75,12 @@ export function TaskCard({ task, onView }: TaskCardProps) {
         </div>
         
         <div className="flex items-center gap-1.5 flex-shrink-0">
+          {task.has_unread_comments && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-600 text-white shadow-xs animate-pulse">
+              <MessageSquare className="h-2.5 w-2.5" />
+              {task.unread_comments_count ? `${task.unread_comments_count} new` : "New comment"}
+            </span>
+          )}
           {task.my_access_level && task.my_access_level !== "owner" && (
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
               task.my_access_level === "full_access"

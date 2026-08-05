@@ -6,7 +6,7 @@ import { useTaskStore } from "../../store/taskStore";
 import { useAuthStore } from "../../store/authStore";
 import { tasksService } from "../../services/tasks";
 import { getTaskFields, formatDate, isOverdue } from "../../lib/taskHelpers";
-import { X, Calendar, Clock, Trash2, Edit2, Loader2, History, Share2, MessageSquare, Send } from "lucide-react";
+import { X, Calendar, Clock, Trash2, Edit2, Loader2, History, Share2, MessageSquare, Send, Users, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Checkbox } from "../ui/Checkbox";
@@ -53,6 +53,8 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
     try {
       const data = await tasksService.getComments(taskId);
       setComments(data);
+      // Refresh task list to clear unread comments badge
+      useTaskStore.getState().fetchTasks();
     } catch (err) {
       console.error("Failed to load comments", err);
     } finally {
@@ -68,11 +70,21 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
       const newComment = await tasksService.createComment(currentTask.id, newCommentText.trim());
       setComments((prev) => [...prev, newComment]);
       setNewCommentText("");
-      toast.success("Comment added!");
     } catch (err: any) {
       toast.error(typeof err === "string" ? err : "Failed to add comment");
     } finally {
       setIsPostingComment(false);
+    }
+  };
+
+  const handleRemoveCollaborator = async (targetUserId: string, username: string) => {
+    if (!currentTask) return;
+    try {
+      await tasksService.removeCollaborator(currentTask.id, targetUserId);
+      toast.success(`Removed @${username} from task`);
+      useTaskStore.getState().fetchTasks();
+    } catch (err: any) {
+      toast.error(typeof err === "string" ? err : "Failed to remove collaborator");
     }
   };
 
@@ -294,6 +306,46 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
                 </span>
               </div>
             </div>
+
+            {/* Collaborators */}
+            <div className="col-span-2 border-t border-slate-100 dark:border-slate-800/60 pt-3">
+              <span className="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 flex items-center gap-1.5">
+                <Users className="h-3.5 w-3.5 text-indigo-500" />
+                Collaborators ({currentTask.collaborators?.length || 0})
+              </span>
+              {currentTask.collaborators && currentTask.collaborators.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {currentTask.collaborators.map((c) => (
+                    <div
+                      key={c.id}
+                      className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100/70 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-xs font-semibold text-slate-800 dark:text-slate-200"
+                    >
+                      <span>@{c.username}</span>
+                      <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md border ${
+                        c.access_level === "full_access"
+                          ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-400"
+                          : "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400"
+                      }`}>
+                        {c.access_level === "full_access" ? "Co-owner" : "Status Only"}
+                      </span>
+                      {isOwner && (
+                        <button
+                          onClick={() => handleRemoveCollaborator(c.user_id, c.username)}
+                          className="p-0.5 ml-0.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                          title={`Remove @${c.username}`}
+                        >
+                          <UserMinus className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-xs text-slate-400 dark:text-slate-500 italic block">
+                  No active collaborators
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Comments Section */}
@@ -411,56 +463,59 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 flex-shrink-0">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 flex-shrink-0">
+          <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
             {isOwner && (
               <Button
                 type="button"
                 variant="outline"
-                className="text-rose-600 border-rose-100 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:border-rose-950/30 dark:hover:bg-rose-950/20"
+                className="text-rose-600 border-rose-100 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:border-rose-950/30 dark:hover:bg-rose-950/20 text-xs sm:text-sm px-2.5 sm:px-3"
                 onClick={handleDeleteClick}
                 disabled={isDeleting}
-                icon={<Trash2 className="h-4 w-4" />}
+                icon={<Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
               >
-                Delete Task
+                Delete
               </Button>
             )}
+
+            <div className="flex items-center gap-2">
+              {onHistory && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="text-xs sm:text-sm px-2.5 sm:px-3"
+                  onClick={() => onHistory(currentTask)}
+                  icon={<History className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                >
+                  History
+                </Button>
+              )}
+
+              {isOwner && onShare && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="text-xs sm:text-sm px-2.5 sm:px-3"
+                  onClick={() => onShare(currentTask)}
+                  icon={<Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                >
+                  Share
+                </Button>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {onHistory && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onHistory(currentTask)}
-                icon={<History className="h-4 w-4" />}
-              >
-                History
-              </Button>
-            )}
-
-            {isOwner && onShare && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onShare(currentTask)}
-                icon={<Share2 className="h-4 w-4" />}
-              >
-                Share
-              </Button>
-            )}
-
-            {canEdit && (
-              <Button
-                type="button"
-                variant="primary"
-                onClick={() => onEdit(currentTask)}
-                icon={<Edit2 className="h-4 w-4" />}
-              >
-                Edit Task
-              </Button>
-            )}
-          </div>
+          {canEdit && (
+            <Button
+              type="button"
+              variant="primary"
+              className="w-full sm:w-auto text-xs sm:text-sm justify-center"
+              onClick={() => onEdit(currentTask)}
+              icon={<Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+            >
+              Edit Task
+            </Button>
+          )}
         </div>
       </div>
 

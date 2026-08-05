@@ -59,4 +59,6 @@ export interface Task {
   owner_username?: string;
   my_access_level?: "owner" | "full_access" | "status_only";
   collaborators?: TaskCollaborator[];
+  has_unread_comments?: boolean;
+  unread_comments_count?: number;
 }
