@@ -2,10 +2,11 @@ import api from "./api";
 import { User } from "../types/auth";
 
 export const usersService = {
-  updateProfile: async (username: string, avatarUrl?: string): Promise<User> => {
+  updateProfile: async (username: string, avatarUrl?: string, chatRetentionDays?: number): Promise<User> => {
     const response = await api.put<User>("/users/me", {
       username,
       avatar_url: avatarUrl || null,
+      chat_retention_days: chatRetentionDays ?? 180,
     });
     return response.data;
   },

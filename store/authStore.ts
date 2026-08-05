@@ -15,7 +15,7 @@ interface AuthState {
   register: (data: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
-  updateProfile: (username: string, avatarUrl?: string) => Promise<void>;
+  updateProfile: (username: string, avatarUrl?: string, chatRetentionDays?: number) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -83,10 +83,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  updateProfile: async (username: string, avatarUrl?: string) => {
+  updateProfile: async (username: string, avatarUrl?: string, chatRetentionDays?: number) => {
     set({ loading: true });
     try {
-      const updatedUser = await usersService.updateProfile(username, avatarUrl);
+      const updatedUser = await usersService.updateProfile(username, avatarUrl, chatRetentionDays);
       set({ user: updatedUser, loading: false });
     } catch (error) {
       set({ loading: false });
