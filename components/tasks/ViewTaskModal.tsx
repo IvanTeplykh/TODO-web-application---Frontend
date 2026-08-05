@@ -332,7 +332,6 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
                         <button
                           onClick={() => handleRemoveCollaborator(c.user_id, c.username)}
                           className="p-0.5 ml-0.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-                          title={`Remove @${c.username}`}
                         >
                           <UserMinus className="h-3.5 w-3.5" />
                         </button>
@@ -393,7 +392,6 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
                                   setEditCommentText(c.content);
                                 }}
                                 className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
-                                title="Edit comment"
                               >
                                 <Edit2 className="h-3 w-3" />
                               </button>
@@ -402,7 +400,6 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
                               <button
                                 onClick={() => handleDeleteComment(c.id)}
                                 className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
-                                title="Delete comment"
                               >
                                 <Trash2 className="h-3 w-3" />
                               </button>

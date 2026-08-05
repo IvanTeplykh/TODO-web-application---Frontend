@@ -485,7 +485,6 @@ export default function ProfilePage() {
                                 ? "bg-rose-500 hover:bg-rose-600 text-white dark:bg-rose-600 dark:hover:bg-rose-700 focus:ring-2 focus:ring-rose-500/30"
                                 : "bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500/40"
                             }`}
-                            title={isEditingUsername ? "Cancel editing username" : "Click here to edit username"}
                           >
                             {isEditingUsername ? (
                               <X className="h-3.5 w-3.5" />

@@ -160,7 +160,6 @@ export function AvatarPicker({
               <button
                 type="button"
                 onClick={handleClear}
-                title="Remove photo"
                 className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors ml-auto"
               >
                 <Trash2 className="h-4 w-4" />

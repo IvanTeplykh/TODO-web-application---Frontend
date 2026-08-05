@@ -336,7 +336,6 @@ export default function ChatPage() {
                           </button>
                           <button
                             onClick={() => setIsCreateChannelOpen(true)}
-                            title="Create new channel"
                             className="p-0.5 rounded-md text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-colors"
                           >
                             <Plus className="h-4 w-4" />

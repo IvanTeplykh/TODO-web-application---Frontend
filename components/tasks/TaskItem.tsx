@@ -122,7 +122,6 @@ export function TaskItem({ task, onEdit, onShare, onHistory }: TaskItemProps) {
             <button
               onClick={() => onHistory(task)}
               className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/20 transition-all"
-              title="Global History"
             >
               <History className="h-4 w-4" />
             </button>
@@ -132,7 +131,6 @@ export function TaskItem({ task, onEdit, onShare, onHistory }: TaskItemProps) {
             <button
               onClick={() => onShare(task)}
               className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/20 transition-all"
-              title="Share Task"
             >
               <Share2 className="h-4 w-4" />
             </button>
@@ -142,7 +140,6 @@ export function TaskItem({ task, onEdit, onShare, onHistory }: TaskItemProps) {
             <button
               onClick={() => onEdit(task)}
               className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/20 transition-all"
-              title="Edit Task"
             >
               <Edit3 className="h-4 w-4" />
             </button>
@@ -153,7 +150,6 @@ export function TaskItem({ task, onEdit, onShare, onHistory }: TaskItemProps) {
               onClick={handleDeleteClick}
               disabled={isDeleting}
               className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:text-rose-400 dark:hover:bg-rose-950/20 transition-all"
-              title="Delete Task"
             >
               {isDeleting ? (
                 <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
