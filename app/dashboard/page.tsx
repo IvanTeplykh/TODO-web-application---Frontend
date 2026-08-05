@@ -166,7 +166,11 @@ export default function DashboardPage() {
         {taskToShare && (
           <ShareTaskModal
             isOpen={taskToShare !== null}
-            onClose={() => setTaskToShare(null)}
+            onClose={() => {
+              const currentTask = taskToShare;
+              setTaskToShare(null);
+              if (currentTask) setActiveTaskForView(currentTask);
+            }}
             taskId={taskToShare.id}
             taskTitle={taskToShare.title}
           />
@@ -175,7 +179,11 @@ export default function DashboardPage() {
         {taskForHistory && (
           <TaskHistoryModal
             isOpen={taskForHistory !== null}
-            onClose={() => setTaskForHistory(null)}
+            onClose={() => {
+              const currentTask = taskForHistory;
+              setTaskForHistory(null);
+              if (currentTask) setActiveTaskForView(currentTask);
+            }}
             taskId={taskForHistory.id}
             taskTitle={taskForHistory.title}
           />
