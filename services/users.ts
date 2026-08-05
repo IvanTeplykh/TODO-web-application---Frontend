@@ -23,4 +23,9 @@ export const usersService = {
     });
     return response.data.valid;
   },
+  searchUsers: async (query: string): Promise<User[]> => {
+    if (!query.trim()) return [];
+    const response = await api.get<User[]>(`/users/search?q=${encodeURIComponent(query.trim())}`);
+    return response.data;
+  },
 };

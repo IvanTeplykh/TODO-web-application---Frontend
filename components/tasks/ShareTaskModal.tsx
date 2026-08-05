@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, Share2, Copy, Check, Shield, UserCheck, Key, RefreshCw } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { X, Share2, Copy, Check, Shield, UserCheck, Key, RefreshCw, Loader2, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 import { useTaskStore } from "../../store/taskStore";
-import { useChatStore } from "../../store/chatStore";
+import { usersService } from "../../services/users";
+import { User } from "../../types/auth";
 
 interface ShareTaskModalProps {
   isOpen: boolean;
@@ -20,13 +21,53 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
   useLockBodyScroll(isOpen);
 
   const { shareTask } = useTaskStore();
-  const { users } = useChatStore();
 
   const [targetUsername, setTargetUsername] = useState("");
   const [accessLevel, setAccessLevel] = useState<"transfer" | "status_only" | "full_access">("status_only");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatedPasscode, setGeneratedPasscode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // User search autocomplete state
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleInputChange = async (val: string) => {
+    setTargetUsername(val);
+    if (!val.trim()) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await usersService.searchUsers(val);
+      setSearchResults(results);
+      setShowDropdown(results.length > 0);
+    } catch (err) {
+      console.error("Failed to search users", err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSelectUser = (username: string) => {
+    setTargetUsername(username);
+    setShowDropdown(false);
+  };
 
   if (!isOpen) return null;
 
@@ -35,6 +76,8 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
     setAccessLevel("status_only");
     setGeneratedPasscode(null);
     setCopied(false);
+    setSearchResults([]);
+    setShowDropdown(false);
     onClose();
   };
 
@@ -70,7 +113,7 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-visible">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
@@ -123,19 +166,65 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Target Username */}
-              <div>
+              {/* Target Username with Search Suggestions */}
+              <div className="relative" ref={dropdownRef}>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Target Username *
                 </label>
-                <Input
-                  id="share-target-username"
-                  placeholder="Enter recipient username (e.g. alex_dev)..."
-                  value={targetUsername}
-                  onChange={(e) => setTargetUsername(e.target.value)}
-                  required
-                  autoFocus
-                />
+                <div className="relative">
+                  <Input
+                    id="share-target-username"
+                    placeholder="Search or enter recipient username..."
+                    value={targetUsername}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    onFocus={() => {
+                      if (searchResults.length > 0) setShowDropdown(true);
+                    }}
+                    required
+                    autoFocus
+                    autoComplete="off"
+                  />
+                  {isSearching && (
+                    <div className="absolute right-3 top-2.5 text-slate-400">
+                      <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Autocomplete Dropdown */}
+                {showDropdown && searchResults.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl max-h-48 overflow-y-auto py-1 animate-in fade-in zoom-in duration-150">
+                    <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                      Matching users
+                    </div>
+                    {searchResults.map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => handleSelectUser(u.username)}
+                        className="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 transition-colors"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {u.avatar_url ? (
+                            <img src={u.avatar_url} alt={u.username} className="h-7 w-7 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
+                          ) : (
+                            <div className="h-7 w-7 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold border border-indigo-200 dark:border-indigo-800">
+                              {u.username.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="truncate">
+                            <span className="text-xs font-bold text-slate-800 dark:text-slate-150 block truncate">
+                              @{u.username}
+                            </span>
+                            <span className="text-[10px] text-slate-400 block truncate">
+                              {u.email}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Access Level Option Cards */}
