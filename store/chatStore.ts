@@ -4,6 +4,8 @@ import { chatService } from "../services/chat";
 import { channelService } from "../services/channel";
 import { getToken } from "../lib/auth";
 import { useAuthStore } from "./authStore";
+import { useTaskStore } from "./taskStore";
+import { toast } from "sonner";
 
 interface ChatState {
   users: ChatUser[];
@@ -475,6 +477,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
           ) {
             get().fetchChannels();
             get().fetchChannelInvites();
+          } else if (
+            payload.type === "task_share_requested" ||
+            payload.type === "task_share_responded" ||
+            payload.type === "task_collaborator_removed" ||
+            payload.type === "task_comment_added"
+          ) {
+            useTaskStore.getState().fetchTasks();
+            useTaskStore.getState().fetchPendingShares();
+
+            if (payload.type === "task_share_requested") {
+              toast.info(`New task invitation from @${payload.owner_username}!`);
+            } else if (payload.type === "task_share_responded" && payload.action === "accept") {
+              toast.success(`Task invitation accepted!`);
+            }
           }
         } catch (err) {
           console.error("Error parsing WebSocket message", err);

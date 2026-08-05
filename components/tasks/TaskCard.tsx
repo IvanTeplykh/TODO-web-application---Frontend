@@ -87,7 +87,7 @@ export function TaskCard({ task, onView }: TaskCardProps) {
                 ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800"
                 : "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800"
             }`}>
-              {task.my_access_level === "full_access" ? "Co-owner" : "Status Only"}
+              {task.my_access_level === "full_access" ? "Co-owner" : "Collaborator"}
             </span>
           )}
           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${priorityStyle}`}>

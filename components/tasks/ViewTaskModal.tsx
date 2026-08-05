@@ -182,7 +182,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
                   ? "bg-indigo-100 text-indigo-600 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-400"
                   : "bg-emerald-100 text-emerald-600 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400"
               }`}>
-                {currentTask.my_access_level === "full_access" ? "Co-owner" : "Status Only"}
+                {currentTask.my_access_level === "full_access" ? "Co-owner" : "Collaborator"}
               </span>
             )}
           </div>
@@ -326,7 +326,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
                           ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-400"
                           : "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400"
                       }`}>
-                        {c.access_level === "full_access" ? "Co-owner" : "Status Only"}
+                        {c.access_level === "full_access" ? "Co-owner" : "Collaborator"}
                       </span>
                       {isOwner && (
                         <button

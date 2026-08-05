@@ -90,7 +90,7 @@ export function TaskItem({ task, onEdit, onShare, onHistory }: TaskItemProps) {
                     ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-400 dark:border-indigo-800"
                     : "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800"
                 }`}>
-                  {task.my_access_level === "full_access" ? "Co-owner" : "Status Only"}
+                  {task.my_access_level === "full_access" ? "Co-owner" : "Collaborator"}
                 </span>
               )}
             </div>

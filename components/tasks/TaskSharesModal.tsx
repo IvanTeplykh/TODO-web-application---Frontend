@@ -161,8 +161,8 @@ export function TaskSharesModal({ isOpen, onClose }: TaskSharesModalProps) {
                       {req.access_level === "transfer"
                         ? "Transfer"
                         : req.access_level === "full_access"
-                        ? "Full Access"
-                        : "Status Only"}
+                        ? "Co-Owner"
+                        : "Collaborator"}
                     </span>
                   </div>
 

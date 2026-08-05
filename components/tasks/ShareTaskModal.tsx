@@ -247,7 +247,7 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-800 dark:text-slate-100">
-                        Status Only Access
+                        Collaborator Access
                       </div>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
                         Recipient can view details and toggle completion status, but cannot edit text or delete.
@@ -269,7 +269,7 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-800 dark:text-slate-100">
-                        Full Co-Owner Control
+                        Co-Owner
                       </div>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
                         Shared control to edit text, priority, due date, and completion status.
