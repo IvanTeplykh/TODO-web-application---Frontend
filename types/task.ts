@@ -31,6 +31,17 @@ export interface TaskHistoryItem {
   created_at: string;
 }
 
+export interface TaskComment {
+  id: string;
+  task_id: string;
+  user_id: string;
+  author_name: string;
+  author_avatar_url?: string | null;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Task {
   id: string;
   title: string;

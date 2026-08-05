@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import { Task } from "../../types/task";
+import React, { useState, useEffect } from "react";
+import { Task, TaskComment } from "../../types/task";
 import { useTaskStore } from "../../store/taskStore";
+import { useAuthStore } from "../../store/authStore";
+import { tasksService } from "../../services/tasks";
 import { getTaskFields, formatDate, isOverdue } from "../../lib/taskHelpers";
-import { X, Calendar, Clock, Trash2, Edit2, Loader2, History, Share2 } from "lucide-react";
+import { X, Calendar, Clock, Trash2, Edit2, Loader2, History, Share2, MessageSquare, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Checkbox } from "../ui/Checkbox";
-
+import { Input } from "../ui/Input";
 import { ConfirmModal } from "../ui/ConfirmModal";
 import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 
@@ -24,12 +26,79 @@ interface ViewTaskModalProps {
 export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistory }: ViewTaskModalProps) {
   useLockBodyScroll(isOpen);
 
+  const { user: currentUser } = useAuthStore();
   const { deleteTask, toggleTask, tasks } = useTaskStore();
   const currentTask = task ? (tasks.find((t) => t.id === task.id) || task) : null;
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+
+  // Comments state
+  const [comments, setComments] = useState<TaskComment[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [newCommentText, setNewCommentText] = useState("");
+  const [isPostingComment, setIsPostingComment] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editCommentText, setEditCommentText] = useState("");
+
+  useEffect(() => {
+    if (isOpen && currentTask) {
+      loadComments(currentTask.id);
+    }
+  }, [isOpen, currentTask?.id]);
+
+  const loadComments = async (taskId: string) => {
+    setLoadingComments(true);
+    try {
+      const data = await tasksService.getComments(taskId);
+      setComments(data);
+    } catch (err) {
+      console.error("Failed to load comments", err);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handlePostComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentTask || !newCommentText.trim()) return;
+    setIsPostingComment(true);
+    try {
+      const newComment = await tasksService.createComment(currentTask.id, newCommentText.trim());
+      setComments((prev) => [...prev, newComment]);
+      setNewCommentText("");
+      toast.success("Comment added!");
+    } catch (err: any) {
+      toast.error(typeof err === "string" ? err : "Failed to add comment");
+    } finally {
+      setIsPostingComment(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!currentTask) return;
+    try {
+      await tasksService.deleteComment(currentTask.id, commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      toast.success("Comment deleted");
+    } catch (err: any) {
+      toast.error(typeof err === "string" ? err : "Failed to delete comment");
+    }
+  };
+
+  const handleSaveEditComment = async (commentId: string) => {
+    if (!currentTask || !editCommentText.trim()) return;
+    try {
+      const updated = await tasksService.updateComment(currentTask.id, commentId, editCommentText.trim());
+      setComments((prev) => prev.map((c) => (c.id === commentId ? updated : c)));
+      setEditingCommentId(null);
+      setEditCommentText("");
+      toast.success("Comment updated!");
+    } catch (err: any) {
+      toast.error(typeof err === "string" ? err : "Failed to update comment");
+    }
+  };
 
   if (!isOpen || !currentTask) return null;
 
@@ -69,7 +138,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
     }
   };
 
-  // Get priority display details
+  // Priority details
   let priorityLabel = "Low";
   let priorityColor = "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
   let priorityDot = "bg-emerald-500";
@@ -86,11 +155,11 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
       <div 
-        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl max-w-lg md:max-w-2xl w-full overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200"
+        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl max-w-lg md:max-w-2xl w-full overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800/60 flex-shrink-0">
           <div className="flex items-center gap-2">
             <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">
               Task Details
@@ -114,7 +183,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
         </div>
 
         {/* Body */}
-        <div className="flex flex-col p-6 space-y-5 overflow-y-auto max-h-[75vh]">
+        <div className="flex flex-col p-6 space-y-5 overflow-y-auto flex-1">
           {/* Title and Priority Badge */}
           <div className="flex items-start justify-between gap-4">
             <h1 className="text-xl font-bold text-slate-800 dark:text-slate-150 leading-snug break-words">
@@ -197,7 +266,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
               )}
             </div>
 
-            {/* Owner & Created At */}
+            {/* Owner */}
             <div>
               <span className="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                 Owner
@@ -226,10 +295,123 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
               </div>
             </div>
           </div>
+
+          {/* Comments Section */}
+          <div className="border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                <MessageSquare className="h-3.5 w-3.5 text-indigo-500" />
+                Comments ({comments.length})
+              </span>
+            </div>
+
+            {/* List of comments */}
+            <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
+              {loadingComments ? (
+                <p className="text-xs text-slate-400 italic text-center py-2">Loading comments...</p>
+              ) : comments.length === 0 ? (
+                <p className="text-xs text-slate-400 italic text-center py-2">No comments yet. Leave a comment below!</p>
+              ) : (
+                comments.map((c) => {
+                  const isAuthor = currentUser?.id === c.user_id;
+                  const canDeleteComment = isAuthor || isOwner;
+                  const isEditing = editingCommentId === c.id;
+
+                  return (
+                    <div
+                      key={c.id}
+                      className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            @{c.author_name}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            {new Date(c.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+
+                        {!isEditing && (
+                          <div className="flex items-center gap-1">
+                            {isAuthor && (
+                              <button
+                                onClick={() => {
+                                  setEditingCommentId(c.id);
+                                  setEditCommentText(c.content);
+                                }}
+                                className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                title="Edit comment"
+                              >
+                                <Edit2 className="h-3 w-3" />
+                              </button>
+                            )}
+                            {canDeleteComment && (
+                              <button
+                                onClick={() => handleDeleteComment(c.id)}
+                                className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
+                                title="Delete comment"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {isEditing ? (
+                        <div className="space-y-2 pt-1">
+                          <Input
+                            value={editCommentText}
+                            onChange={(e) => setEditCommentText(e.target.value)}
+                            className="text-xs h-9"
+                            autoFocus
+                          />
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => setEditingCommentId(null)}>
+                              Cancel
+                            </Button>
+                            <Button size="sm" variant="primary" className="h-7 text-xs px-2" onClick={() => handleSaveEditComment(c.id)}>
+                              Save
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-slate-650 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                          {c.content}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Post new comment form */}
+            <form onSubmit={handlePostComment} className="flex gap-2 items-center pt-1">
+              <Input
+                placeholder="Write a comment..."
+                value={newCommentText}
+                onChange={(e) => setNewCommentText(e.target.value)}
+                className="text-xs h-9 flex-1"
+              />
+              <Button
+                type="submit"
+                size="sm"
+                variant="primary"
+                className="h-9 px-3 text-xs"
+                loading={isPostingComment}
+                disabled={!newCommentText.trim()}
+                icon={<Send className="h-3.5 w-3.5" />}
+              >
+                Send
+              </Button>
+            </form>
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 flex-shrink-0">
           <div>
             {isOwner && (
               <Button

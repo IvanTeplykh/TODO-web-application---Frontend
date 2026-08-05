@@ -1,5 +1,5 @@
 import api from "./api";
-import { Task, TaskShareRequest, TaskHistoryItem } from "../types/task";
+import { Task, TaskShareRequest, TaskHistoryItem, TaskComment } from "../types/task";
 import { PaginatedResponse } from "../types/api";
 
 export interface GetTasksParams {
@@ -92,5 +92,24 @@ export const tasksService = {
   removeCollaborator: async (taskId: string, targetUserId: string): Promise<{ message: string }> => {
     const response = await api.delete<{ message: string }>(`/tasks/${taskId}/collaborators/${targetUserId}`);
     return response.data;
+  },
+
+  getComments: async (taskId: string): Promise<TaskComment[]> => {
+    const response = await api.get<TaskComment[]>(`/tasks/${taskId}/comments`);
+    return response.data;
+  },
+
+  createComment: async (taskId: string, content: string): Promise<TaskComment> => {
+    const response = await api.post<TaskComment>(`/tasks/${taskId}/comments`, { content });
+    return response.data;
+  },
+
+  updateComment: async (taskId: string, commentId: string, content: string): Promise<TaskComment> => {
+    const response = await api.put<TaskComment>(`/tasks/${taskId}/comments/${commentId}`, { content });
+    return response.data;
+  },
+
+  deleteComment: async (taskId: string, commentId: string): Promise<void> => {
+    await api.delete(`/tasks/${taskId}/comments/${commentId}`);
   },
 };
