@@ -815,7 +815,7 @@ export default function ChatPage() {
                 </div>
 
                 {/* Channel Protection Guard & Input Box */}
-                {!activeRecipient.is_global && activeRecipient.connection_status !== "accepted" ? (
+                {!activeRecipient.is_global && !activeRecipient.is_channel && activeRecipient.connection_status !== "accepted" ? (
                   <div className="p-4 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 text-center space-y-2">
                     {activeRecipient.connection_status === "pending_sent" ? (
                       <div className="flex flex-col items-center gap-1 text-xs text-amber-600 dark:text-amber-400">

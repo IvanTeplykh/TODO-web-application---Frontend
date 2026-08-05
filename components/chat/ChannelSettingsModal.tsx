@@ -5,6 +5,8 @@ import { X, Settings, Users, Shield, UserPlus, Trash2, Check, UserMinus, Image, 
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
+import { Select } from "../ui/Select";
+import { AvatarPicker } from "../ui/AvatarPicker";
 import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 import { useChatStore } from "../../store/chatStore";
 import { channelService } from "../../services/channel";
@@ -26,7 +28,9 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
 
   const [activeTab, setActiveTab] = useState<"general" | "members">("general");
   const [name, setName] = useState("");
+  const [nameError, setNameError] = useState("");
   const [description, setDescription] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -69,23 +73,57 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
   const isAdminOrOwner = channel.my_role === "owner" || channel.my_role === "admin";
   const isOwner = channel.my_role === "owner";
 
+  const handleNameChange = (val: string) => {
+    setName(val);
+    if (val.trim().length === 0) {
+      setNameError("");
+    } else if (val.length > 50) {
+      setNameError("Channel name cannot exceed 50 characters");
+    } else {
+      setNameError("");
+    }
+  };
+
+  const handleDescriptionChange = (val: string) => {
+    setDescription(val);
+    if (val.length > 250) {
+      setDescriptionError("Description cannot exceed 250 characters");
+    } else {
+      setDescriptionError("");
+    }
+  };
+
   const handleSaveGeneral = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      toast.error("Channel name is required");
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
+      setNameError("Channel name is required");
+      return;
+    }
+
+    if (trimmedName.length > 50) {
+      setNameError("Channel name cannot exceed 50 characters");
+      return;
+    }
+
+    if (description.length > 250) {
+      setDescriptionError("Description cannot exceed 250 characters");
       return;
     }
 
     setIsSaving(true);
     try {
       await updateChannel(channelId, {
-        name: name.trim(),
+        name: trimmedName,
         description: description.trim() || undefined,
         avatar_url: avatarUrl.trim() || undefined,
       });
       toast.success("Channel settings updated");
-    } catch (err) {
-      toast.error("Failed to update channel");
+    } catch (err: any) {
+      const errorDetail = err.response?.data?.detail;
+      const msg = typeof errorDetail === "string" ? errorDetail : "Failed to update channel";
+      toast.error(msg);
     } finally {
       setIsSaving(false);
     }
@@ -206,43 +244,56 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
         <div className="p-6 overflow-y-auto flex-1 space-y-4">
           {activeTab === "general" && (
             <form onSubmit={handleSaveGeneral} className="space-y-4">
+              <AvatarPicker
+                value={avatarUrl}
+                onChange={setAvatarUrl}
+                fallbackText={name || "CH"}
+                label="Channel Avatar"
+                shape="rounded"
+              />
+
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Channel Name
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Channel Name
+                  </label>
+                  <span className={`text-[10px] font-semibold ${name.length > 50 ? "text-rose-500 font-bold" : "text-slate-400"}`}>
+                    {name.length}/50
+                  </span>
+                </div>
                 <Input
                   id="edit-channel-name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   disabled={!isAdminOrOwner}
+                  error={nameError}
                   icon={<Hash className="h-4 w-4 text-slate-400" />}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Description
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Description
+                  </label>
+                  <span className={`text-[10px] font-semibold ${description.length > 250 ? "text-rose-500 font-bold" : "text-slate-400"}`}>
+                    {description.length}/250
+                  </span>
+                </div>
                 <textarea
                   rows={3}
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => handleDescriptionChange(e.target.value)}
                   disabled={!isAdminOrOwner}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors resize-none disabled:opacity-60"
+                  className={`w-full px-3 py-2 text-xs rounded-xl border bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 transition-colors resize-none disabled:opacity-60 ${
+                    descriptionError
+                      ? "border-rose-500 focus:ring-rose-500/20"
+                      : "border-slate-200 dark:border-slate-800 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  }`}
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Avatar Image URL
-                </label>
-                <Input
-                  id="edit-channel-avatar"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  disabled={!isAdminOrOwner}
-                  icon={<Image className="h-4 w-4 text-slate-400" />}
-                />
+                {descriptionError && (
+                  <p className="mt-1 text-[10px] text-rose-500 font-semibold">{descriptionError}</p>
+                )}
               </div>
 
               {isAdminOrOwner && (
@@ -283,26 +334,26 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                     Add User to Channel
                   </label>
-                  <div className="flex gap-2">
-                    <select
-                      value={selectedUserToAdd}
-                      onChange={(e) => setSelectedUserToAdd(e.target.value)}
-                      className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-hidden"
-                    >
-                      <option value="">Select user to add...</option>
-                      {availableUsersToAdd.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.username}
-                        </option>
-                      ))}
-                    </select>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <Select
+                        value={selectedUserToAdd}
+                        options={availableUsersToAdd.map((u) => ({
+                          value: u.id,
+                          label: u.username,
+                        }))}
+                        onChange={(val) => setSelectedUserToAdd(String(val))}
+                        placeholder="Select user to add..."
+                      />
+                    </div>
                     <Button
                       size="sm"
                       variant="primary"
+                      className="h-10 px-4 text-xs font-semibold shrink-0"
                       disabled={!selectedUserToAdd}
                       loading={isAddingMember}
                       onClick={handleAddMember}
-                      icon={<UserPlus className="h-3.5 w-3.5" />}
+                      icon={<UserPlus className="h-4 w-4" />}
                     >
                       Add
                     </Button>

@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Hash, Image, AlignLeft } from "lucide-react";
+import { X, Hash } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
+import { AvatarPicker } from "../ui/AvatarPicker";
 import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 import { useChatStore } from "../../store/chatStore";
 
@@ -20,6 +21,7 @@ export function CreateChannelModal({ isOpen, onClose }: CreateChannelModalProps)
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
   const [description, setDescription] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,21 +31,54 @@ export function CreateChannelModal({ isOpen, onClose }: CreateChannelModalProps)
     setName("");
     setNameError("");
     setDescription("");
+    setDescriptionError("");
     setAvatarUrl("");
     onClose();
   };
 
+  const handleNameChange = (val: string) => {
+    setName(val);
+    if (val.trim().length === 0) {
+      setNameError("");
+    } else if (val.length > 50) {
+      setNameError("Channel name cannot exceed 50 characters");
+    } else {
+      setNameError("");
+    }
+  };
+
+  const handleDescriptionChange = (val: string) => {
+    setDescription(val);
+    if (val.length > 250) {
+      setDescriptionError("Description cannot exceed 250 characters");
+    } else {
+      setDescriptionError("");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
       setNameError("Channel name is required");
+      return;
+    }
+
+    if (trimmedName.length > 50) {
+      setNameError("Channel name cannot exceed 50 characters");
+      return;
+    }
+
+    if (description.length > 250) {
+      setDescriptionError("Description cannot exceed 250 characters");
       return;
     }
 
     setIsSubmitting(true);
     try {
       const newChannel = await createChannel({
-        name: name.trim(),
+        name: trimmedName,
         description: description.trim() || undefined,
         avatar_url: avatarUrl.trim() || undefined,
       });
@@ -60,8 +95,10 @@ export function CreateChannelModal({ isOpen, onClose }: CreateChannelModalProps)
       });
 
       handleClose();
-    } catch (err: unknown) {
-      toast.error("Failed to create channel");
+    } catch (err: any) {
+      const errorDetail = err.response?.data?.detail;
+      const msg = typeof errorDetail === "string" ? errorDetail : "Failed to create channel";
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -91,57 +128,72 @@ export function CreateChannelModal({ isOpen, onClose }: CreateChannelModalProps)
 
         {/* Body Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Avatar Image Picker */}
+          <AvatarPicker
+            value={avatarUrl}
+            onChange={setAvatarUrl}
+            fallbackText={name || "CH"}
+            label="Channel Avatar"
+            shape="rounded"
+          />
+
+          {/* Channel Name */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Channel Name *
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Channel Name *
+              </label>
+              <span className={`text-[10px] font-semibold ${name.length > 50 ? "text-rose-500 font-bold" : "text-slate-400"}`}>
+                {name.length}/50
+              </span>
+            </div>
             <Input
               id="channel-name"
               placeholder="e.g. Design Team, Announcements"
               value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                if (nameError) setNameError("");
-              }}
+              onChange={(e) => handleNameChange(e.target.value)}
               error={nameError}
               icon={<Hash className="h-4 w-4 text-slate-400" />}
               autoFocus
             />
           </div>
 
+          {/* Description */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Description (Optional)
-            </label>
-            <div className="relative">
-              <textarea
-                rows={3}
-                placeholder="What is this channel about?"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors resize-none"
-              />
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Description (Optional)
+              </label>
+              <span className={`text-[10px] font-semibold ${description.length > 250 ? "text-rose-500 font-bold" : "text-slate-400"}`}>
+                {description.length}/250
+              </span>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Avatar Image URL (Optional)
-            </label>
-            <Input
-              id="channel-avatar"
-              placeholder="https://example.com/avatar.png"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              icon={<Image className="h-4 w-4 text-slate-400" />}
+            <textarea
+              rows={3}
+              placeholder="What is this channel about?"
+              value={description}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
+              className={`w-full px-3 py-2 text-xs rounded-xl border bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 transition-colors resize-none ${
+                descriptionError
+                  ? "border-rose-500 focus:ring-rose-500/20"
+                  : "border-slate-200 dark:border-slate-800 focus:ring-indigo-500/20 focus:border-indigo-500"
+              }`}
             />
+            {descriptionError && (
+              <p className="mt-1 text-[10px] text-rose-500 font-semibold">{descriptionError}</p>
+            )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" loading={isSubmitting}>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={!!nameError || !!descriptionError || !name.trim()}
+            >
               Create Channel
             </Button>
           </div>
