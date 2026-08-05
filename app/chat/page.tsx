@@ -39,6 +39,7 @@ export default function ChatPage() {
     users,
     chatRequests,
     channels,
+    channelInvites,
     activeRecipient,
     messages,
     unreadCounts,
@@ -47,6 +48,8 @@ export default function ChatPage() {
     fetchUsers,
     fetchRequests,
     fetchChannels,
+    fetchChannelInvites,
+    respondChannelInvite,
     fetchMessages,
     editMessage,
     deleteMessage,
@@ -85,13 +88,14 @@ export default function ChatPage() {
     fetchUsers();
     fetchRequests();
     fetchChannels();
+    fetchChannelInvites();
     fetchMessages(activeRecipient.id);
     connectWS();
 
     return () => {
       disconnectWS();
     };
-  }, [activeRecipient.id, connectWS, disconnectWS, fetchChannels, fetchMessages, fetchRequests, fetchUsers]);
+  }, [activeRecipient.id, connectWS, disconnectWS, fetchChannels, fetchChannelInvites, fetchMessages, fetchRequests, fetchUsers]);
 
   // Auto-scroll messages to bottom when new messages arrive
   useEffect(() => {
@@ -179,6 +183,20 @@ export default function ChatPage() {
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
       toast.error(msg || "Failed to respond to request");
+    }
+  };
+
+  const handleRespondChannelInviteClick = async (inviteId: string, action: "accept" | "decline") => {
+    try {
+      await respondChannelInvite(inviteId, action);
+      if (action === "accept") {
+        toast.success("Joined channel!");
+      } else {
+        toast.info("Channel invitation declined");
+      }
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      toast.error(msg || "Failed to respond to channel invite");
     }
   };
 
@@ -273,9 +291,9 @@ export default function ChatPage() {
                       }`}
                     >
                       Requests
-                      {pendingIncoming.length > 0 && (
+                      {pendingIncoming.length + channelInvites.length > 0 && (
                         <span className="absolute -top-1 -right-1 h-3.5 min-w-3.5 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
-                          {pendingIncoming.length}
+                          {pendingIncoming.length + channelInvites.length}
                         </span>
                       )}
                     </button>
@@ -453,6 +471,63 @@ export default function ChatPage() {
 
                   {activeTab === "requests" && (
                     <div className="space-y-3">
+                      {/* Channel Invitations */}
+                      {channelInvites.length > 0 && (
+                        <div>
+                          <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                            Channel Invites ({channelInvites.length})
+                          </span>
+                          <div className="space-y-2 mt-1">
+                            {channelInvites.map((inv) => (
+                              <div
+                                key={inv.id}
+                                className="p-2.5 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 space-y-2"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="h-7 w-7 rounded-lg bg-indigo-200 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs flex-shrink-0 overflow-hidden">
+                                    {inv.channel_avatar ? (
+                                      <img src={inv.channel_avatar} alt={inv.channel_name} className="h-full w-full object-cover" />
+                                    ) : (
+                                      <Hash className="h-4 w-4" />
+                                    )}
+                                  </div>
+                                  <div className="truncate">
+                                    <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                                      #{inv.channel_name}
+                                    </h4>
+                                    {inv.channel_description && (
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                        {inv.channel_description}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-1.5">
+                                  <Button
+                                    size="sm"
+                                    variant="primary"
+                                    className="h-7 text-[10px] py-0 px-2.5 flex-1 bg-emerald-600 hover:bg-emerald-700"
+                                    onClick={() => handleRespondChannelInviteClick(inv.id, "accept")}
+                                    icon={<Check className="h-3 w-3" />}
+                                  >
+                                    Accept Channel Invite
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7 text-[10px] py-0 px-2.5 text-rose-500 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                    onClick={() => handleRespondChannelInviteClick(inv.id, "decline")}
+                                    icon={<X className="h-3 w-3" />}
+                                  >
+                                    Decline
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       {/* Incoming Requests */}
                       <div>
                         <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">

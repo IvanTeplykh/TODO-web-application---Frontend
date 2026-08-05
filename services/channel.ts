@@ -1,5 +1,5 @@
 import api from "./api";
-import { Channel, ChannelMember, ChatMessage } from "../types/chat";
+import { Channel, ChannelInvite, ChannelMember, ChatMessage } from "../types/chat";
 
 export const channelService = {
   createChannel: async (data: { name: string; description?: string; avatar_url?: string }): Promise<Channel> => {
@@ -30,8 +30,20 @@ export const channelService = {
     return response.data;
   },
 
-  addMember: async (channelId: string, userId: string): Promise<ChannelMember> => {
-    const response = await api.post<ChannelMember>(`/channels/${channelId}/members`, { user_id: userId });
+  addMember: async (channelId: string, payload: { user_id?: string; username?: string }): Promise<ChannelMember> => {
+    const response = await api.post<ChannelMember>(`/channels/${channelId}/members`, payload);
+    return response.data;
+  },
+
+  getPendingInvites: async (): Promise<ChannelInvite[]> => {
+    const response = await api.get<ChannelInvite[]>("/channels/invites/pending");
+    return response.data;
+  },
+
+  respondToInvite: async (inviteId: string, action: "accept" | "decline"): Promise<{ message: string; channel_id: string; status: string }> => {
+    const response = await api.post<{ message: string; channel_id: string; status: string }>(`/channels/invites/${inviteId}/respond`, null, {
+      params: { action }
+    });
     return response.data;
   },
 

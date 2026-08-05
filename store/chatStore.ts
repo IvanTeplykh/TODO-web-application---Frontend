@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ChatUser, ChatMessage, ChatRecipient, ChatRequest, Channel } from "../types/chat";
+import { ChatUser, ChatMessage, ChatRecipient, ChatRequest, Channel, ChannelInvite } from "../types/chat";
 import { chatService } from "../services/chat";
 import { channelService } from "../services/channel";
 import { getToken } from "../lib/auth";
@@ -9,6 +9,7 @@ interface ChatState {
   users: ChatUser[];
   chatRequests: ChatRequest[];
   channels: Channel[];
+  channelInvites: ChannelInvite[];
   activeRecipient: ChatRecipient;
   messages: ChatMessage[];
   unreadCounts: Record<string, number>;
@@ -19,6 +20,8 @@ interface ChatState {
   fetchUsers: () => Promise<void>;
   fetchRequests: () => Promise<void>;
   fetchChannels: () => Promise<void>;
+  fetchChannelInvites: () => Promise<void>;
+  respondChannelInvite: (inviteId: string, action: "accept" | "decline") => Promise<void>;
   createChannel: (data: { name: string; description?: string; avatar_url?: string }) => Promise<Channel>;
   updateChannel: (channelId: string, data: { name?: string; description?: string; avatar_url?: string }) => Promise<Channel>;
   deleteChannel: (channelId: string) => Promise<void>;
@@ -44,6 +47,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   users: [],
   chatRequests: [],
   channels: [],
+  channelInvites: [],
   activeRecipient: DEFAULT_RECIPIENT,
   messages: [],
   unreadCounts: {},
@@ -75,6 +79,32 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set({ channels });
     } catch (error) {
       console.error("Failed to fetch channels", error);
+    }
+  },
+
+  fetchChannelInvites: async () => {
+    try {
+      const channelInvites = await channelService.getPendingInvites();
+      set({ channelInvites });
+    } catch (error) {
+      console.error("Failed to fetch channel invites", error);
+    }
+  },
+
+  respondChannelInvite: async (inviteId: string, action: "accept" | "decline") => {
+    try {
+      await channelService.respondToInvite(inviteId, action);
+      set((state) => ({
+        channelInvites: state.channelInvites.filter((inv) => inv.id !== inviteId),
+      }));
+      // Refresh channels after accepting
+      if (action === "accept") {
+        const channels = await channelService.getMyChannels();
+        set({ channels });
+      }
+    } catch (error) {
+      console.error("Failed to respond to channel invite", error);
+      throw error;
     }
   },
 
@@ -366,8 +396,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
               channels: state.channels.filter((c) => c.id !== deletedChId),
               activeRecipient: state.activeRecipient.id === deletedChId ? DEFAULT_RECIPIENT : state.activeRecipient,
             }));
-          } else if (payload.type === "channel_member_added" || payload.type === "channel_member_removed" || payload.type === "channel_member_role_updated") {
+          } else if (
+            payload.type === "channel_member_added" ||
+            payload.type === "channel_member_removed" ||
+            payload.type === "channel_member_role_updated" ||
+            payload.type === "channel_invite_sent" ||
+            payload.type === "channel_invite_responded"
+          ) {
             get().fetchChannels();
+            get().fetchChannelInvites();
           }
         } catch (err) {
           console.error("Error parsing WebSocket message", err);

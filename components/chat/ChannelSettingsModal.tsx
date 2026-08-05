@@ -128,16 +128,27 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
     }
   };
 
+  const [manualUsername, setManualUsername] = useState("");
+
   const handleAddMember = async () => {
-    if (!selectedUserToAdd) return;
+    const targetUsername = manualUsername.trim();
+    if (!selectedUserToAdd && !targetUsername) return;
+
     setIsAddingMember(true);
     try {
-      await channelService.addMember(channelId, selectedUserToAdd);
-      toast.success("Member added to channel");
+      if (targetUsername) {
+        await channelService.addMember(channelId, { username: targetUsername });
+        toast.success(`Invitation sent to @${targetUsername}!`);
+      } else if (selectedUserToAdd) {
+        const targetUserObj = users.find((u) => u.id === selectedUserToAdd);
+        await channelService.addMember(channelId, { user_id: selectedUserToAdd });
+        toast.success(`Invitation sent to ${targetUserObj?.username || "user"}!`);
+      }
       setSelectedUserToAdd("");
+      setManualUsername("");
       await loadMembers();
     } catch (err: any) {
-      const msg = err.response?.data?.detail || "Failed to add member";
+      const msg = err.response?.data?.detail || "Failed to send invitation";
       toast.error(msg);
     } finally {
       setIsAddingMember(false);
@@ -327,35 +338,64 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
 
           {activeTab === "members" && (
             <div className="space-y-4">
-              {/* Add Member Bar (Admin Only) */}
+              {/* Invite Member Bar (Admin Only) */}
               {isAdminOrOwner && (
-                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/60 dark:border-slate-800 space-y-2">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Add User to Channel
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <Select
-                        value={selectedUserToAdd}
-                        options={availableUsersToAdd.map((u) => ({
-                          value: u.id,
-                          label: u.username,
-                        }))}
-                        onChange={(val) => setSelectedUserToAdd(String(val))}
-                        placeholder="Select user to add..."
-                      />
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Invite User to Channel
+                    </label>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                      User receives an invitation request
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Input
+                      id="manual-username-input"
+                      placeholder="Type username manually..."
+                      value={manualUsername}
+                      onChange={(e) => {
+                        setManualUsername(e.target.value);
+                        if (e.target.value) setSelectedUserToAdd("");
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddMember();
+                        }
+                      }}
+                      className="text-xs h-9"
+                    />
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <Select
+                          value={selectedUserToAdd}
+                          options={availableUsersToAdd.map((u) => ({
+                            value: u.id,
+                            label: u.username,
+                          }))}
+                          onChange={(val) => {
+                            setSelectedUserToAdd(String(val));
+                            setManualUsername("");
+                          }}
+                          placeholder="Or pick connected user..."
+                          disabled={!!manualUsername.trim()}
+                        />
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        className="h-10 px-4 text-xs font-semibold shrink-0"
+                        disabled={!selectedUserToAdd && !manualUsername.trim()}
+                        loading={isAddingMember}
+                        onClick={handleAddMember}
+                        icon={<UserPlus className="h-4 w-4" />}
+                      >
+                        Send Invite
+                      </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      className="h-10 px-4 text-xs font-semibold shrink-0"
-                      disabled={!selectedUserToAdd}
-                      loading={isAddingMember}
-                      onClick={handleAddMember}
-                      icon={<UserPlus className="h-4 w-4" />}
-                    >
-                      Add
-                    </Button>
                   </div>
                 </div>
               )}
@@ -386,17 +426,24 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
                             <span className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
                               {m.username} {isSelf && <span className="text-[10px] text-slate-400">(You)</span>}
                             </span>
-                            <span
-                              className={`text-[10px] font-extrabold uppercase ${
-                                m.role === "owner"
-                                  ? "text-amber-500"
-                                  : m.role === "admin"
-                                  ? "text-indigo-500"
-                                  : "text-slate-400"
-                              }`}
-                            >
-                              {m.role}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`text-[10px] font-extrabold uppercase ${
+                                  m.role === "owner"
+                                    ? "text-amber-500"
+                                    : m.role === "admin"
+                                    ? "text-indigo-500"
+                                    : "text-slate-400"
+                                }`}
+                              >
+                                {m.role}
+                              </span>
+                              {m.status === "pending" && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                  Pending Invite
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
 

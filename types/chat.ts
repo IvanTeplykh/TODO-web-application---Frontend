@@ -48,7 +48,17 @@ export interface ChannelMember {
   username: string;
   avatar_url?: string | null;
   role: "owner" | "admin" | "member" | string;
+  status?: "pending" | "accepted";
   joined_at: string;
+}
+
+export interface ChannelInvite {
+  id: string;
+  channel_id: string;
+  channel_name: string;
+  channel_description?: string | null;
+  channel_avatar?: string | null;
+  created_at: string;
 }
 
 export type ChatRecipient = {
