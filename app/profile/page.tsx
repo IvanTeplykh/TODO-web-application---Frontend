@@ -161,12 +161,29 @@ export default function ProfilePage() {
     }
   };
 
+  const [retentionDays, setRetentionDays] = useState(180);
+  const [isSavingChatSettings, setIsSavingChatSettings] = useState(false);
+
   useEffect(() => {
     if (user) {
       setUsername(user.username);
       setAvatar(user.avatar_url || "");
+      setRetentionDays(user.chat_retention_days ?? 180);
     }
   }, [user]);
+
+  const handleSaveChatSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingChatSettings(true);
+    try {
+      await updateProfile(user?.username || username, user?.avatar_url || avatar || undefined, retentionDays);
+      toast.success("Chat retention settings saved successfully!");
+    } catch (error) {
+      toast.error(typeof error === "string" ? error : "Failed to update chat settings");
+    } finally {
+      setIsSavingChatSettings(false);
+    }
+  };
 
   useEffect(() => {
     if (!currentPassword) {
@@ -521,6 +538,57 @@ export default function ProfilePage() {
                         icon={<Save className="h-4.5 w-4.5" />}
                       >
                         Save Changes
+                      </Button>
+                    </div>
+                  </form>
+                </Card>
+
+                {/* Chat Settings Card */}
+                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500 mb-6 flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                    Chat Settings & Message Retention
+                  </h3>
+
+                  <form onSubmit={handleSaveChatSettings} className="space-y-5">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        Private Chats Auto-Delete Period
+                      </label>
+                      <select
+                        id="chat-retention-select"
+                        value={retentionDays}
+                        onChange={(e) => setRetentionDays(Number(e.target.value))}
+                        className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500"
+                      >
+                        <option value={7}>7 Days (1 Week)</option>
+                        <option value={30}>30 Days (1 Month)</option>
+                        <option value={90}>90 Days (3 Months)</option>
+                        <option value={180}>180 Days (6 Months — Default)</option>
+                        <option value={365}>365 Days (1 Year)</option>
+                      </select>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2 leading-relaxed">
+                        Messages in all private chats will be automatically deleted after the selected retention period.
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/30 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-2.5">
+                      <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block mb-0.5">Please note:</span>
+                        Public Channel (Global Chat) has a fixed retention period of <strong>180 days</strong> for all users.
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        loading={isSavingChatSettings}
+                        disabled={retentionDays === (user?.chat_retention_days ?? 180)}
+                        icon={<Save className="h-4.5 w-4.5" />}
+                      >
+                        Save Chat Settings
                       </Button>
                     </div>
                   </form>

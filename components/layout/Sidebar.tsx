@@ -46,7 +46,7 @@ export function Sidebar() {
       onClick: () => handleFilterClick("overdue"),
     },
     {
-      label: "Team Chat",
+      label: "Chat",
       icon: MessageSquare,
       active: pathname === "/chat",
       onClick: () => router.push("/chat"),
