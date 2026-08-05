@@ -179,14 +179,14 @@ export default function ChatPage() {
     (r) => r.requester_id === user?.id && r.status === "pending"
   );
 
-  const filteredUsers = users.filter(
+  const discoverUsers = users.filter(
     (u) =>
-      u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase())
+      u.connection_status !== "accepted" &&
+      u.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalDiscoverPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
-  const paginatedDiscoverUsers = filteredUsers.slice(
+  const totalDiscoverPages = Math.ceil(discoverUsers.length / USERS_PER_PAGE);
+  const paginatedDiscoverUsers = discoverUsers.slice(
     (discoverPage - 1) * USERS_PER_PAGE,
     discoverPage * USERS_PER_PAGE
   );
@@ -477,64 +477,65 @@ export default function ChatPage() {
                   {activeTab === "discover" && (
                     <div>
                       <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                        Other Registered Users ({filteredUsers.length})
+                        Other Registered Users ({discoverUsers.length})
                       </span>
                       <div className="space-y-1.5 mt-2">
-                        {paginatedDiscoverUsers.map((u) => {
-                          const status = u.connection_status || "none";
+                        {discoverUsers.length === 0 ? (
+                          <p className="px-2 text-[11px] text-slate-400 dark:text-slate-500 italic">
+                            No new users to discover.
+                          </p>
+                        ) : (
+                          paginatedDiscoverUsers.map((u) => {
+                            const status = u.connection_status || "none";
 
-                          return (
-                            <div
-                              key={u.id}
-                              className="flex items-center justify-between p-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800"
-                            >
-                              <div className="flex items-center gap-2.5 truncate">
-                                <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden font-bold text-[11px]">
-                                  {u.avatar_url ? (
-                                    <img
-                                      src={u.avatar_url}
-                                      alt={u.username}
-                                      className="h-full w-full object-cover"
-                                    />
-                                  ) : (
-                                    getInitials(u.username)
-                                  )}
+                            return (
+                              <div
+                                key={u.id}
+                                className="flex items-center justify-between p-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800"
+                              >
+                                <div className="flex items-center gap-2.5 truncate">
+                                  <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden font-bold text-[11px]">
+                                    {u.avatar_url ? (
+                                      <img
+                                        src={u.avatar_url}
+                                        alt={u.username}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    ) : (
+                                      getInitials(u.username)
+                                    )}
+                                  </div>
+                                  <div className="truncate">
+                                    <span className="block font-bold text-slate-800 dark:text-slate-200 truncate">
+                                      {u.username}
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="truncate">
-                                  <span className="block font-bold text-slate-800 dark:text-slate-200 truncate">
-                                    {u.username}
+
+                                {status === "pending_sent" ? (
+                                  <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md">
+                                    <Clock className="h-3 w-3" /> Sent
                                   </span>
-                                  <span className="block text-[10px] text-slate-400 truncate">{u.email}</span>
-                                </div>
+                                ) : status === "pending_received" ? (
+                                  <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-md">
+                                    Request received
+                                  </span>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7 text-[10px] py-0 px-2 font-semibold"
+                                    loading={isSendingReq === u.id}
+                                    onClick={() => handleSendRequestClick(u.id)}
+                                    icon={<UserPlus className="h-3 w-3" />}
+                                  >
+                                    Connect
+                                  </Button>
+                                )}
                               </div>
-
-                              {status === "accepted" ? (
-                                <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
-                                  <UserCheck className="h-3 w-3" /> Connected
-                                </span>
-                              ) : status === "pending_sent" ? (
-                                <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md">
-                                  <Clock className="h-3 w-3" /> Sent
-                                </span>
-                              ) : status === "pending_received" ? (
-                                <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-md">
-                                  Request received
-                                </span>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7 text-[10px] py-0 px-2 font-semibold"
-                                  loading={isSendingReq === u.id}
-                                  onClick={() => handleSendRequestClick(u.id)}
-                                  icon={<UserPlus className="h-3 w-3" />}
-                                >
-                                  Connect
-                                </Button>
-                              )}
-                            </div>
-                          );
-                        })}
+                            );
+                          })
+                        )}
                       </div>
 
                       {totalDiscoverPages > 1 && (
