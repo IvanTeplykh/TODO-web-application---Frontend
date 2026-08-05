@@ -4,6 +4,8 @@ import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTaskStore } from "../../store/taskStore";
 import { useUIStore } from "../../store/uiStore";
+import { useChatStore } from "../../store/chatStore";
+import { useAuthStore } from "../../store/authStore";
 import { LayoutDashboard, CheckCircle2, Clock, AlertCircle, MessageSquare, User, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function Sidebar() {
@@ -11,7 +13,15 @@ export function Sidebar() {
   const router = useRouter();
   const { status, setFilters } = useTaskStore();
   const { isSidebarCollapsed, toggleSidebar } = useUIStore();
+  const { unreadCounts, chatRequests, channelInvites } = useChatStore();
+  const { user } = useAuthStore();
   const collapsed = isSidebarCollapsed;
+
+  const unreadMessagesCount = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0);
+  const pendingRequestsCount =
+    (chatRequests ? chatRequests.filter((r) => r.recipient_id === user?.id && r.status === "pending").length : 0) +
+    (channelInvites ? channelInvites.length : 0);
+  const totalChatBadge = unreadMessagesCount + pendingRequestsCount;
 
   const handleFilterClick = (newStatus: "all" | "done" | "undone" | "overdue") => {
     setFilters({ status: newStatus });
@@ -50,6 +60,7 @@ export function Sidebar() {
       icon: MessageSquare,
       active: pathname === "/chat",
       onClick: () => router.push("/chat"),
+      badge: totalChatBadge,
     },
     {
       label: "Profile",
@@ -91,9 +102,16 @@ export function Sidebar() {
                   : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/50 dark:hover:text-white"
               }`}
             >
-              <Icon className={`h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-105 ${
-                item.active ? "text-indigo-600 dark:text-indigo-400" : ""
-              }`} />
+              <div className="relative flex-shrink-0">
+                <Icon className={`h-5 w-5 transition-transform group-hover:scale-105 ${
+                  item.active ? "text-indigo-600 dark:text-indigo-400" : ""
+                }`} />
+                {item.badge != null && item.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-slate-900 shadow-xs animate-in zoom-in-50 duration-200">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
+              </div>
               {!collapsed && <span className="hidden md:inline">{item.label}</span>}
               {collapsed && (
                 <div className="absolute left-full ml-2.5 rounded-lg bg-slate-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap">

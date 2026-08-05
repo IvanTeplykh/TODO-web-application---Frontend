@@ -772,7 +772,7 @@ export default function ChatPage() {
                     </div>
                   </div>
 
-                  {activeRecipient.is_channel && (
+                  {activeRecipient.is_channel && (activeRecipient.my_role === "owner" || activeRecipient.my_role === "admin") && (
                     <Button
                       size="sm"
                       variant="outline"
