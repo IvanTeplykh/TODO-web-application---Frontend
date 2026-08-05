@@ -44,7 +44,6 @@ export function AvatarPicker({
       reader.onloadend = () => {
         if (typeof reader.result === "string") {
           onChange(reader.result);
-          toast.success("Image selected");
         }
       };
       reader.readAsDataURL(file);
