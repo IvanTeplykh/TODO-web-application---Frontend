@@ -43,12 +43,37 @@ export const DEFAULT_RECIPIENT: ChatRecipient = {
   connection_status: "accepted",
 };
 
+const RECIPIENT_STORAGE_KEY = "todo_active_recipient";
+
+const getSavedRecipient = (): ChatRecipient => {
+  if (typeof window === "undefined") return DEFAULT_RECIPIENT;
+  try {
+    const saved = localStorage.getItem(RECIPIENT_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.id) return parsed;
+    }
+  } catch (e) {
+    console.error("Failed to parse saved active recipient", e);
+  }
+  return DEFAULT_RECIPIENT;
+};
+
+const saveRecipientToStorage = (recipient: ChatRecipient) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(RECIPIENT_STORAGE_KEY, JSON.stringify(recipient));
+  } catch (e) {
+    console.error("Failed to save active recipient", e);
+  }
+};
+
 export const useChatStore = create<ChatState>((set, get) => ({
   users: [],
   chatRequests: [],
   channels: [],
   channelInvites: [],
-  activeRecipient: DEFAULT_RECIPIENT,
+  activeRecipient: getSavedRecipient(),
   messages: [],
   unreadCounts: {},
   loading: false,
@@ -59,6 +84,21 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const users = await chatService.getUsers();
       set({ users });
+      const currentActive = get().activeRecipient;
+      if (!currentActive.is_global && !currentActive.is_channel) {
+        const updatedUser = users.find((u) => u.id === currentActive.id);
+        if (updatedUser) {
+          const updatedRecipient: ChatRecipient = {
+            id: updatedUser.id,
+            name: updatedUser.username,
+            avatar_url: updatedUser.avatar_url,
+            is_online: updatedUser.is_online,
+            connection_status: updatedUser.connection_status,
+          };
+          set({ activeRecipient: updatedRecipient });
+          saveRecipientToStorage(updatedRecipient);
+        }
+      }
     } catch (error) {
       console.error("Failed to fetch chat users", error);
     }
@@ -77,6 +117,26 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const channels = await channelService.getMyChannels();
       set({ channels });
+      const currentActive = get().activeRecipient;
+      if (currentActive.is_channel) {
+        const updatedChannel = channels.find((c) => c.id === currentActive.id);
+        if (updatedChannel) {
+          const updatedRecipient: ChatRecipient = {
+            id: updatedChannel.id,
+            name: updatedChannel.name,
+            avatar_url: updatedChannel.avatar_url,
+            description: updatedChannel.description,
+            is_channel: true,
+            my_role: updatedChannel.my_role,
+            members_count: updatedChannel.members_count,
+          };
+          set({ activeRecipient: updatedRecipient });
+          saveRecipientToStorage(updatedRecipient);
+        } else {
+          set({ activeRecipient: DEFAULT_RECIPIENT });
+          saveRecipientToStorage(DEFAULT_RECIPIENT);
+        }
+      }
     } catch (error) {
       console.error("Failed to fetch channels", error);
     }
@@ -122,13 +182,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
   updateChannel: async (channelId, data) => {
     try {
       const updated = await channelService.updateChannel(channelId, data);
-      set((state) => ({
-        channels: state.channels.map((c) => (c.id === updated.id ? updated : c)),
-        activeRecipient:
+      set((state) => {
+        const nextActive =
           state.activeRecipient.id === updated.id
             ? { ...state.activeRecipient, name: updated.name, avatar_url: updated.avatar_url, description: updated.description }
-            : state.activeRecipient,
-      }));
+            : state.activeRecipient;
+        if (state.activeRecipient.id === updated.id) {
+          saveRecipientToStorage(nextActive);
+        }
+        return {
+          channels: state.channels.map((c) => (c.id === updated.id ? updated : c)),
+          activeRecipient: nextActive,
+        };
+      });
       return updated;
     } catch (error) {
       console.error("Failed to update channel", error);
@@ -142,6 +208,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set((state) => {
         const nextChannels = state.channels.filter((c) => c.id !== channelId);
         const nextActive = state.activeRecipient.id === channelId ? DEFAULT_RECIPIENT : state.activeRecipient;
+        if (state.activeRecipient.id === channelId) {
+          saveRecipientToStorage(DEFAULT_RECIPIENT);
+        }
         return { channels: nextChannels, activeRecipient: nextActive };
       });
     } catch (error) {
@@ -243,6 +312,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setActiveRecipient: (recipient: ChatRecipient) => {
     set({ activeRecipient: recipient, messages: [] });
+    saveRecipientToStorage(recipient);
     get().fetchMessages(recipient.id);
   },
 
