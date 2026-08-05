@@ -119,7 +119,6 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
         description: description.trim(),
         avatar_url: avatarUrl.trim(),
       });
-      toast.success("Channel settings updated");
     } catch (err: any) {
       const errorDetail = err.response?.data?.detail;
       const msg = typeof errorDetail === "string" ? errorDetail : "Failed to update channel";

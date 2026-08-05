@@ -672,7 +672,7 @@ export default function ChatPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-8 text-xs px-2.5 font-semibold"
+                      className="h-8 text-xs px-2.5 font-semibold translate-x-2"
                       onClick={() => setIsChannelSettingsOpen(true)}
                       icon={<Settings className="h-4 w-4" />}
                     >
