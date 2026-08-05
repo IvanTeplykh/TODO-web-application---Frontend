@@ -18,6 +18,7 @@ interface SelectProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  maxHeight?: string;
 }
 
 export function Select({
@@ -29,6 +30,7 @@ export function Select({
   placeholder = "Select option",
   className = "",
   disabled = false,
+  maxHeight = "max-h-40",
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -89,7 +91,7 @@ export function Select({
       {/* Dropdown Options Popup */}
       {isOpen && (
         <div className="absolute z-50 mt-1.5 w-full rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-1.5 shadow-xl shadow-slate-900/10 dark:shadow-black/50 backdrop-blur-xl animate-in fade-in-50 zoom-in-95 duration-150">
-          <div className="max-h-60 overflow-y-auto space-y-0.5 custom-scrollbar">
+          <div className={`${maxHeight} overflow-y-auto space-y-0.5 pr-1`}>
             {options.map((opt) => {
               const isSelected = opt.value === value;
               return (
