@@ -83,7 +83,6 @@ export function CreateChannelModal({ isOpen, onClose }: CreateChannelModalProps)
         avatar_url: avatarUrl.trim() || undefined,
       });
 
-      toast.success(`Channel #${newChannel.name} created!`);
       setActiveRecipient({
         id: newChannel.id,
         name: newChannel.name,

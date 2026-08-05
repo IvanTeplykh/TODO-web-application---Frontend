@@ -43,7 +43,41 @@ export function AvatarPicker({
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === "string") {
-          onChange(reader.result);
+          const rawUrl = reader.result;
+          const img = new Image();
+          img.src = rawUrl;
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const maxDim = 300;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              }
+            } else {
+              if (height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              const compressed = canvas.toDataURL("image/jpeg", 0.85);
+              onChange(compressed);
+            } else {
+              onChange(rawUrl);
+            }
+          };
+          img.onerror = () => {
+            onChange(rawUrl);
+          };
         }
       };
       reader.readAsDataURL(file);
