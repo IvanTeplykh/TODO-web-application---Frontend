@@ -30,7 +30,18 @@ import { Pagination } from "../../components/ui/Pagination";
 import { toast } from "sonner";
 
 export default function ChatPage() {
-  const { user } = useAuthStore();
+  const { user, updateProfile } = useAuthStore();
+
+  const handleRetentionChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newDays = Number(e.target.value);
+    if (!user) return;
+    try {
+      await updateProfile(user.username, user.avatar_url, newDays);
+      toast.success(`Private chats auto-delete set to ${newDays} days`);
+    } catch {
+      toast.error("Failed to update retention settings");
+    }
+  };
   const {
     users,
     chatRequests,
@@ -217,7 +228,7 @@ export default function ChatPage() {
           <Sidebar />
 
           <main className="flex-1 p-4 md:p-6 max-w-6xl mx-auto w-full flex flex-col h-[calc(100vh-4rem)]">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
@@ -226,6 +237,25 @@ export default function ChatPage() {
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Private messaging with channel approval, edit & delete capabilities
                 </p>
+              </div>
+
+              {/* Private Chat Retention Control */}
+              <div className="flex items-center gap-2 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+                <Clock className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 shrink-0">
+                  Private Messages Auto-Delete:
+                </span>
+                <select
+                  value={user?.chat_retention_days ?? 180}
+                  onChange={handleRetentionChange}
+                  className="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-transparent border-none outline-none cursor-pointer focus:ring-0"
+                >
+                  <option value={7} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">7 Days</option>
+                  <option value={30} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">30 Days</option>
+                  <option value={90} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">90 Days</option>
+                  <option value={180} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">180 Days (Default)</option>
+                  <option value={365} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">365 Days (1 Year)</option>
+                </select>
               </div>
             </div>
 
