@@ -245,17 +245,17 @@ export default function ChatPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
         <Navbar />
 
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
 
-          <main className="flex-1 p-4 md:p-6 max-w-6xl mx-auto w-full flex flex-col h-[calc(100vh-4rem)]">
-            <div className="mb-4 flex items-center justify-between">
+          <main className="flex-1 p-3 md:p-4 max-w-6xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
+            <div className="mb-2.5 flex items-center justify-between shrink-0">
               <div>
-                <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                  <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                <h1 className="text-xl font-black tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                   Chat
                 </h1>
               </div>
