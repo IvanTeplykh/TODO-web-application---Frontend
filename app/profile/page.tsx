@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { User as UserIcon, Mail, LogOut, Camera, Trash2, Save, Lock, Edit2, Loader2, X, MessageSquare, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmLogoutModal } from "../../components/auth/ConfirmLogoutModal";
+import { DeleteAccountModal } from "../../components/profile/DeleteAccountModal";
 import { usersService } from "../../services/users";
 
 export default function ProfilePage() {
@@ -29,6 +30,8 @@ export default function ProfilePage() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeletePhotoOpen, setIsDeletePhotoOpen] = useState(false);
   const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
+  const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isPhotoChanged = avatar !== (user?.avatar_url || "");
@@ -229,6 +232,20 @@ export default function ProfilePage() {
       toast.error("Logout failed");
       setIsLoggingOut(false);
       setIsLogoutOpen(false);
+    }
+  };
+
+  const handleConfirmDeleteAccount = async (password: string) => {
+    setIsDeletingAccount(true);
+    try {
+      await usersService.deleteAccount(password);
+      toast.success("Account deleted successfully");
+      await logout();
+      router.push("/");
+    } catch (err: any) {
+      throw err;
+    } finally {
+      setIsDeletingAccount(false);
     }
   };
 
@@ -702,6 +719,35 @@ export default function ProfilePage() {
                     </div>
                   </form>
                 </Card>
+
+                {/* Danger Zone: Delete Account */}
+                <Card className="border-rose-200/70 dark:border-rose-900/40 bg-rose-50/20 dark:bg-rose-950/10">
+                  <CardHeader className="border-b border-rose-100 dark:border-rose-900/30">
+                    <h2 className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                      <Trash2 className="h-4.5 w-4.5" />
+                      Danger Zone
+                    </h2>
+                  </CardHeader>
+                  <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                        Delete Account Permanently
+                      </h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 max-w-md">
+                        Once deleted, your account cannot be recovered. Shared tasks where you are Owner will be automatically transferred to Co-Owners or Collaborators.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      className="bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10 text-xs shrink-0"
+                      onClick={() => setIsDeleteAccountOpen(true)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1.5" />
+                      Delete Account
+                    </Button>
+                  </div>
+                </Card>
               </div>
             </div>
           </main>
@@ -726,6 +772,13 @@ export default function ProfilePage() {
         description="Are you sure you want to remove your profile photo? This action is irreversible."
         confirmText="Remove Photo"
         icon={<Trash2 className="h-4.5 w-4.5 text-red-500" />}
+      />
+
+      <DeleteAccountModal
+        isOpen={isDeleteAccountOpen}
+        onClose={() => setIsDeleteAccountOpen(false)}
+        onConfirm={handleConfirmDeleteAccount}
+        isLoading={isDeletingAccount}
       />
     </ProtectedRoute>
   );

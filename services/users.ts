@@ -28,4 +28,10 @@ export const usersService = {
     const response = await api.get<User[]>(`/users/search?q=${encodeURIComponent(query.trim())}`);
     return response.data;
   },
+  deleteAccount: async (password: string): Promise<{ message: string }> => {
+    const response = await api.delete<{ message: string }>("/users/me", {
+      data: { password },
+    });
+    return response.data;
+  },
 };
