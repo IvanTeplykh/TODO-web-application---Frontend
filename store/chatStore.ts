@@ -567,9 +567,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }
       };
 
-      ws.onclose = () => {
+      ws.onclose = (event: CloseEvent) => {
         if (pingInterval) clearInterval(pingInterval);
         set({ connected: false, ws: null });
+        if (event.code === 1008) {
+          console.warn("WebSocket authentication failed (1008). Stopping reconnection loop.");
+          return;
+        }
         setTimeout(() => {
           get().connectWS();
         }, 3000);
