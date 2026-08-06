@@ -365,8 +365,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
           })
         );
       } else {
-        console.warn("WebSocket is not connected");
-        toast.info("Connecting chat... Please try sending again.");
+        try {
+          const sent = await chatService.sendMessage(recipientId, content.trim());
+          set((state) => {
+            if (state.messages.some((m) => m.id === sent.id)) return state;
+            return { messages: [...state.messages, sent] };
+          });
+        } catch (err) {
+          console.error("Failed to send message via HTTP fallback", err);
+          toast.error("Failed to send message. Please check connection.");
+        }
         get().connectWS();
       }
     }

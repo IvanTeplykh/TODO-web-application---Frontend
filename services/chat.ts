@@ -14,6 +14,14 @@ export const chatService = {
     return response.data;
   },
 
+  sendMessage: async (recipientId: string, content: string): Promise<ChatMessage> => {
+    const response = await api.post<ChatMessage>("/chat/messages", {
+      recipient_id: recipientId,
+      content,
+    });
+    return response.data;
+  },
+
   editMessage: async (messageId: string, content: string): Promise<ChatMessage> => {
     const response = await api.patch<ChatMessage>(`/chat/messages/${messageId}`, {
       content,
