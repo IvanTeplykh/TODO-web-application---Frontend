@@ -90,18 +90,23 @@ export default function ChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Initial data fetch & WebSocket connection (once on mount)
   useEffect(() => {
     fetchUsers();
     fetchRequests();
     fetchChannels();
     fetchChannelInvites();
-    fetchMessages(activeRecipient.id);
     connectWS();
 
     return () => {
       disconnectWS();
     };
-  }, [activeRecipient.id, connectWS, disconnectWS, fetchChannels, fetchChannelInvites, fetchMessages, fetchRequests, fetchUsers]);
+  }, []);
+
+  // Fetch messages whenever active recipient changes
+  useEffect(() => {
+    fetchMessages(activeRecipient.id);
+  }, [activeRecipient.id]);
 
   // Auto-scroll messages to bottom when new messages arrive
   useEffect(() => {

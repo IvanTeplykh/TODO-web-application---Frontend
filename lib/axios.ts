@@ -1,10 +1,10 @@
 import axios from "axios";
 import { getToken } from "./auth";
 
-const getBaseURL = () => {
+export const getBaseURL = () => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!envUrl) {
-    return "https://todo-web-application-backend-3xoh.onrender.com/api/v1";
+    return "http://localhost:8000/api/v1";
   }
   const normalized = envUrl.replace(/\/$/, "");
   return normalized.endsWith("/api/v1") ? normalized : `${normalized}/api/v1`;

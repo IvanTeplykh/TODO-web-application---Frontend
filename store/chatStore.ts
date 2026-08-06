@@ -3,6 +3,7 @@ import { ChatUser, ChatMessage, ChatRecipient, ChatRequest, Channel, ChannelInvi
 import { chatService } from "../services/chat";
 import { channelService } from "../services/channel";
 import { getToken } from "../lib/auth";
+import { getBaseURL } from "../lib/axios";
 import { useAuthStore } from "./authStore";
 import { useTaskStore } from "./taskStore";
 import { toast } from "sonner";
@@ -357,11 +358,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const token = getToken();
     if (!token) return;
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-    let cleanUrl = apiUrl.replace(/\/+$/, "");
-    if (!cleanUrl.includes("/api/v1")) {
-      cleanUrl = `${cleanUrl}/api/v1`;
-    }
+    const apiUrl = getBaseURL();
+    const cleanUrl = apiUrl.replace(/\/+$/, "");
     const wsScheme = cleanUrl.startsWith("https") ? "wss" : "ws";
     const hostAndPath = cleanUrl.replace(/^https?:\/\//, "");
     const wsUrl = `${wsScheme}://${hostAndPath}/chat/ws?token=${encodeURIComponent(token)}`;
