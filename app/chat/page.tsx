@@ -236,6 +236,13 @@ export default function ChatPage() {
     return name.trim().substring(0, 2).toUpperCase();
   };
 
+  const isValidAvatarUrl = (url: string | null | undefined): boolean => {
+    if (!url || typeof url !== "string") return false;
+    const trimmed = url.trim();
+    if (!trimmed) return false;
+    return trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:image/");
+  };
+
   const formatTime = (isoString: string) => {
     try {
       const date = new Date(isoString);
@@ -398,8 +405,13 @@ export default function ChatPage() {
                                 >
                                   <div className="flex items-center gap-2.5 truncate">
                                     <div className="h-7 w-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 overflow-hidden font-bold text-[11px]">
-                                      {ch.avatar_url ? (
-                                        <img src={ch.avatar_url} alt={ch.name} className="h-full w-full object-cover" />
+                                      {isValidAvatarUrl(ch.avatar_url) ? (
+                                        <img
+                                          src={ch.avatar_url!}
+                                          alt={ch.name}
+                                          className="h-full w-full object-cover"
+                                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                                        />
                                       ) : (
                                         <Hash className="h-4 w-4" />
                                       )}
@@ -467,11 +479,12 @@ export default function ChatPage() {
                                     <div className="flex items-center gap-2.5 truncate">
                                       <div className="relative flex-shrink-0">
                                         <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden text-slate-700 dark:text-slate-300 font-bold text-[11px]">
-                                          {u.avatar_url ? (
+                                          {isValidAvatarUrl(u.avatar_url) ? (
                                             <img
-                                              src={u.avatar_url}
+                                              src={u.avatar_url!}
                                               alt={u.username}
                                               className="h-full w-full object-cover"
+                                              onError={(e) => { e.currentTarget.style.display = "none"; }}
                                             />
                                           ) : (
                                             getInitials(u.username)
@@ -518,8 +531,13 @@ export default function ChatPage() {
                               >
                                 <div className="flex items-center gap-2">
                                   <div className="h-7 w-7 rounded-lg bg-indigo-200 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs flex-shrink-0 overflow-hidden">
-                                    {inv.channel_avatar ? (
-                                      <img src={inv.channel_avatar} alt={inv.channel_name} className="h-full w-full object-cover" />
+                                    {isValidAvatarUrl(inv.channel_avatar) ? (
+                                      <img
+                                        src={inv.channel_avatar!}
+                                        alt={inv.channel_name}
+                                        className="h-full w-full object-cover"
+                                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                                      />
                                     ) : (
                                       <Hash className="h-4 w-4" />
                                     )}
@@ -579,11 +597,12 @@ export default function ChatPage() {
                               >
                                 <div className="flex items-center gap-2">
                                   <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden font-bold text-xs">
-                                    {req.requester_avatar ? (
+                                    {isValidAvatarUrl(req.requester_avatar) ? (
                                       <img
-                                        src={req.requester_avatar}
+                                        src={req.requester_avatar!}
                                         alt={req.requester_name}
                                         className="h-full w-full object-cover"
+                                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                                       />
                                     ) : (
                                       getInitials(req.requester_name)
@@ -669,11 +688,12 @@ export default function ChatPage() {
                               >
                                 <div className="flex items-center gap-2.5 truncate">
                                   <div className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden font-bold text-[11px]">
-                                    {u.avatar_url ? (
+                                    {isValidAvatarUrl(u.avatar_url) ? (
                                       <img
-                                        src={u.avatar_url}
+                                        src={u.avatar_url!}
                                         alt={u.username}
                                         className="h-full w-full object-cover"
+                                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                                       />
                                     ) : (
                                       getInitials(u.username)
@@ -733,8 +753,13 @@ export default function ChatPage() {
                   <div className="flex items-center gap-3">
                     {activeRecipient.is_global || activeRecipient.is_channel ? (
                       <div className="h-9 w-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold overflow-hidden flex-shrink-0">
-                        {activeRecipient.avatar_url ? (
-                          <img src={activeRecipient.avatar_url} alt={activeRecipient.name} className="h-full w-full object-cover" />
+                        {isValidAvatarUrl(activeRecipient.avatar_url) ? (
+                          <img
+                            src={activeRecipient.avatar_url!}
+                            alt={activeRecipient.name}
+                            className="h-full w-full object-cover"
+                            onError={(e) => { e.currentTarget.style.display = "none"; }}
+                          />
                         ) : (
                           <Hash className="h-5 w-5" />
                         )}
@@ -742,11 +767,12 @@ export default function ChatPage() {
                     ) : (
                       <div className="relative">
                         <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden font-bold text-slate-700 dark:text-slate-300 text-xs">
-                          {activeRecipient.avatar_url ? (
+                          {isValidAvatarUrl(activeRecipient.avatar_url) ? (
                             <img
-                              src={activeRecipient.avatar_url}
+                              src={activeRecipient.avatar_url!}
                               alt={activeRecipient.name}
                               className="h-full w-full object-cover"
+                              onError={(e) => { e.currentTarget.style.display = "none"; }}
                             />
                           ) : (
                             getInitials(activeRecipient.name)
@@ -821,11 +847,12 @@ export default function ChatPage() {
                           }`}
                         >
                           <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden flex-shrink-0 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-xs">
-                            {msg.sender_avatar ? (
+                            {isValidAvatarUrl(msg.sender_avatar) ? (
                               <img
-                                src={msg.sender_avatar}
+                                src={msg.sender_avatar!}
                                 alt={msg.sender_name}
                                 className="h-full w-full object-cover"
+                                onError={(e) => { e.currentTarget.style.display = "none"; }}
                               />
                             ) : (
                               getInitials(msg.sender_name)
@@ -998,7 +1025,7 @@ export default function ChatPage() {
                       type="submit"
                       variant="primary"
                       size="sm"
-                      disabled={!inputContent.trim() || !connected}
+                      disabled={!inputContent.trim()}
                       icon={<Send className="h-4 w-4" />}
                       className="h-10 px-4"
                     >

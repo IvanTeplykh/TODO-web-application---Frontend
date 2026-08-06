@@ -65,7 +65,13 @@ const getSavedRecipient = (): ChatRecipient => {
 const saveRecipientToStorage = (recipient: ChatRecipient) => {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(RECIPIENT_STORAGE_KEY, JSON.stringify(recipient));
+    const minimalRecipient = {
+      id: recipient.id,
+      name: recipient.name,
+      is_global: recipient.is_global,
+      is_channel: recipient.is_channel,
+    };
+    localStorage.setItem(RECIPIENT_STORAGE_KEY, JSON.stringify(minimalRecipient));
   } catch (e) {
     console.error("Failed to save active recipient", e);
   }
@@ -259,7 +265,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       let messages: ChatMessage[] = [];
       const recipient = get().activeRecipient;
-      if (recipient.is_channel) {
+      const isChannel = recipient.is_channel || (recipientId !== "global" && get().channels.some((c) => c.id === recipientId));
+
+      if (isChannel) {
         messages = await channelService.getChannelMessages(recipientId);
       } else {
         messages = await chatService.getMessages(recipientId);
@@ -280,9 +288,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   editMessage: async (messageId: string, content: string) => {
     const recipient = get().activeRecipient;
+    const isChannel = recipient.is_channel || (recipient.id !== "global" && get().channels.some((c) => c.id === recipient.id));
     try {
       let updated: ChatMessage;
-      if (recipient.is_channel) {
+      if (isChannel) {
         updated = await channelService.editChannelMessage(recipient.id, messageId, content);
       } else {
         updated = await chatService.editMessage(messageId, content);
@@ -298,8 +307,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   deleteMessage: async (messageId: string) => {
     const recipient = get().activeRecipient;
+    const isChannel = recipient.is_channel || (recipient.id !== "global" && get().channels.some((c) => c.id === recipient.id));
     try {
-      if (recipient.is_channel) {
+      if (isChannel) {
         await channelService.deleteChannelMessage(recipient.id, messageId);
       } else {
         await chatService.deleteMessage(messageId);
@@ -323,7 +333,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const { activeRecipient } = get();
     if (!content.trim()) return;
 
-    if (activeRecipient.is_channel) {
+    const isChannel = activeRecipient.is_channel || (activeRecipient.id !== "global" && get().channels.some((c) => c.id === activeRecipient.id));
+
+    if (isChannel) {
       try {
         const posted = await channelService.postChannelMessage(activeRecipient.id, content.trim());
         set((state) => {
