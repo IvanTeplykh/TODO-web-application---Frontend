@@ -2,9 +2,12 @@ import axios from "axios";
 import { getToken } from "./auth";
 
 export const getBaseURL = () => {
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  let envUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!envUrl) {
     return "http://localhost:8000/api/v1";
+  }
+  if (!envUrl.startsWith("http://") && !envUrl.startsWith("https://")) {
+    envUrl = `https://${envUrl}`;
   }
   const normalized = envUrl.replace(/\/$/, "");
   return normalized.endsWith("/api/v1") ? normalized : `${normalized}/api/v1`;
