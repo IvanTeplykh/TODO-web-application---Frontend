@@ -257,7 +257,7 @@ export default function ChatPage() {
   const totalChannelUnread = (unreadCounts["global"] || 0) + channels.reduce((acc, ch) => acc + (unreadCounts[ch.id] || 0), 0);
   const totalContactsUnread = acceptedUsers.reduce((acc, u) => acc + (unreadCounts[u.id] || 0), 0);
   const onlineContactsCount = acceptedUsers.filter((u) => u.is_online).length;
-  const currentActiveUser = users.find((u) => u.id === activeRecipient.id);
+  const currentActiveUser = users.find((u) => u.id.toLowerCase() === activeRecipient.id.toLowerCase());
   const isRecipientOnline = currentActiveUser ? currentActiveUser.is_online : activeRecipient.is_online;
 
   return (

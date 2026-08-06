@@ -484,10 +484,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
             }));
           } else if (payload.type === "user_status") {
             const { user_id, is_online } = payload;
+            const targetId = String(user_id).toLowerCase();
             set((state) => ({
-              users: state.users.map((u) => (u.id === user_id ? { ...u, is_online } : u)),
+              users: state.users.map((u) => (u.id.toLowerCase() === targetId ? { ...u, is_online } : u)),
               activeRecipient:
-                state.activeRecipient.id === user_id
+                state.activeRecipient.id.toLowerCase() === targetId
                   ? { ...state.activeRecipient, is_online }
                   : state.activeRecipient,
             }));
