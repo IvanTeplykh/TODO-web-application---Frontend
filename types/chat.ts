@@ -3,7 +3,7 @@ export interface ChatUser {
   username: string;
   avatar_url?: string | null;
   is_online: boolean;
-  connection_status?: "accepted" | "pending_sent" | "pending_received" | "none";
+  connection_status?: "accepted" | "pending_sent" | "pending_received" | "none" | "declined";
 }
 
 export interface ChatMessage {
@@ -71,5 +71,5 @@ export type ChatRecipient = {
   my_role?: string | null;
   members_count?: number;
   is_online?: boolean;
-  connection_status?: "accepted" | "pending_sent" | "pending_received" | "none";
+  connection_status?: "accepted" | "pending_sent" | "pending_received" | "none" | "declined";
 };
