@@ -96,22 +96,33 @@ export const useChatStore = create<ChatState>((set, get) => ({
   fetchUsers: async () => {
     try {
       const users = await chatService.getUsers();
-      set({ users });
-      const currentActive = get().activeRecipient;
-      if (!currentActive.is_global && !currentActive.is_channel) {
-        const updatedUser = users.find((u) => u.id === currentActive.id);
-        if (updatedUser) {
-          const updatedRecipient: ChatRecipient = {
-            id: updatedUser.id,
-            name: updatedUser.username,
-            avatar_url: updatedUser.avatar_url,
-            is_online: updatedUser.is_online,
-            connection_status: updatedUser.connection_status,
+      set((state) => {
+        const onlineMap = new Map(state.users.map((u) => [u.id.toLowerCase(), u.is_online]));
+        const mergedUsers = users.map((u) => {
+          const wasOnline = onlineMap.get(u.id.toLowerCase());
+          return {
+            ...u,
+            is_online: wasOnline !== undefined ? Boolean(u.is_online || wasOnline) : u.is_online,
           };
-          set({ activeRecipient: updatedRecipient });
-          saveRecipientToStorage(updatedRecipient);
+        });
+
+        const currentActive = state.activeRecipient;
+        let updatedRecipient = currentActive;
+        if (!currentActive.is_global && !currentActive.is_channel) {
+          const updatedUser = mergedUsers.find((u) => u.id.toLowerCase() === currentActive.id.toLowerCase());
+          if (updatedUser) {
+            updatedRecipient = {
+              id: updatedUser.id,
+              name: updatedUser.username,
+              avatar_url: updatedUser.avatar_url,
+              is_online: updatedUser.is_online,
+              connection_status: updatedUser.connection_status,
+            };
+            saveRecipientToStorage(updatedRecipient);
+          }
         }
-      }
+        return { users: mergedUsers, activeRecipient: updatedRecipient };
+      });
     } catch (error) {
       console.error("Failed to fetch chat users", error);
     }
