@@ -255,6 +255,10 @@ export default function ChatPage() {
   // Find request ID for active recipient if pending
   const incomingReqForActive = pendingIncoming.find((r) => r.requester_id === activeRecipient.id);
   const totalChannelUnread = (unreadCounts["global"] || 0) + channels.reduce((acc, ch) => acc + (unreadCounts[ch.id] || 0), 0);
+  const totalContactsUnread = acceptedUsers.reduce((acc, u) => acc + (unreadCounts[u.id] || 0), 0);
+  const onlineContactsCount = acceptedUsers.filter((u) => u.is_online).length;
+  const currentActiveUser = users.find((u) => u.id === activeRecipient.id);
+  const isRecipientOnline = currentActiveUser ? currentActiveUser.is_online : activeRecipient.is_online;
 
   return (
     <ProtectedRoute>
@@ -450,6 +454,16 @@ export default function ChatPage() {
                               <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
                             )}
                             Contacts ({acceptedUsers.length})
+                            {onlineContactsCount > 0 && (
+                              <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-900/40">
+                                {onlineContactsCount} online
+                              </span>
+                            )}
+                            {totalContactsUnread > 0 && (
+                              <span className="h-3.5 min-w-3.5 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center animate-pulse">
+                                {totalContactsUnread}
+                              </span>
+                            )}
                           </button>
                         </div>
 
@@ -786,7 +800,7 @@ export default function ChatPage() {
                         </div>
                         <span
                           className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-slate-900 ${
-                            activeRecipient.is_online ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
+                            isRecipientOnline ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
                           }`}
                         />
                       </div>
@@ -801,7 +815,7 @@ export default function ChatPage() {
                           ? "Public group channel. Messages are automatically deleted after 180 days."
                           : activeRecipient.is_channel
                           ? activeRecipient.description || `${activeRecipient.members_count || 1} members`
-                          : activeRecipient.is_online
+                          : isRecipientOnline
                           ? "Online"
                           : "Offline"}
                       </p>

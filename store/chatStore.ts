@@ -54,7 +54,10 @@ const getSavedRecipient = (): ChatRecipient => {
     const saved = localStorage.getItem(RECIPIENT_STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed && parsed.id) return parsed;
+      if (parsed && parsed.id) {
+        if (parsed.id === "global") return DEFAULT_RECIPIENT;
+        return parsed;
+      }
     }
   } catch (e) {
     console.error("Failed to parse saved active recipient", e);
@@ -68,8 +71,9 @@ const saveRecipientToStorage = (recipient: ChatRecipient) => {
     const minimalRecipient = {
       id: recipient.id,
       name: recipient.name,
-      is_global: recipient.is_global,
+      is_global: recipient.id === "global" || recipient.is_global,
       is_channel: recipient.is_channel,
+      connection_status: recipient.connection_status,
     };
     localStorage.setItem(RECIPIENT_STORAGE_KEY, JSON.stringify(minimalRecipient));
   } catch (e) {
@@ -333,7 +337,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const { activeRecipient } = get();
     if (!content.trim()) return;
 
-    const isChannel = activeRecipient.is_channel || (activeRecipient.id !== "global" && get().channels.some((c) => c.id === activeRecipient.id));
+    const isGlobal = activeRecipient.id === "global" || activeRecipient.is_global;
+    const isChannel = !isGlobal && (activeRecipient.is_channel || get().channels.some((c) => c.id === activeRecipient.id));
 
     if (isChannel) {
       try {
@@ -347,16 +352,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
         throw err;
       }
     } else {
+      const recipientId = isGlobal ? "global" : activeRecipient.id;
       const { ws, connected } = get();
       if (ws && connected && ws.readyState === WebSocket.OPEN) {
         ws.send(
           JSON.stringify({
-            recipient_id: activeRecipient.id,
+            recipient_id: recipientId,
             content: content.trim(),
           })
         );
       } else {
         console.warn("WebSocket is not connected");
+        toast.info("Connecting chat... Please try sending again.");
+        get().connectWS();
       }
     }
   },
@@ -405,11 +413,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
             const currentRecipient = get().activeRecipient;
             const currentUserId = useAuthStore.getState().user?.id;
 
+            const isGlobal = currentRecipient.id === "global" || currentRecipient.is_global;
+
+            const msgSender = (msg.sender_id || "").toLowerCase();
+            const msgRecipient = (msg.recipient_id || "").toLowerCase();
+            const currUser = (currentUserId || "").toLowerCase();
+            const activeId = (currentRecipient.id || "").toLowerCase();
+
             const isForActiveConversation =
-              (currentRecipient.is_global && msg.recipient_id === "global") ||
-              (!currentRecipient.is_global &&
-                ((msg.sender_id === currentUserId && msg.recipient_id === currentRecipient.id) ||
-                  (msg.sender_id === currentRecipient.id && msg.recipient_id === currentUserId)));
+              (isGlobal && msgRecipient === "global") ||
+              (!isGlobal &&
+                ((msgSender === currUser && msgRecipient === activeId) ||
+                  (msgSender === activeId && (msgRecipient === currUser || msgRecipient === "global"))));
 
             if (isForActiveConversation) {
               set((state) => {
@@ -417,7 +432,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 return { messages: [...state.messages, msg] };
               });
             } else {
-              const key = msg.recipient_id === "global" ? "global" : msg.sender_id;
+              const key = msgRecipient === "global" ? "global" : msgSender;
               set((state) => ({
                 unreadCounts: {
                   ...state.unreadCounts,
