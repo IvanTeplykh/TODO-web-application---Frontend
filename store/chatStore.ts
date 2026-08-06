@@ -428,12 +428,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
           } else if (payload.type === "new_channel_message") {
             const msg: ChatMessage = payload.message;
             const currentRecipient = get().activeRecipient;
+            const currentUserId = useAuthStore.getState().user?.id;
+            const isMe = msg.sender_id === currentUserId;
+
             if (currentRecipient.is_channel && currentRecipient.id === payload.message.channel_id) {
               set((state) => {
                 if (state.messages.some((m) => m.id === msg.id)) return state;
                 return { messages: [...state.messages, msg] };
               });
-            } else {
+            } else if (!isMe) {
               const key = payload.message.channel_id;
               set((state) => ({
                 unreadCounts: {
@@ -466,7 +469,49 @@ export const useChatStore = create<ChatState>((set, get) => ({
             const { user_id, is_online } = payload;
             set((state) => ({
               users: state.users.map((u) => (u.id === user_id ? { ...u, is_online } : u)),
+              activeRecipient:
+                state.activeRecipient.id === user_id
+                  ? { ...state.activeRecipient, is_online }
+                  : state.activeRecipient,
             }));
+          } else if (
+            payload.type === "chat_request_received" ||
+            payload.type === "chat_request_updated"
+          ) {
+            get().fetchRequests();
+            get().fetchUsers();
+
+            const req: ChatRequest = payload.request;
+            const currentUserId = useAuthStore.getState().user?.id;
+
+            if (req) {
+              if (payload.type === "chat_request_received" && req.recipient_id === currentUserId) {
+                toast.info(`New chat request from @${req.requester_name}!`);
+              } else if (payload.type === "chat_request_updated" && req.requester_id === currentUserId) {
+                if (req.status === "accepted") {
+                  toast.success(`@${req.recipient_name} accepted your chat request!`);
+                } else if (req.status === "declined") {
+                  toast.info(`@${req.recipient_name} declined your chat request.`);
+                }
+              }
+
+              // Real-time connection_status update for open active recipient
+              const currentActive = get().activeRecipient;
+              if (!currentActive.is_global && !currentActive.is_channel) {
+                if (currentActive.id === req.requester_id || currentActive.id === req.recipient_id) {
+                  let newStatus: "none" | "pending_sent" | "pending_received" | "accepted" | "declined" = "none";
+                  if (req.status === "accepted") {
+                    newStatus = "accepted";
+                  } else if (req.status === "pending") {
+                    newStatus = req.requester_id === currentUserId ? "pending_sent" : "pending_received";
+                  } else if (req.status === "declined") {
+                    newStatus = "declined";
+                  }
+                  const updatedActive = { ...currentActive, connection_status: newStatus };
+                  set({ activeRecipient: updatedActive });
+                }
+              }
+            }
           } else if (payload.type === "channel_updated") {
             const ch: Channel = payload.channel;
             set((state) => ({

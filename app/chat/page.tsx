@@ -254,6 +254,7 @@ export default function ChatPage() {
 
   // Find request ID for active recipient if pending
   const incomingReqForActive = pendingIncoming.find((r) => r.requester_id === activeRecipient.id);
+  const totalChannelUnread = (unreadCounts["global"] || 0) + channels.reduce((acc, ch) => acc + (unreadCounts[ch.id] || 0), 0);
 
   return (
     <ProtectedRoute>
@@ -345,6 +346,11 @@ export default function ChatPage() {
                               <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
                             )}
                             Channels ({channels.length + 1})
+                            {totalChannelUnread > 0 && (
+                              <span className="h-3.5 min-w-3.5 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center animate-pulse">
+                                {totalChannelUnread}
+                              </span>
+                            )}
                           </button>
                           <button
                             onClick={() => setIsCreateChannelOpen(true)}
