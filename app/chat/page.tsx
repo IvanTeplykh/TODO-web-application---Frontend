@@ -144,7 +144,6 @@ export default function ChatPage() {
       await editMessage(msgId, editContent.trim());
       setEditingMsgId(null);
       setEditContent("");
-      toast.success("Message updated");
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
       toast.error(msg || "Failed to edit message");
