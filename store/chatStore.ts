@@ -265,7 +265,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   fetchMessages: async (recipientId: string) => {
-    set({ loading: true, messages: [] });
+    if (get().messages.length === 0) {
+      set({ loading: true });
+    }
     try {
       let messages: ChatMessage[] = [];
       const recipient = get().activeRecipient;
