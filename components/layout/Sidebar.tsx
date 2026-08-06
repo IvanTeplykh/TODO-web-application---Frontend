@@ -6,7 +6,7 @@ import { useTaskStore } from "../../store/taskStore";
 import { useUIStore } from "../../store/uiStore";
 import { useChatStore } from "../../store/chatStore";
 import { useAuthStore } from "../../store/authStore";
-import { LayoutDashboard, CheckCircle2, Clock, AlertCircle, MessageSquare, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Users, ShieldCheck, MessageSquare, User, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -23,7 +23,7 @@ export function Sidebar() {
     (channelInvites ? channelInvites.length : 0);
   const totalChatBadge = unreadMessagesCount + pendingRequestsCount;
 
-  const handleFilterClick = (newStatus: "all" | "done" | "undone" | "overdue") => {
+  const handleFilterClick = (newStatus: "all" | "done" | "undone" | "overdue" | "collaborator" | "co_owner") => {
     setFilters({ status: newStatus });
     if (pathname !== "/dashboard") {
       router.push("/dashboard");
@@ -38,22 +38,16 @@ export function Sidebar() {
       onClick: () => handleFilterClick("all"),
     },
     {
-      label: "Completed",
-      icon: CheckCircle2,
-      active: pathname === "/dashboard" && status === "done",
-      onClick: () => handleFilterClick("done"),
+      label: "Collaborator",
+      icon: Users,
+      active: pathname === "/dashboard" && status === "collaborator",
+      onClick: () => handleFilterClick("collaborator"),
     },
     {
-      label: "Pending",
-      icon: Clock,
-      active: pathname === "/dashboard" && status === "undone",
-      onClick: () => handleFilterClick("undone"),
-    },
-    {
-      label: "Overdue",
-      icon: AlertCircle,
-      active: pathname === "/dashboard" && status === "overdue",
-      onClick: () => handleFilterClick("overdue"),
+      label: "Co-owner",
+      icon: ShieldCheck,
+      active: pathname === "/dashboard" && status === "co_owner",
+      onClick: () => handleFilterClick("co_owner"),
     },
     {
       label: "Chat",

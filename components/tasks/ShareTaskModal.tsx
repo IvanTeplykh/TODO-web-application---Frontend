@@ -7,7 +7,7 @@ import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 import { useTaskStore } from "../../store/taskStore";
-import { usersService } from "../../services/users";
+import { useChatStore } from "../../store/chatStore";
 import { User } from "../../types/auth";
 
 interface ShareTaskModalProps {
@@ -21,6 +21,7 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
   useLockBodyScroll(isOpen);
 
   const { shareTask } = useTaskStore();
+  const { users, fetchUsers } = useChatStore();
 
   const [targetUsername, setTargetUsername] = useState("");
   const [accessLevel, setAccessLevel] = useState<"transfer" | "status_only" | "full_access">("status_only");
@@ -28,11 +29,19 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
   const [generatedPasscode, setGeneratedPasscode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // User search autocomplete state
+  // User search autocomplete state (restricted to accepted contacts)
   const [searchResults, setSearchResults] = useState<User[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isValidUser, setIsValidUser] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const contacts = users.filter((u) => u.connection_status === "accepted");
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchUsers();
+    }
+  }, [isOpen, fetchUsers]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -44,28 +53,27 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleInputChange = async (val: string) => {
+  const handleInputChange = (val: string) => {
     setTargetUsername(val);
     if (!val.trim()) {
       setSearchResults([]);
       setShowDropdown(false);
+      setIsValidUser(false);
       return;
     }
 
-    setIsSearching(true);
-    try {
-      const results = await usersService.searchUsers(val);
-      setSearchResults(results);
-      setShowDropdown(results.length > 0);
-    } catch (err) {
-      console.error("Failed to search users", err);
-    } finally {
-      setIsSearching(false);
-    }
+    const query = val.trim().toLowerCase();
+    const matches = contacts.filter((c) => c.username.toLowerCase().includes(query));
+    setSearchResults(matches as unknown as User[]);
+    setShowDropdown(matches.length > 0);
+
+    const exactMatch = contacts.some((c) => c.username.toLowerCase() === query);
+    setIsValidUser(exactMatch);
   };
 
   const handleSelectUser = (username: string) => {
     setTargetUsername(username);
+    setIsValidUser(true);
     setShowDropdown(false);
   };
 
@@ -78,6 +86,7 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
     setCopied(false);
     setSearchResults([]);
     setShowDropdown(false);
+    setIsValidUser(false);
     onClose();
   };
 
@@ -94,7 +103,6 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
       const res = await shareTask(taskId, username, accessLevel);
       if (res.passcode) {
         setGeneratedPasscode(res.passcode);
-        toast.success("Share request created! Share the 6-digit passcode with the recipient.");
       }
     } catch (err: unknown) {
       toast.error(typeof err === "string" ? err : "Failed to create share request");
@@ -174,28 +182,31 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
                 <div className="relative">
                   <Input
                     id="share-target-username"
-                    placeholder="Search or enter recipient username..."
+                    placeholder="Search or enter contact username..."
                     value={targetUsername}
                     onChange={(e) => handleInputChange(e.target.value)}
                     onFocus={() => {
-                      if (searchResults.length > 0) setShowDropdown(true);
+                      if (contacts.length > 0) {
+                        setSearchResults(contacts as unknown as User[]);
+                        setShowDropdown(true);
+                      }
                     }}
                     required
                     autoFocus
                     autoComplete="off"
                   />
-                  {isSearching && (
-                    <div className="absolute right-3 top-2.5 text-slate-400">
-                      <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
-                    </div>
-                  )}
                 </div>
+                {targetUsername.trim() && (
+                  <p className={`text-[11px] font-medium mt-1 ${isValidUser ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"}`}>
+                    {isValidUser ? "✓ Contact found" : "✕ User is not in your contacts"}
+                  </p>
+                )}
 
                 {/* Autocomplete Dropdown */}
                 {showDropdown && searchResults.length > 0 && (
                   <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl max-h-48 overflow-y-auto py-1 animate-in fade-in zoom-in duration-150">
                     <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800">
-                      Matching users
+                      Contacts
                     </div>
                     {searchResults.map((u) => (
                       <button
@@ -309,7 +320,7 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
                   type="submit"
                   variant="primary"
                   loading={isSubmitting}
-                  disabled={!targetUsername.trim()}
+                  disabled={!targetUsername.trim() || !isValidUser}
                   icon={<Key className="h-4 w-4" />}
                 >
                   Generate Passcode & Send

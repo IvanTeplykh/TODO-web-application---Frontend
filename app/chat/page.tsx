@@ -173,7 +173,6 @@ export default function ChatPage() {
     setIsSendingReq(recipientId);
     try {
       await sendChatRequest(recipientId);
-      toast.success("Chat request sent!");
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
       toast.error(msg || "Failed to send chat request");

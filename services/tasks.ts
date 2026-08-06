@@ -5,7 +5,7 @@ import { PaginatedResponse } from "../types/api";
 export interface GetTasksParams {
   page?: number;
   limit?: number;
-  status?: "all" | "done" | "undone" | "overdue";
+  status?: "all" | "done" | "undone" | "overdue" | "collaborator" | "co_owner";
   search?: string;
   sort?: string;
   order?: "asc" | "desc";
