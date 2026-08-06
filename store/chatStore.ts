@@ -410,6 +410,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const ws = new WebSocket(wsUrl);
       let pingInterval: NodeJS.Timeout | null = null;
+      let visibilityListener: (() => void) | null = null;
       let reconnectDelay = 1000;
 
       ws.onopen = () => {
@@ -421,10 +422,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
         get().fetchMessages(get().activeRecipient.id);
 
         pingInterval = setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) {
+          if (ws.readyState === WebSocket.OPEN && typeof document !== "undefined" && !document.hidden) {
             ws.send(JSON.stringify({ type: "ping" }));
           }
         }, 20000);
+
+        if (typeof document !== "undefined") {
+          visibilityListener = () => {
+            if (!document.hidden && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ type: "ping" }));
+            }
+          };
+          document.addEventListener("visibilitychange", visibilityListener);
+        }
       };
 
       ws.onmessage = (event) => {
@@ -611,6 +621,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       ws.onclose = (event: CloseEvent) => {
         if (pingInterval) clearInterval(pingInterval);
+        if (typeof document !== "undefined" && visibilityListener) {
+          document.removeEventListener("visibilitychange", visibilityListener);
+        }
         set({ connected: false, ws: null });
         if (event.code === 1008) {
           console.warn("WebSocket authentication failed (1008). Stopping reconnection loop.");
