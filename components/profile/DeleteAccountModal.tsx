@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import axios from "axios";
 import { X, AlertTriangle, Lock, Trash2 } from "lucide-react";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -35,8 +36,9 @@ export function DeleteAccountModal({
     setError("");
     try {
       await onConfirm(password);
-    } catch (err: any) {
-      setError(err?.response?.data?.detail || "Failed to delete account. Please check your password.");
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      setError(msg || "Failed to delete account. Please check your password.");
     }
   };
 

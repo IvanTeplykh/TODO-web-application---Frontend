@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { X, History, Clock, User, CheckCircle2, Pencil, Share2, RefreshCw, UserMinus } from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
+import { X, History, Clock, CheckCircle2, Pencil, Share2, RefreshCw, UserMinus } from "lucide-react";
 import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 import { tasksService } from "../../services/tasks";
 import { TaskHistoryItem } from "../../types/task";
@@ -19,13 +19,7 @@ export function TaskHistoryModal({ isOpen, onClose, taskId, taskTitle }: TaskHis
   const [history, setHistory] = useState<TaskHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && taskId) {
-      loadHistory();
-    }
-  }, [isOpen, taskId]);
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setLoading(true);
     try {
       const data = await tasksService.getHistory(taskId);
@@ -35,7 +29,13 @@ export function TaskHistoryModal({ isOpen, onClose, taskId, taskTitle }: TaskHis
     } finally {
       setLoading(false);
     }
-  };
+  }, [taskId]);
+
+  useEffect(() => {
+    if (isOpen && taskId) {
+      loadHistory();
+    }
+  }, [isOpen, taskId, loadHistory]);
 
   if (!isOpen) return null;
 
@@ -84,7 +84,7 @@ export function TaskHistoryModal({ isOpen, onClose, taskId, taskTitle }: TaskHis
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">Global Task History</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[240px]">"{taskTitle}"</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[240px]">&quot;{taskTitle}&quot;</p>
             </div>
           </div>
           <button

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Camera, Trash2, Link as LinkIcon, Upload, Hash } from "lucide-react";
+import { Trash2, Link as LinkIcon, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "./Button";
 import { Input } from "./Input";
@@ -115,6 +115,7 @@ export function AvatarPicker({
           className={`relative group h-16 w-16 ${shapeClasses} overflow-hidden border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex items-center justify-center flex-shrink-0 cursor-pointer shadow-xs`}
         >
           {value ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img src={value} alt="Avatar" className="h-full w-full object-cover" />
           ) : (
             <span className="text-base font-black text-indigo-600 dark:text-indigo-400">

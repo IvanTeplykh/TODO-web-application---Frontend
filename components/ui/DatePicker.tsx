@@ -45,8 +45,10 @@ export function DatePicker({ value, onChange, className = "" }: DatePickerProps)
     };
   }, [isOpen]);
 
-  // Sync year/month with value if value changes externally
-  useEffect(() => {
+  // Sync year/month with value if value changes externally (pattern: adjust state during render)
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
     if (value) {
       const parts = value.split("-").map(Number);
       if (parts.length === 3 && !parts.some(isNaN)) {
@@ -54,7 +56,7 @@ export function DatePicker({ value, onChange, className = "" }: DatePickerProps)
         setCurrentMonth(parts[1] - 1);
       }
     }
-  }, [value]);
+  }
 
   const formatDateLabel = (dateStr: string): string => {
     if (!dateStr) return "Select date...";

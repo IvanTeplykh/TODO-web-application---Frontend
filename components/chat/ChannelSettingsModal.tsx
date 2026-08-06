@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import axios from "axios";
 import { X, Settings, Users, Shield, UserPlus, Trash2, Check, UserMinus, Image, Hash, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
@@ -38,25 +39,24 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
   const [members, setMembers] = useState<ChannelMember[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [selectedUserToAdd, setSelectedUserToAdd] = useState("");
+  const [manualUsername, setManualUsername] = useState("");
   const [isAddingMember, setIsAddingMember] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
+  // Sync state when channel prop changes (pattern: adjust state during render)
+  const [prevChannel, setPrevChannel] = useState(channel);
+  if (channel !== prevChannel) {
+    setPrevChannel(channel);
     if (channel) {
       setName(channel.name);
       setDescription(channel.description || "");
       setAvatarUrl(channel.avatar_url || "");
     }
-  }, [channel]);
+  }
 
-  useEffect(() => {
-    if (isOpen && channelId) {
-      loadMembers();
-    }
-  }, [isOpen, channelId]);
-
-  const loadMembers = async () => {
+  const loadMembers = useCallback(async () => {
+    if (!channelId) return;
     setLoadingMembers(true);
     try {
       const data = await channelService.getChannelMembers(channelId);
@@ -66,7 +66,13 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
     } finally {
       setLoadingMembers(false);
     }
-  };
+  }, [channelId]);
+
+  useEffect(() => {
+    if (isOpen && channelId) {
+      loadMembers();
+    }
+  }, [isOpen, channelId, loadMembers]);
 
   if (!isOpen || !channel) return null;
 
@@ -119,16 +125,14 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
         description: description.trim(),
         avatar_url: avatarUrl.trim(),
       });
-    } catch (err: any) {
-      const errorDetail = err.response?.data?.detail;
+    } catch (err: unknown) {
+      const errorDetail = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
       const msg = typeof errorDetail === "string" ? errorDetail : "Failed to update channel";
       toast.error(msg);
     } finally {
       setIsSaving(false);
     }
   };
-
-  const [manualUsername, setManualUsername] = useState("");
 
   const handleAddMember = async () => {
     const targetUsername = manualUsername.trim();
@@ -147,9 +151,9 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
       setSelectedUserToAdd("");
       setManualUsername("");
       await loadMembers();
-    } catch (err: any) {
-      const msg = err.response?.data?.detail || "Failed to send invitation";
-      toast.error(msg);
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      toast.error(typeof msg === "string" ? msg : "Failed to send invitation");
     } finally {
       setIsAddingMember(false);
     }
@@ -160,8 +164,9 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
       await channelService.removeMember(channelId, userId);
       toast.success(`${username} removed from channel`);
       await loadMembers();
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Failed to remove member");
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      toast.error(typeof msg === "string" ? msg : "Failed to remove member");
     }
   };
 
@@ -171,8 +176,9 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
       await channelService.updateMemberRole(channelId, member.user_id, newRole);
       toast.success(`${member.username} is now ${newRole === "admin" ? "an Admin" : "a Member"}`);
       await loadMembers();
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Failed to update role");
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      toast.error(typeof msg === "string" ? msg : "Failed to update role");
     }
   };
 

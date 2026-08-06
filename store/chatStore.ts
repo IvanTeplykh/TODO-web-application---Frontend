@@ -376,6 +376,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           })
         );
       } else {
+        // Fallback to HTTP when WS is unavailable; then trigger reconnection
         try {
           const sent = await chatService.sendMessage(recipientId, content.trim());
           set((state) => {
@@ -409,8 +410,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const ws = new WebSocket(wsUrl);
       let pingInterval: NodeJS.Timeout | null = null;
+      let reconnectDelay = 1000;
 
       ws.onopen = () => {
+        reconnectDelay = 1000;
         set({ connected: true });
         get().fetchUsers();
         get().fetchRequests();
@@ -613,9 +616,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
           console.warn("WebSocket authentication failed (1008). Stopping reconnection loop.");
           return;
         }
+        // Exponential backoff strategy for reconnection
+        const currentDelay = reconnectDelay;
+        reconnectDelay = Math.min(reconnectDelay * 2, 30000);
         setTimeout(() => {
           get().connectWS();
-        }, 3000);
+        }, currentDelay);
       };
 
       ws.onerror = (err) => {

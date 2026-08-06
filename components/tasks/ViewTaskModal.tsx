@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Task, TaskComment } from "../../types/task";
 import { useTaskStore } from "../../store/taskStore";
 import { useAuthStore } from "../../store/authStore";
@@ -42,13 +42,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editCommentText, setEditCommentText] = useState("");
 
-  useEffect(() => {
-    if (isOpen && currentTask) {
-      loadComments(currentTask.id);
-    }
-  }, [isOpen, currentTask?.id]);
-
-  const loadComments = async (taskId: string) => {
+  const loadComments = useCallback(async (taskId: string) => {
     setLoadingComments(true);
     try {
       const data = await tasksService.getComments(taskId);
@@ -60,7 +54,13 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
     } finally {
       setLoadingComments(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && currentTask) {
+      loadComments(currentTask.id);
+    }
+  }, [isOpen, currentTask?.id, loadComments]);
 
   const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +70,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
       const newComment = await tasksService.createComment(currentTask.id, newCommentText.trim());
       setComments((prev) => [...prev, newComment]);
       setNewCommentText("");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(typeof err === "string" ? err : "Failed to add comment");
     } finally {
       setIsPostingComment(false);
@@ -83,7 +83,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
       await tasksService.removeCollaborator(currentTask.id, targetUserId);
       toast.success(`Removed @${username} from task`);
       useTaskStore.getState().fetchTasks();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(typeof err === "string" ? err : "Failed to remove collaborator");
     }
   };
@@ -94,7 +94,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
       await tasksService.deleteComment(currentTask.id, commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
       toast.success("Comment deleted");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(typeof err === "string" ? err : "Failed to delete comment");
     }
   };
@@ -107,7 +107,7 @@ export function ViewTaskModal({ task, isOpen, onClose, onEdit, onShare, onHistor
       setEditingCommentId(null);
       setEditCommentText("");
       toast.success("Comment updated!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(typeof err === "string" ? err : "Failed to update comment");
     }
   };

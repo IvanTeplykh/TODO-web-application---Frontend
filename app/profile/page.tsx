@@ -242,7 +242,7 @@ export default function ProfilePage() {
       toast.success("Account deleted successfully");
       await logout();
       router.push("/");
-    } catch (err: any) {
+    } catch (err: unknown) {
       throw err;
     } finally {
       setIsDeletingAccount(false);

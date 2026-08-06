@@ -42,9 +42,13 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
     return "Medium 🟡";
   };
 
-  // Initialize values when task changes or modal opens
-  useEffect(() => {
-    if (task) {
+  // Initialize values when task changes or modal opens (adjust state during render)
+  const [prevTask, setPrevTask] = useState(task);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (task !== prevTask || isOpen !== prevIsOpen) {
+    setPrevTask(task);
+    setPrevIsOpen(isOpen);
+    if (task && isOpen) {
       const parsed = getTaskFields(task);
       setTitle(parsed.title);
       setDescription(parsed.description || "");
@@ -53,7 +57,7 @@ export function EditTaskModal({ task, isOpen, onClose }: EditTaskModalProps) {
       setCompleted(task.completed);
       setTitleError("");
     }
-  }, [task, isOpen]);
+  }
 
   if (!isOpen || !task) return null;
 

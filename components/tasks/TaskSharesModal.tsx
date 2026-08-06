@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Check, Key, Clock, ShieldAlert, UserCheck, RefreshCw } from "lucide-react";
+import { X, Key, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -40,7 +40,7 @@ export function TaskSharesModal({ isOpen, onClose }: TaskSharesModalProps) {
     try {
       await respondShare(reqId, "", "decline");
       toast.info("Task invitation declined");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(typeof err === "string" ? err : "Failed to decline invitation");
     }
   };
@@ -62,7 +62,7 @@ export function TaskSharesModal({ isOpen, onClose }: TaskSharesModalProps) {
       if (pendingTaskShares.length <= 1) {
         handleClose();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(typeof err === "string" ? err : "Failed to accept task share");
     } finally {
       setIsSubmitting(false);
@@ -104,7 +104,7 @@ export function TaskSharesModal({ isOpen, onClose }: TaskSharesModalProps) {
                   Enter 6-Digit Passcode
                 </span>
                 <p className="text-xs text-slate-600 dark:text-slate-400">
-                  Enter the passcode provided by <strong className="text-slate-900 dark:text-white">@{selectedShare.owner_username}</strong> to accept "{selectedShare.task_title}".
+                  Enter the passcode provided by <strong className="text-slate-900 dark:text-white">@{selectedShare.owner_username}</strong> to accept &quot;{selectedShare.task_title}&quot;.
                 </p>
                 <div className="pt-2 max-w-xs mx-auto">
                   <Input

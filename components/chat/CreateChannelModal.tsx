@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import axios from "axios";
 import { X, Hash } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
@@ -94,10 +95,9 @@ export function CreateChannelModal({ isOpen, onClose }: CreateChannelModalProps)
       });
 
       handleClose();
-    } catch (err: any) {
-      const errorDetail = err.response?.data?.detail;
-      const msg = typeof errorDetail === "string" ? errorDetail : "Failed to create channel";
-      toast.error(msg);
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : "Failed to create channel";
+      toast.error(typeof msg === "string" ? msg : "Failed to create channel");
     } finally {
       setIsSubmitting(false);
     }

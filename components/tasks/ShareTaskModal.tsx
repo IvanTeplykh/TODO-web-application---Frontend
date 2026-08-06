@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, Share2, Copy, Check, Shield, UserCheck, Key, RefreshCw, Loader2, User as UserIcon } from "lucide-react";
+import { X, Share2, Copy, Check, UserCheck, Key, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -96,7 +96,7 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
         setGeneratedPasscode(res.passcode);
         toast.success("Share request created! Share the 6-digit passcode with the recipient.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(typeof err === "string" ? err : "Failed to create share request");
     } finally {
       setIsSubmitting(false);
@@ -121,8 +121,8 @@ export function ShareTaskModal({ isOpen, onClose, taskId, taskTitle }: ShareTask
               <Share2 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">Share / Transfer Task</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[240px]">"{taskTitle}"</p>
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">Share Task</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">&quot;{taskTitle}&quot;</p>
             </div>
           </div>
           <button
