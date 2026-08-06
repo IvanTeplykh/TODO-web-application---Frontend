@@ -284,6 +284,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set((state) => {
         const nextUnread = { ...state.unreadCounts };
         delete nextUnread[recipientId];
+        delete nextUnread[recipientId.toLowerCase()];
         return { unreadCounts: nextUnread };
       });
     } catch (error) {
@@ -434,7 +435,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 return { messages: [...state.messages, msg] };
               });
             } else {
-              const key = msgRecipient === "global" ? "global" : msgSender;
+              const targetUser = get().users.find((u) => u.id.toLowerCase() === msgSender);
+              const key = msgRecipient === "global" ? "global" : (targetUser ? targetUser.id : msgSender);
               set((state) => ({
                 unreadCounts: {
                   ...state.unreadCounts,
@@ -481,6 +483,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
             const deletedId: string = payload.message_id;
             set((state) => ({
               messages: state.messages.filter((m) => m.id !== deletedId),
+            }));
+          } else if (payload.type === "online_users") {
+            const onlineSet = new Set(
+              (payload.user_ids || []).map((id: string) => String(id).toLowerCase())
+            );
+            set((state) => ({
+              users: state.users.map((u) => ({
+                ...u,
+                is_online: onlineSet.has(u.id.toLowerCase()),
+              })),
+              activeRecipient: {
+                ...state.activeRecipient,
+                is_online: onlineSet.has(state.activeRecipient.id.toLowerCase()),
+              },
             }));
           } else if (payload.type === "user_status") {
             const { user_id, is_online } = payload;
