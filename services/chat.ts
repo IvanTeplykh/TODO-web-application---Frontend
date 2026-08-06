@@ -52,4 +52,9 @@ export const chatService = {
     });
     return response.data;
   },
+
+  removeContact: async (targetUserId: string): Promise<{ message: string; user_id: string }> => {
+    const response = await api.delete<{ message: string; user_id: string }>(`/chat/contacts/${targetUserId}`);
+    return response.data;
+  },
 };

@@ -26,6 +26,7 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  UserMinus,
 } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
@@ -57,6 +58,7 @@ export default function ChatPage() {
     deleteMessage,
     sendChatRequest,
     respondChatRequest,
+    removeContact,
     setActiveRecipient,
     sendMessage,
     connectWS,
@@ -206,6 +208,16 @@ export default function ChatPage() {
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
       toast.error(msg || "Failed to respond to channel invite");
+    }
+  };
+
+  const handleRemoveContactClick = async (contactId: string) => {
+    try {
+      await removeContact(contactId);
+      toast.success("Removed from contacts");
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      toast.error(msg || "Failed to remove contact");
     }
   };
 
@@ -829,6 +841,18 @@ export default function ChatPage() {
                       icon={<Settings className="h-4 w-4" />}
                     >
                       Settings
+                    </Button>
+                  )}
+
+                  {!activeRecipient.is_global && !activeRecipient.is_channel && users.some((u) => u.id === activeRecipient.id && u.connection_status === "accepted") && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs px-2.5 font-semibold text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5"
+                      onClick={() => handleRemoveContactClick(activeRecipient.id)}
+                      icon={<UserMinus className="h-3.5 w-3.5" />}
+                    >
+                      Remove Contact
                     </Button>
                   )}
                 </div>

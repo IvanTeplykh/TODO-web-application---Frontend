@@ -33,6 +33,7 @@ interface ChatState {
   deleteMessage: (messageId: string) => Promise<void>;
   sendChatRequest: (recipientId: string) => Promise<void>;
   respondChatRequest: (requestId: string, action: "accept" | "decline") => Promise<void>;
+  removeContact: (targetUserId: string) => Promise<void>;
   setActiveRecipient: (recipient: ChatRecipient) => void;
   sendMessage: (content: string) => Promise<void>;
   connectWS: () => void;
@@ -271,6 +272,25 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
     } catch (error) {
       console.error("Failed to respond to chat request", error);
+      throw error;
+    }
+  },
+
+  removeContact: async (targetUserId: string) => {
+    try {
+      await chatService.removeContact(targetUserId);
+      await get().fetchUsers();
+      await get().fetchRequests();
+      const currentRecipient = get().activeRecipient;
+      if (currentRecipient.id === targetUserId) {
+        set({
+          activeRecipient: DEFAULT_RECIPIENT,
+          messages: [],
+        });
+        saveRecipientToStorage(DEFAULT_RECIPIENT);
+      }
+    } catch (error) {
+      console.error("Failed to remove contact", error);
       throw error;
     }
   },
@@ -543,7 +563,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
             }));
           } else if (
             payload.type === "chat_request_received" ||
-            payload.type === "chat_request_updated"
+            payload.type === "chat_request_updated" ||
+            payload.type === "contact_removed"
           ) {
             get().fetchRequests();
             get().fetchUsers();
