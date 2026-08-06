@@ -429,6 +429,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           const payload = JSON.parse(event.data);
 
           if (payload.type === "pong") return;
+          console.log("[WS EVENT]", payload);
 
           if (payload.type === "new_message") {
             const msg: ChatMessage = payload.message;
