@@ -6,6 +6,8 @@ import { LoginInput, RegisterInput } from "../lib/validators";
 import { getToken, setToken, removeToken } from "../lib/auth";
 import { usersService } from "../services/users";
 
+import { useChatStore } from "./chatStore";
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -74,6 +76,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     set({ loading: true });
     try {
+      useChatStore.getState().disconnectWS();
       await authService.logout();
     } catch {
       // Ignore logout request errors (token might have already expired)

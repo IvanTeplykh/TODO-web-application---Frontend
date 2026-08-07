@@ -101,11 +101,7 @@ export default function ChatPage() {
     fetchChannels();
     fetchChannelInvites();
     connectWS();
-
-    return () => {
-      disconnectWS();
-    };
-  }, []);
+  }, [fetchUsers, fetchRequests, fetchChannels, fetchChannelInvites, connectWS]);
 
   // Fetch messages whenever active recipient changes
   useEffect(() => {

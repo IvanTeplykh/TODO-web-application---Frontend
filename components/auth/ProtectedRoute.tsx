@@ -3,10 +3,12 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/authStore";
+import { useChatStore } from "../../store/chatStore";
 import { Spinner } from "../ui/Spinner";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuthStore();
+  const { connectWS, fetchUsers, fetchRequests, fetchChannels, fetchChannelInvites } = useChatStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -14,6 +16,16 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
       router.replace("/login");
     }
   }, [isAuthenticated, loading, router]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      connectWS();
+      fetchUsers();
+      fetchRequests();
+      fetchChannels();
+      fetchChannelInvites();
+    }
+  }, [isAuthenticated, connectWS, fetchUsers, fetchRequests, fetchChannels, fetchChannelInvites]);
 
   if (loading || !isAuthenticated) {
     return (
