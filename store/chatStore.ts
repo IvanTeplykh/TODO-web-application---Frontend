@@ -457,7 +457,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sendChatRequest: async (targetUsernameOrId: string) => {
     try {
       const res = await api.post("/chat/requests", { recipient_id: targetUsernameOrId });
-      toast.success(`Chat request sent to @${res.data.recipient_name}!`);
       await get().fetchRequests();
       await get().fetchUsers();
     } catch (err: any) {
