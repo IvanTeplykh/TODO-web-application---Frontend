@@ -744,8 +744,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
         set({ connected: false, ws: null });
 
         if (event.code === 1008) {
-          console.warn("WebSocket authentication failed (1008). Stopping reconnection loop.");
+          console.warn("WebSocket authentication failed (1008). Logging out stale session.");
           currentReconnectDelay = 1000;
+          useAuthStore.getState().logout();
           return;
         }
 

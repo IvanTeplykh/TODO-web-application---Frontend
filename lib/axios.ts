@@ -1,5 +1,6 @@
 import axios from "axios";
-import { getToken } from "./auth";
+import { getToken, removeToken } from "./auth";
+import { useAuthStore } from "../store/authStore";
 
 export const getBaseURL = () => {
   let envUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -38,9 +39,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
+        removeToken();
         localStorage.removeItem("user");
-        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/register")) {
           window.location.href = "/login";
         }
