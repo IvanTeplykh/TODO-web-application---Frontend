@@ -82,6 +82,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Ignore logout request errors (token might have already expired)
     } finally {
       removeToken();
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("todo_unread_counts");
+      }
       set({ user: null, token: null, isAuthenticated: false, loading: false });
     }
   },

@@ -79,6 +79,7 @@ export const DEFAULT_RECIPIENT: ChatRecipient = {
 };
 
 const RECIPIENT_STORAGE_KEY = "todo_active_recipient";
+const UNREAD_COUNTS_STORAGE_KEY = "todo_unread_counts";
 
 const getSavedRecipient = (): ChatRecipient => {
   if (typeof window === "undefined") return DEFAULT_RECIPIENT;
@@ -113,6 +114,28 @@ const saveRecipientToStorage = (recipient: ChatRecipient) => {
   }
 };
 
+const getSavedUnreadCounts = (): Record<string, number> => {
+  if (typeof window === "undefined") return {};
+  try {
+    const saved = localStorage.getItem(UNREAD_COUNTS_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error("Failed to parse saved unread counts", e);
+  }
+  return {};
+};
+
+const saveUnreadCountsToStorage = (counts: Record<string, number>) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(UNREAD_COUNTS_STORAGE_KEY, JSON.stringify(counts));
+  } catch (e) {
+    console.error("Failed to save unread counts", e);
+  }
+};
+
 export const useChatStore = create<ChatState>((set, get) => ({
   users: [],
   chatRequests: [],
@@ -120,7 +143,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   channelInvites: [],
   activeRecipient: getSavedRecipient(),
   messages: [],
-  unreadCounts: {},
+  unreadCounts: getSavedUnreadCounts(),
   loading: false,
   connected: false,
   ws: null,
@@ -347,6 +370,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         const nextUnread = { ...state.unreadCounts };
         delete nextUnread[recipientId];
         delete nextUnread[recipientId.toLowerCase()];
+        saveUnreadCountsToStorage(nextUnread);
         return { unreadCounts: nextUnread };
       });
     } catch (error) {
@@ -525,12 +549,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
             } else {
               const targetUser = get().users.find((u) => u.id.toLowerCase() === msgSender);
               const key = msgRecipient === "global" ? "global" : (targetUser ? targetUser.id : msgSender);
-              set((state) => ({
-                unreadCounts: {
+              set((state) => {
+                const nextUnread = {
                   ...state.unreadCounts,
                   [key]: (state.unreadCounts[key] || 0) + 1,
-                },
-              }));
+                };
+                saveUnreadCountsToStorage(nextUnread);
+                return { unreadCounts: nextUnread };
+              });
             }
           } else if (payload.type === "new_channel_message") {
             const msg: ChatMessage = payload.message;
@@ -549,12 +575,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
               });
             } else if (!isMe) {
               const key = payload.message.channel_id;
-              set((state) => ({
-                unreadCounts: {
+              set((state) => {
+                const nextUnread = {
                   ...state.unreadCounts,
                   [key]: (state.unreadCounts[key] || 0) + 1,
-                },
-              }));
+                };
+                saveUnreadCountsToStorage(nextUnread);
+                return { unreadCounts: nextUnread };
+              });
             }
           } else if (payload.type === "channel_message_edited") {
             const updatedMsg: ChatMessage = payload.message;
