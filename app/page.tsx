@@ -16,6 +16,8 @@ import {
   Sparkles,
   Plus,
   Users,
+  MessageSquare,
+  Send,
 } from "lucide-react";
 
 import { ThemeToggle } from "../components/ui/ThemeToggle";
@@ -150,11 +152,69 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Hero Preview Card */}
-        <div className="lg:col-span-6 relative w-full select-none flex items-center justify-center z-10">
-          <div className="glass-card w-full max-w-[500px] rounded-3xl p-6 sm:p-8 space-y-4 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl relative">
+        {/* Hero Dual Preview Stack: Chat Card (Angled behind) & Main Workspace Card (Front) */}
+        <div className="lg:col-span-6 relative w-full select-none flex items-center justify-center py-6 sm:py-10">
+          
+          {/* Background Chat Window (Angled Behind) */}
+          <div className="absolute top-0 right-2 sm:-right-4 w-[88%] sm:w-[92%] rounded-3xl p-5 border border-indigo-500/30 dark:border-indigo-500/40 bg-slate-900/90 text-white shadow-2xl backdrop-blur-2xl transform rotate-[7deg] translate-y-3 sm:translate-y-4 hover:rotate-[4deg] transition-transform duration-500 ease-out z-0 opacity-90 hover:opacity-100">
+            {/* Chat Top Header */}
+            <div className="flex items-center justify-between border-b border-indigo-500/20 pb-3 mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-xs shadow-xs">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white leading-tight">Team Channel #devs</h4>
+                  <p className="text-[10px] text-indigo-300 font-medium">3 members online</p>
+                </div>
+              </div>
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                Live Chat
+              </span>
+            </div>
+
+            {/* Chat Messages Body */}
+            <div className="space-y-2.5 text-[11px] pb-1">
+              {/* Incoming message */}
+              <div className="flex items-start gap-2 max-w-[85%]">
+                <div className="h-6 w-6 rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center font-bold text-[10px] flex-shrink-0 border border-cyan-500/30">
+                  A
+                </div>
+                <div className="bg-slate-800/90 border border-slate-700/60 rounded-2xl rounded-tl-xs px-3 py-2 text-slate-200 shadow-xs">
+                  <p className="font-semibold text-cyan-400 text-[10px] mb-0.5">Alex Johnson</p>
+                  <p>Have you verified the task sharing permissions API?</p>
+                </div>
+              </div>
+
+              {/* Outgoing message */}
+              <div className="flex items-start justify-end gap-2 ml-auto max-w-[85%]">
+                <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl rounded-tr-xs px-3 py-2 text-white shadow-md">
+                  <p>Yes! PostgreSQL integration & E2E tests pass 100% 🚀</p>
+                </div>
+                <div className="h-6 w-6 rounded-full bg-indigo-500/30 text-indigo-300 flex items-center justify-center font-bold text-[10px] flex-shrink-0 border border-indigo-500/40">
+                  You
+                </div>
+              </div>
+            </div>
+
+            {/* Input Bar Mockup */}
+            <div className="mt-3 pt-2.5 border-t border-indigo-500/20 flex items-center gap-2">
+              <div className="flex-1 bg-slate-800/70 border border-indigo-500/20 rounded-xl px-3 py-1 text-slate-400 text-[10px] truncate">
+                Type a message...
+              </div>
+              <div className="h-6 w-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-xs flex-shrink-0">
+                <Send className="h-3 w-3" />
+              </div>
+            </div>
+          </div>
+
+          {/* Main Foreground Workspace Preview Card */}
+          <div className="glass-card w-full max-w-[480px] rounded-3xl p-6 sm:p-7 space-y-3.5 border border-slate-200/90 dark:border-slate-800/90 shadow-2xl relative z-10 transform -rotate-[3deg] hover:rotate-0 transition-transform duration-500 ease-out">
             {/* Top Bar Mockup */}
-            <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-3">
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 rounded-full bg-rose-500" />
                 <div className="h-3 w-3 rounded-full bg-amber-500" />
@@ -166,7 +226,7 @@ export default function LandingPage() {
             </div>
 
             {/* Task Item 1 */}
-            <div className="p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 flex items-center justify-between gap-3 shadow-xs">
+            <div className="p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 flex items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-3">
                 <div className="h-5 w-5 rounded-lg border-2 border-indigo-500/40 flex items-center justify-center text-indigo-500" />
                 <div>
@@ -184,7 +244,7 @@ export default function LandingPage() {
             </div>
 
             {/* Task Item 2 */}
-            <div className="p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 flex items-center justify-between gap-3 shadow-xs">
+            <div className="p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 flex items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-3">
                 <div className="h-5 w-5 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
                   ✓
@@ -204,7 +264,7 @@ export default function LandingPage() {
             </div>
 
             {/* Task Item 3 */}
-            <div className="p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 flex items-center justify-between gap-3 shadow-xs">
+            <div className="p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 flex items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-3">
                 <div className="h-5 w-5 rounded-lg border-2 border-indigo-500/40" />
                 <div>
