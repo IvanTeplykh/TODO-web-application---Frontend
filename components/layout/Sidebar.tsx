@@ -12,7 +12,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { status, setFilters } = useTaskStore();
-  const { isSidebarCollapsed, toggleSidebar } = useUIStore();
+  const { isSidebarCollapsed, toggleSidebar, notificationPreferences } = useUIStore();
   const { unreadCounts, chatRequests, channelInvites } = useChatStore();
   const { user } = useAuthStore();
   const collapsed = isSidebarCollapsed;
@@ -21,7 +21,9 @@ export function Sidebar() {
   const pendingRequestsCount =
     (chatRequests ? chatRequests.filter((r) => r.recipient_id === user?.id && r.status === "pending").length : 0) +
     (channelInvites ? channelInvites.length : 0);
-  const totalChatBadge = unreadMessagesCount + pendingRequestsCount;
+  const totalChatBadge = notificationPreferences.notifyBadges
+    ? unreadMessagesCount + pendingRequestsCount
+    : 0;
 
   const handleFilterClick = (newStatus: "all" | "done" | "undone" | "overdue" | "collaborator" | "co_owner") => {
     setFilters({ status: newStatus });

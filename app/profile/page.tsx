@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { useAuthStore } from "../../store/authStore";
+import { useUIStore } from "../../store/uiStore";
 import { useRouter } from "next/navigation";
 import { User as UserIcon, Mail, LogOut, Camera, Trash2, Save, Lock, Edit2, Loader2, X, MessageSquare, Clock } from "lucide-react";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ import { usersService } from "../../services/users";
 
 export default function ProfilePage() {
   const { user, logout, updateProfile } = useAuthStore();
+  const { notificationPreferences, updateNotificationPreferences } = useUIStore();
   const router = useRouter();
   
   const [username, setUsername] = useState("");
@@ -46,13 +48,21 @@ export default function ProfilePage() {
   const [currentPasswordError, setCurrentPasswordError] = useState("");
   const [isCheckingPassword, setIsCheckingPassword] = useState(false);
 
-  // Notification preferences state
-  const [notifyBadges, setNotifyBadges] = useState(true);
-  const [notifyComments, setNotifyComments] = useState(true);
-  const [notifyCollaborators, setNotifyCollaborators] = useState(true);
-  const [notifyOverdue, setNotifyOverdue] = useState(true);
-  const [notifySound, setNotifySound] = useState(false);
+  // Persistent notification preferences state
+  const [notifyBadges, setNotifyBadges] = useState(notificationPreferences.notifyBadges);
+  const [notifyComments, setNotifyComments] = useState(notificationPreferences.notifyComments);
+  const [notifyCollaborators, setNotifyCollaborators] = useState(notificationPreferences.notifyCollaborators);
+  const [notifyOverdue, setNotifyOverdue] = useState(notificationPreferences.notifyOverdue);
+  const [notifySound, setNotifySound] = useState(notificationPreferences.notifySound);
   const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+
+  useEffect(() => {
+    setNotifyBadges(notificationPreferences.notifyBadges);
+    setNotifyComments(notificationPreferences.notifyComments);
+    setNotifyCollaborators(notificationPreferences.notifyCollaborators);
+    setNotifyOverdue(notificationPreferences.notifyOverdue);
+    setNotifySound(notificationPreferences.notifySound);
+  }, [notificationPreferences]);
 
   const getNewReqColor = (isMet: boolean) => {
     if (!newPassword) {
@@ -906,10 +916,17 @@ export default function ProfilePage() {
                       variant="primary"
                       onClick={() => {
                         setIsSavingNotifications(true);
+                        updateNotificationPreferences({
+                          notifyBadges,
+                          notifyComments,
+                          notifyCollaborators,
+                          notifyOverdue,
+                          notifySound,
+                        });
                         setTimeout(() => {
                           setIsSavingNotifications(false);
-                          toast.success("Notification preferences saved successfully!");
-                        }, 300);
+                          toast.success("Notification preferences saved & applied!");
+                        }, 250);
                       }}
                       loading={isSavingNotifications}
                       icon={<Save className="h-4.5 w-4.5" />}

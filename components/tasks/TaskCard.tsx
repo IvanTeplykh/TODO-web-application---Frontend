@@ -1,8 +1,7 @@
-"use client";
-
 import React, { useState } from "react";
 import { Task } from "../../types/task";
 import { useTaskStore } from "../../store/taskStore";
+import { useUIStore } from "../../store/uiStore";
 import { getTaskFields, formatDate, isOverdue } from "../../lib/taskHelpers";
 import { Checkbox } from "../ui/Checkbox";
 import { Badge } from "../ui/Badge";
@@ -18,10 +17,14 @@ interface TaskCardProps {
 
 export function TaskCard({ task, onView, onEdit, onDelete }: TaskCardProps) {
   const { toggleTask, deleteTask } = useTaskStore();
+  const { notificationPreferences } = useUIStore();
   const [isToggling, setIsToggling] = useState(false);
 
   const { title, description, dueDate } = getTaskFields(task);
-  const overdue = isOverdue(dueDate, task.completed);
+  const isTaskOverdue = isOverdue(dueDate, task.completed);
+  const overdue = notificationPreferences.notifyOverdue ? isTaskOverdue : false;
+  const showCommentBadge = notificationPreferences.notifyComments && task.has_unread_comments;
+  const showRoleBadge = notificationPreferences.notifyCollaborators && task.my_access_level && task.my_access_level !== "owner";
 
   const handleToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
@@ -95,7 +98,7 @@ export function TaskCard({ task, onView, onEdit, onDelete }: TaskCardProps) {
         
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* Role badge (Outlined) */}
-          {task.my_access_level && task.my_access_level !== "owner" && (
+          {showRoleBadge && (
             <Badge variant="info" styleType="outlined" className="text-[10px] uppercase tracking-wider py-0 px-2">
               {task.my_access_level === "full_access" ? "Co-owner" : "Collaborator"}
             </Badge>
@@ -145,7 +148,7 @@ export function TaskCard({ task, onView, onEdit, onDelete }: TaskCardProps) {
           )}
 
           {/* Unread / Comments count */}
-          {task.has_unread_comments && (
+          {showCommentBadge && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-600 text-white shadow-xs animate-pulse">
               <MessageSquare className="h-2.5 w-2.5" />
               {task.unread_comments_count ? `${task.unread_comments_count}` : "1"}
