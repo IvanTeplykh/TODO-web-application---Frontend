@@ -74,6 +74,8 @@ export function RegisterForm() {
 
   const [isCheckingEmail, setIsCheckingEmail] = React.useState(false);
   const [emailExistsError, setEmailExistsError] = React.useState("");
+  const [agreeTerms, setAgreeTerms] = React.useState(false);
+  const [termsError, setTermsError] = React.useState("");
 
   const isEmailFormatValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
   const isEmailVerified = emailVal && isEmailFormatValid && !errors.email && !isCheckingEmail && !emailExistsError;
@@ -109,6 +111,11 @@ export function RegisterForm() {
   }, [emailVal, errors.email]);
 
   const onSubmit = async (data: RegisterInput) => {
+    if (!agreeTerms) {
+      setTermsError("You must agree to the Terms of Service and Privacy Policy to register");
+      return;
+    }
+
     if (isCheckingEmail || emailExistsError) {
       return;
     }
@@ -196,6 +203,43 @@ export function RegisterForm() {
             One special char
           </div>
         </div>
+      </div>
+
+      {/* Terms & Privacy Checkbox */}
+      <div className="space-y-1 pt-1">
+        <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-600 dark:text-slate-400 select-none">
+          <input
+            type="checkbox"
+            checked={agreeTerms}
+            onChange={(e) => {
+              setAgreeTerms(e.target.checked);
+              if (e.target.checked) setTermsError("");
+            }}
+            className="mt-0.5 rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500/40 cursor-pointer h-4 w-4"
+          />
+          <span className="leading-snug">
+            I agree to the{" "}
+            <Link
+              href="/terms"
+              target="_blank"
+              className="font-bold text-indigo-600 hover:underline dark:text-indigo-400"
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/privacy"
+              target="_blank"
+              className="font-bold text-indigo-600 hover:underline dark:text-indigo-400"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </span>
+        </label>
+        {termsError && (
+          <p className="text-[11px] font-semibold text-rose-500 animate-in fade-in duration-200">{termsError}</p>
+        )}
       </div>
 
       <Button
