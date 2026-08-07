@@ -5,17 +5,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../store/authStore";
 import { CreateTaskModal } from "../components/tasks/CreateTaskModal";
+import { Footer } from "../components/layout/Footer";
 import {
-  CheckCircle2,
   ListTodo,
   Clock,
-  Search,
   BarChart3,
   Shield,
   ArrowRight,
   Zap,
   Sparkles,
   Plus,
+  Users,
 } from "lucide-react";
 
 import { ThemeToggle } from "../components/ui/ThemeToggle";
@@ -27,69 +27,65 @@ export default function LandingPage() {
 
   const features = [
     {
-      title: "Task Management",
-      desc: "Organize everything in one place with simple list structures.",
+      title: "Smart Task Management",
+      desc: "Organize tasks seamlessly with flexible priority scales, due date tracking, and search filters.",
       icon: ListTodo,
-      color:
-        "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-indigo-400",
+      color: "text-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-500/20",
     },
     {
-      title: "Priority Levels",
-      desc: "Set priorities (Low, Medium, High) to focus on what matters most.",
+      title: "Priority Scale System",
+      desc: "Categorize tasks dynamically by numerical priority (1-10) with visual High, Medium, and Low badges.",
       icon: Zap,
-      color: "text-rose-600 bg-rose-50 dark:bg-rose-950/20 dark:text-rose-450",
+      color: "text-rose-600 bg-rose-50/80 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200/50 dark:border-rose-500/20",
     },
     {
-      title: "Due Dates",
-      desc: "Assign deadlines and get visual warnings when a task is overdue.",
+      title: "Real-time Collaboration",
+      desc: "Share tasks securely with team members as collaborators or co-owners with customizable permissions.",
+      icon: Users,
+      color: "text-emerald-600 bg-emerald-50/80 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20",
+    },
+    {
+      title: "Deadline Detection",
+      desc: "Never miss a deadline. Automatic overdue warnings highlight pending items automatically.",
       icon: Clock,
-      color:
-        "text-amber-600 bg-amber-50 dark:bg-amber-950/20 dark:text-amber-400",
+      color: "text-amber-600 bg-amber-50/80 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200/50 dark:border-amber-500/20",
     },
     {
-      title: "Fast Search",
-      desc: "Find any task instantly with real-time title query filters.",
-      icon: Search,
-      color: "text-sky-600 bg-sky-50 dark:bg-sky-950/20 dark:text-sky-400",
-    },
-    {
-      title: "Statistics",
-      desc: "Monitor your completion rates and track daily performance stats.",
+      title: "Productivity Analytics",
+      desc: "Track task completion rates with visual progress bars and category counter metrics.",
       icon: BarChart3,
-      color:
-        "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400",
+      color: "text-sky-600 bg-sky-50/80 dark:bg-sky-950/40 dark:text-sky-400 border-sky-200/50 dark:border-sky-500/20",
     },
     {
-      title: "Secure Authentication",
-      desc: "Your tasks are private and securely stored with JWT encryption.",
+      title: "Encrypted Security",
+      desc: "JWT authentication paired with field-level encryption for complete privacy and data safety.",
       icon: Shield,
-      color:
-        "text-violet-600 bg-violet-50 dark:bg-violet-950/20 dark:text-violet-400",
+      color: "text-violet-600 bg-violet-50/80 dark:bg-violet-950/40 dark:text-violet-400 border-violet-200/50 dark:border-violet-500/20",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-indigo-50/50 via-slate-50 to-cyan-50/50 text-slate-800 transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/30 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
       {/* Navigation Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white/80 backdrop-blur-md dark:border-slate-900/55 dark:bg-slate-950/80">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-950/80 transition-colors">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-550 text-white shadow-md shadow-indigo-500/20">
-              <span className="text-lg font-bold">T</span>
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 text-white shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-200">
+              <span className="text-xl font-black">T</span>
             </div>
-            <span className="text-lg font-black bg-gradient-to-r from-slate-905 to-slate-700 bg-clip-text text-transparent dark:from-white dark:to-slate-300">
+            <span className="text-lg font-black tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 bg-clip-text text-transparent dark:from-white dark:via-slate-100 dark:to-indigo-200">
               TODO APP
             </span>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
             {loading ? (
-              <div className="h-8 w-16 bg-slate-100 dark:bg-slate-900 rounded-lg animate-pulse" />
+              <div className="h-9 w-20 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl animate-pulse" />
             ) : isAuthenticated ? (
               <Link
                 href="/dashboard"
-                className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 px-4 text-xs font-bold text-white shadow-md hover:bg-indigo-700 transition-all"
+                className="inline-flex h-9 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 text-xs font-bold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
               >
                 Go to Dashboard
               </Link>
@@ -97,13 +93,13 @@ export default function LandingPage() {
               <div className="flex items-center gap-3">
                 <Link
                   href="/login"
-                  className="text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
+                  className="text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors px-2"
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 px-4 text-xs font-bold text-white shadow-md hover:bg-indigo-700 transition-all"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 text-xs font-bold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
                 >
                   Register
                 </Link>
@@ -114,112 +110,129 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="mx-auto max-w-6xl px-6 py-12 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center flex-1">
-        <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100/50 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Smart Task Management</span>
+      <section className="relative overflow-hidden mx-auto max-w-6xl px-6 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center flex-1">
+        {/* Background Ambient Glows */}
+        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="lg:col-span-6 space-y-6 text-center lg:text-left z-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 backdrop-blur-xs">
+            <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
+            <span>Next-Gen Task Management Platform</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent dark:from-white dark:via-slate-200 dark:to-slate-450">
-            Organize your work. <br />
-            <span className="bg-gradient-to-r from-indigo-650 to-cyan-500 bg-clip-text text-transparent dark:from-indigo-400 dark:to-cyan-400">
-              Focus on what matters.
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-slate-900 dark:text-white">
+            Master Your Workflow. <br />
+            <span className="bg-gradient-to-r from-indigo-600 via-violet-500 to-cyan-400 bg-clip-text text-transparent">
+              Achieve Your Goals.
             </span>
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
-            Manage your daily tasks, priority levels, and due dates in a clean
-            workspace designed to keep you focused.
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
+            Streamline your personal and team tasks with intuitive priority tracking, real-time sharing, and an ultra-responsive glassmorphic workspace.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
             <Link
               href={isAuthenticated ? "/dashboard" : "/register"}
-              className="w-full sm:w-auto inline-flex h-11 items-center justify-center rounded-xl bg-indigo-650 px-6 font-bold text-white shadow-lg shadow-indigo-600/15 hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] transition-all gap-1.5"
+              className="w-full sm:w-auto inline-flex h-12 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-7 font-bold text-white shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all gap-2 text-sm"
             >
-              <span>Get Started</span>
+              <span>Launch Workspace</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="w-full sm:w-auto inline-flex h-11 items-center justify-center rounded-xl border border-indigo-200/80 bg-indigo-50/50 dark:border-indigo-900/40 dark:bg-indigo-950/20 px-6 font-bold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all gap-1.5 cursor-pointer"
+              className="w-full sm:w-auto inline-flex h-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/80 dark:border-slate-800 dark:bg-slate-900/80 backdrop-blur-md px-7 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 hover:-translate-y-0.5 active:scale-[0.98] transition-all gap-2 text-sm cursor-pointer shadow-xs"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-indigo-500" />
               <span>Create Note</span>
             </button>
           </div>
         </div>
 
-        {/* Hero Dashboard Preview Mockup (Aesthetic CSS Representation) */}
-        <div className="lg:col-span-6 relative w-full select-none py-16 md:py-20 flex items-center justify-center">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-tr from-indigo-500/15 to-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative w-full max-w-[540px] rounded-2xl border border-slate-200/60 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-2xl p-7 md:p-8 overflow-hidden transform -rotate-[25deg] hover:-rotate-[20deg] transition-transform duration-500 ease-out">
-            {/* Mock Dashboard Top Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
-              <div className="w-6" /> {/* Spacer */}
-              <div className="h-5 w-32 bg-slate-100 dark:bg-slate-800 rounded-full" />
-              <div className="h-6 w-6 rounded-full bg-indigo-100 dark:bg-indigo-950" />
+        {/* Hero Preview Card */}
+        <div className="lg:col-span-6 relative w-full select-none flex items-center justify-center z-10">
+          <div className="glass-card w-full max-w-[500px] rounded-3xl p-6 sm:p-8 space-y-4 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl relative">
+            {/* Top Bar Mockup */}
+            <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-rose-500" />
+                <div className="h-3 w-3 rounded-full bg-amber-500" />
+                <div className="h-3 w-3 rounded-full bg-emerald-500" />
+              </div>
+              <span className="text-xs font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                Workspace Preview
+              </span>
             </div>
 
-            {/* Mock Dashboard Body */}
-            <div className="space-y-4">
-              {/* Task Item 1 */}
-              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-                <div className="flex items-center">
-                  <div className="h-5 w-5 rounded-md border border-slate-200 dark:border-slate-800 flex-shrink-0" />
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 ml-3">
-                    Finish Backend API
-                  </span>
+            {/* Task Item 1 */}
+            <div className="p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="h-5 w-5 rounded-lg border-2 border-indigo-500/40 flex items-center justify-center text-indigo-500" />
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    Design API Architecture
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Due in 2 days
+                  </p>
                 </div>
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30 flex items-center gap-1">
-                  <span>🔥</span> High
-                </span>
               </div>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                🔥 High (9)
+              </span>
+            </div>
 
-              {/* Task Item 2 */}
-              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-                <div className="flex items-center">
-                  <div className="h-5 w-5 rounded-md bg-indigo-650 flex items-center justify-center text-white text-[10px] flex-shrink-0">
-                    ✓
-                  </div>
-                  <span className="text-sm font-medium text-slate-300/40 dark:text-slate-700/40 line-through ml-3">
-                    Buy groceries
-                  </span>
+            {/* Task Item 2 */}
+            <div className="p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="h-5 w-5 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                  ✓
                 </div>
-                <span className="text-[10px] font-bold px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30">
-                  Low
-                </span>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 line-through">
+                    Setup PostgreSQL Database
+                  </h4>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                    Completed
+                  </p>
+                </div>
               </div>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                Low (3)
+              </span>
+            </div>
 
-              {/* Task Item 3 */}
-              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-                <div className="flex items-center">
-                  <div className="h-5 w-5 rounded-md border border-slate-200 dark:border-slate-800 flex-shrink-0" />
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 ml-3">
-                    Design UI components
-                  </span>
+            {/* Task Item 3 */}
+            <div className="p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="h-5 w-5 rounded-lg border-2 border-indigo-500/40" />
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    Implement Real-time Chat
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Shared with 3 co-owners
+                  </p>
                 </div>
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30">
-                  Medium
-                </span>
               </div>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                🟡 Medium (6)
+              </span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="bg-slate-100/30 dark:bg-slate-900/10 border-y border-slate-200/40 dark:border-slate-900 py-16 md:py-24">
+      <section className="bg-slate-100/60 dark:bg-slate-900/40 border-y border-slate-200/60 dark:border-slate-800/60 py-16 md:py-24 backdrop-blur-xs">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-            <h2 className="text-3xl font-black tracking-tight text-slate-800 dark:text-slate-100">
-              Features Built for Productivity
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              Built for Maximum Productivity
             </h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-              Everything you need to focus, optimize your schedule, and execute
-              your goals.
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+              Everything you need to plan, collaborate, and execute tasks seamlessly.
             </p>
           </div>
 
@@ -229,17 +242,17 @@ export default function LandingPage() {
               return (
                 <div
                   key={idx}
-                  className="p-6 rounded-2xl border border-slate-200/50 dark:border-slate-800/80 bg-white dark:bg-slate-900 hover:shadow-md transition-shadow"
+                  className="glass-card p-6 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 hover:-translate-y-1 transition-all duration-200"
                 >
                   <div
-                    className={`flex h-11 w-11 items-center justify-center rounded-xl mb-4 border ${f.color}`}
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl mb-4 border ${f.color} shadow-xs`}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="text-base font-bold text-slate-800 dark:text-slate-150 mb-1.5">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
                     {f.title}
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-405 leading-relaxed">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                     {f.desc}
                   </p>
                 </div>
@@ -249,153 +262,31 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Large Dashboard Preview Mockup Section */}
-      <section
-        id="preview"
-        className="mx-auto max-w-6xl px-6 py-16 md:py-24 text-center"
-      >
-        <div className="max-w-2xl mx-auto mb-12 space-y-3">
-          <h2 className="text-3xl font-black tracking-tight text-slate-800 dark:text-slate-100">
-            A Clean Workspace
+      {/* Call to Action Section */}
+      <section className="mx-auto max-w-6xl px-6 py-16 md:py-24 w-full">
+        <div className="glass-card rounded-3xl p-8 md:p-12 border border-indigo-500/20 dark:border-indigo-500/30 bg-gradient-to-r from-indigo-600/10 via-purple-600/5 to-cyan-600/10 text-center space-y-6 relative overflow-hidden">
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+            Ready to elevate your productivity?
           </h2>
-          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-            Take a look at the dashboard workflow interface. Manage your
-            lifecycle in real-time.
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto font-medium">
+            Join thousands of users organizing tasks efficiently with TODO APP.
           </p>
-        </div>
-
-        {/* HTML Mockup styled exactly like our actual app page */}
-        <div className="rounded-2xl border border-slate-200/70 bg-white dark:border-slate-850 dark:bg-slate-900 shadow-2xl p-4 md:p-6 text-left max-w-4xl mx-auto overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white text-xs font-bold">
-                T
-              </div>
-              <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">
-                TODO APP
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="h-7 w-48 bg-slate-100 dark:bg-slate-800 rounded-lg hidden sm:block" />
-              <div className="h-7 w-7 rounded-full bg-slate-100 dark:bg-slate-800" />
-            </div>
-          </div>
-
-          {/* Quick stats grid mockup */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-6">
-            <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-950/10">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Total Tasks
-              </span>
-              <span className="text-base font-extrabold text-slate-800 dark:text-slate-100">
-                12
-              </span>
-            </div>
-            <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-950/10">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Completed
-              </span>
-              <span className="text-base font-extrabold text-slate-850 dark:text-slate-100">
-                5
-              </span>
-            </div>
-            <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-950/10">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Pending
-              </span>
-              <span className="text-base font-extrabold text-slate-850 dark:text-slate-100">
-                7
-              </span>
-            </div>
-            <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-950/10">
-              <span className="block text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Completion Rate
-              </span>
-              <span className="text-base font-extrabold text-slate-850 dark:text-slate-100">
-                42%
-              </span>
-            </div>
-          </div>
-
-          {/* Tasks listing mockup */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Card 1 */}
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800/85 bg-white dark:bg-slate-900 shadow-sm">
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded border border-slate-200" />
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                    Finish Backend API
-                  </span>
-                </div>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30">
-                  🔥 High
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-3 ml-6 line-clamp-1">
-                Implement jwt token authentication and database setup.
-              </p>
-              <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-550 border-t border-slate-50 dark:border-slate-800/50 pt-2 ml-6">
-                <span>📅 Jul 25, 2026</span>
-                <span className="text-indigo-650 dark:text-indigo-400 font-bold">
-                  View →
-                </span>
-              </div>
-            </div>
-
-            {/* Card 2 */}
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800/85 bg-white dark:bg-slate-900 shadow-sm opacity-70">
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-indigo-600 text-white flex items-center justify-center text-[8px]">
-                    ✓
-                  </div>
-                  <span className="text-xs font-medium text-slate-550 dark:text-slate-400 line-through">
-                    Buy groceries
-                  </span>
-                </div>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30">
-                  Low
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-3 ml-6 line-clamp-1">
-                Milk, bread, eggs and fresh apples.
-              </p>
-              <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-550 border-t border-slate-50 dark:border-slate-800/50 pt-2 ml-6">
-                <span>📅 Jul 18, 2026</span>
-                <span className="text-indigo-650 dark:text-indigo-400 font-bold">
-                  View →
-                </span>
-              </div>
-            </div>
+          <div className="flex justify-center pt-2">
+            <Link
+              href={isAuthenticated ? "/dashboard" : "/register"}
+              className="inline-flex h-12 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-8 font-bold text-white shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all text-sm gap-2"
+            >
+              <span>Get Started Now</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-slate-200/50 bg-white py-8 dark:border-slate-900 dark:bg-slate-950">
-        <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 dark:text-slate-500">
-          <div>
-            &copy; {new Date().getFullYear()} TODO APP. All rights reserved.
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="hover:text-slate-600 dark:hover:text-slate-300"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="hover:text-slate-600 dark:hover:text-slate-300"
-            >
-              Register
-            </Link>
-          </div>
-        </div>
-      </footer>
+      {/* Shared Footer */}
+      <Footer />
 
+      {/* Quick Create Task Modal */}
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
