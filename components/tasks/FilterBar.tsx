@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useTaskStore } from "../../store/taskStore";
-import { Button } from "../ui/Button";
 
 export function FilterBar() {
   const { status, setFilters } = useTaskStore();
@@ -10,28 +9,26 @@ export function FilterBar() {
   const filters: { label: string; value: "all" | "done" | "undone" | "overdue" }[] = [
     { label: "All", value: "all" },
     { label: "Done", value: "done" },
-    { label: "Undone", value: "undone" },
+    { label: "Pending", value: "undone" },
     { label: "Overdue", value: "overdue" },
   ];
 
   return (
-    <div className="flex gap-2 bg-slate-100/55 dark:bg-slate-900/40 p-1 rounded-xl w-fit">
+    <div className="flex gap-1.5 bg-slate-200/60 dark:bg-slate-900/60 p-1.5 rounded-2xl w-fit border border-slate-200/40 dark:border-slate-800/40 backdrop-blur-md">
       {filters.map((f) => {
         const isActive = status === f.value;
         return (
-          <Button
+          <button
             key={f.value}
-            variant={isActive ? "primary" : "ghost"}
-            size="sm"
             onClick={() => setFilters({ status: f.value })}
-            className={`!py-1.5 px-4 rounded-lg text-xs font-semibold ${
+            className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
               isActive 
-                ? "shadow-sm shadow-indigo-600/20" 
-                : "text-slate-500 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white"
+                ? "bg-white text-indigo-600 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-indigo-400 dark:shadow-none" 
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
             }`}
           >
             {f.label}
-          </Button>
+          </button>
         );
       })}
     </div>

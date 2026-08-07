@@ -8,12 +8,12 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Card({ children, glass = true, className = "", ...props }: CardProps) {
   const styles = glass
-    ? "bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 shadow-xl shadow-slate-100/50 dark:shadow-none"
-    : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md";
+    ? "glass-card"
+    : "bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-md shadow-slate-200/40 dark:shadow-none";
 
   return (
     <div
-      className={`rounded-2xl p-6 transition-all duration-300 ${styles} ${className}`}
+      className={`rounded-2xl p-6 ${styles} ${className}`}
       {...props}
     >
       {children}
@@ -39,7 +39,7 @@ export function CardContent({ children, className = "", ...props }: React.HTMLAt
 
 export function CardFooter({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`mt-6 pt-4 border-t border-slate-100 dark:border-slate-850 flex items-center justify-between ${className}`} {...props}>
+    <div className={`mt-6 pt-4 border-t border-slate-100/80 dark:border-slate-800/60 flex items-center justify-between ${className}`} {...props}>
       {children}
     </div>
   );

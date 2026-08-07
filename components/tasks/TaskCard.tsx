@@ -34,40 +34,40 @@ export function TaskCard({ task, onView }: TaskCardProps) {
 
   // Determine priority color schema
   let priorityLabel = "Low";
-  let priorityStyle = "bg-emerald-50 text-emerald-700 dark:bg-emerald-550/10 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-500/20";
+  let priorityStyle = "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
   let priorityIcon = "🟢";
   
   if (task.priority >= 8) {
     priorityLabel = "High";
-    priorityStyle = "bg-rose-50 text-rose-700 dark:bg-rose-550/10 dark:text-rose-400 border-rose-100/50 dark:border-rose-500/20";
+    priorityStyle = "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20";
     priorityIcon = "🔥";
   } else if (task.priority >= 4) {
     priorityLabel = "Medium";
-    priorityStyle = "bg-amber-50 text-amber-700 dark:bg-amber-550/10 dark:text-amber-400 border-amber-100/50 dark:border-amber-500/20";
+    priorityStyle = "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
     priorityIcon = "🟡";
   }
 
   return (
     <div 
       onClick={() => onView(task)}
-      className={`group relative rounded-2xl border bg-white p-5 cursor-pointer transition-all duration-300 hover:shadow-lg dark:bg-slate-900 ${
+      className={`group relative rounded-2xl border p-5 cursor-pointer transition-all duration-200 glass-card ${
         task.completed 
-          ? "border-slate-100 dark:border-slate-800/60 opacity-60 hover:opacity-80" 
+          ? "border-slate-200/50 dark:border-slate-800/40 opacity-70 hover:opacity-90 bg-slate-50/50 dark:bg-slate-900/30" 
           : overdue
-            ? "border-rose-200 dark:border-rose-900/50 bg-rose-50/5 dark:bg-rose-950/5 shadow-rose-100/10 hover:border-rose-400"
-            : "border-slate-200/60 dark:border-slate-800/80 hover:border-indigo-400 dark:hover:border-indigo-500/50"
+            ? "border-rose-300 dark:border-rose-900/60 bg-rose-500/5 dark:bg-rose-950/10 hover:border-rose-400"
+            : "hover:border-indigo-400/80 dark:hover:border-indigo-500/60"
       }`}
     >
       {/* Top row: Checkbox, Title and Priority */}
-      <div className="flex items-start justify-between gap-3 mb-2">
+      <div className="flex items-start justify-between gap-3 mb-2.5">
         <div className="flex items-start gap-3 min-w-0" onClick={(e) => e.stopPropagation()}>
           <Checkbox
             checked={task.completed}
             disabled={isToggling}
             onChange={handleToggle}
-            className="mt-1 flex-shrink-0"
+            className="mt-0.5 flex-shrink-0"
           />
-          <h3 className={`text-base font-bold text-slate-800 dark:text-slate-100 break-words leading-snug line-clamp-1 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors ${
+          <h3 className={`text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 break-words leading-snug line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors ${
             task.completed ? "line-through text-slate-400 dark:text-slate-500 font-medium" : ""
           }`}>
             {title}
@@ -76,7 +76,7 @@ export function TaskCard({ task, onView }: TaskCardProps) {
         
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {task.has_unread_comments && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-600 text-white shadow-xs animate-pulse">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-600 text-white shadow-xs animate-pulse">
               <MessageSquare className="h-2.5 w-2.5" />
               {task.unread_comments_count ? `${task.unread_comments_count} new` : "New comment"}
             </span>
@@ -90,7 +90,7 @@ export function TaskCard({ task, onView }: TaskCardProps) {
               {task.my_access_level === "full_access" ? "Co-owner" : "Collaborator"}
             </span>
           )}
-          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${priorityStyle}`}>
+          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${priorityStyle}`}>
             <span className="text-[10px]">{priorityIcon}</span>
             <span>{priorityLabel}</span>
           </span>
@@ -98,42 +98,42 @@ export function TaskCard({ task, onView }: TaskCardProps) {
       </div>
 
       {/* Body: Description snippet */}
-      <div className="pl-8 mb-4 min-h-[40px]">
+      <div className="pl-7 sm:pl-8 mb-4 min-h-[38px]">
         {description ? (
-          <p className={`text-xs text-slate-500 dark:text-slate-300 line-clamp-2 leading-relaxed ${
+          <p className={`text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed ${
             task.completed ? "line-through text-slate-400 dark:text-slate-500" : ""
           }`}>
             {description}
           </p>
         ) : (
-          <p className="text-xs text-slate-400 dark:text-slate-400 italic">
+          <p className="text-xs text-slate-400 dark:text-slate-500 italic">
             No description provided.
           </p>
         )}
       </div>
 
       {/* Footer: Due date and indicator */}
-      <div className="pl-8 flex items-center justify-between border-t border-slate-50 dark:border-slate-800/50 pt-3 text-[11px] font-medium text-slate-400 dark:text-slate-300">
+      <div className="pl-7 sm:pl-8 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
         <div>
           {dueDate ? (
             <div className="flex items-center gap-1.5">
-              <Calendar className={`h-3.5 w-3.5 ${overdue ? "text-rose-500" : "text-slate-400 dark:text-slate-300"}`} />
-              <span className={overdue ? "text-rose-600 dark:text-rose-400 font-bold" : "text-slate-500 dark:text-slate-300"}>
+              <Calendar className={`h-3.5 w-3.5 ${overdue ? "text-rose-500" : "text-slate-400 dark:text-slate-400"}`} />
+              <span className={overdue ? "text-rose-600 dark:text-rose-400 font-bold" : "text-slate-600 dark:text-slate-300"}>
                 {formatDate(dueDate)}
               </span>
               {overdue && (
-                <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[8px] font-extrabold bg-rose-50 text-rose-600 border border-rose-100/50 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20">
-                  <AlertCircle className="h-2 w-2" />
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                  <AlertCircle className="h-2.5 w-2.5" />
                   Overdue
                 </span>
               )}
             </div>
           ) : (
-            <span>No due date</span>
+            <span className="text-slate-400">No due date</span>
           )}
         </div>
 
-        <div className="flex items-center gap-1 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+        <div className="flex items-center gap-1 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 font-semibold transition-colors">
           <span>View</span>
           <ArrowRight className="h-3 w-3 transform group-hover:translate-x-1 transition-transform" />
         </div>

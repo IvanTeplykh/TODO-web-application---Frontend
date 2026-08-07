@@ -66,49 +66,49 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`relative border-r border-slate-200/50 bg-slate-50/50 transition-all duration-300 dark:border-slate-800/50 dark:bg-slate-900/10 flex flex-col ${
+      className={`relative border-r border-slate-200/60 bg-white/50 dark:border-slate-800/60 dark:bg-slate-950/20 backdrop-blur-md transition-all duration-300 flex flex-col ${
         collapsed ? "w-16" : "w-16 md:w-64"
       }`}
     >
       <button
         onClick={toggleSidebar}
-        className="absolute -right-3 top-6 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-955 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white z-20"
+        className="absolute -right-3.5 top-6 hidden md:flex h-7 w-7 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 shadow-md transition-all hover:bg-slate-100 hover:text-slate-900 hover:scale-110 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white z-20 cursor-pointer"
       >
         {collapsed ? (
-          <ChevronRight className="h-3 w-3" />
+          <ChevronRight className="h-3.5 w-3.5" />
         ) : (
-          <ChevronLeft className="h-3 w-3" />
+          <ChevronLeft className="h-3.5 w-3.5" />
         )}
       </button>
 
-      <nav className={`flex-1 space-y-1.5 py-4 ${collapsed ? "px-2" : "px-2 md:px-4"}`}>
+      <nav className={`flex-1 space-y-1.5 py-5 ${collapsed ? "px-2" : "px-2 md:px-3.5"}`}>
         {navItems.map((item, idx) => {
           const Icon = item.icon;
           return (
             <button
               key={idx}
               onClick={item.onClick}
-              className={`flex w-full items-center rounded-xl py-2.5 text-sm font-medium transition-all duration-200 group relative ${
-                collapsed ? "justify-center px-0" : "gap-3 px-3 justify-center md:justify-start"
+              className={`flex w-full items-center rounded-2xl py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 group relative cursor-pointer ${
+                collapsed ? "justify-center px-0" : "gap-3 px-3.5 justify-center md:justify-start"
               } ${
                 item.active
-                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 font-semibold"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/50 dark:hover:text-white"
+                  ? "bg-gradient-to-r from-indigo-500/15 to-violet-500/10 text-indigo-700 dark:from-indigo-500/20 dark:to-violet-500/15 dark:text-indigo-300 font-bold border border-indigo-500/20 dark:border-indigo-500/30 shadow-xs"
+                  : "text-slate-500 hover:bg-slate-100/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-white"
               }`}
             >
               <div className="relative flex-shrink-0">
-                <Icon className={`h-5 w-5 transition-transform group-hover:scale-105 ${
+                <Icon className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${
                   item.active ? "text-indigo-600 dark:text-indigo-400" : ""
                 }`} />
                 {item.badge != null && item.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-slate-900 shadow-xs animate-in zoom-in-50 duration-200">
+                  <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white ring-2 ring-white dark:ring-slate-900 shadow-xs">
                     {item.badge > 99 ? "99+" : item.badge}
                   </span>
                 )}
               </div>
               {!collapsed && <span className="hidden md:inline">{item.label}</span>}
               {collapsed && (
-                <div className="absolute left-full ml-2.5 rounded-lg bg-slate-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap">
+                <div className="absolute left-full ml-3 rounded-xl bg-slate-900 dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white shadow-xl opacity-0 transition-all duration-200 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap">
                   {item.label}
                 </div>
               )}

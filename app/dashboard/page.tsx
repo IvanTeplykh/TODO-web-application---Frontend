@@ -80,18 +80,23 @@ export default function DashboardPage() {
         <div className="flex flex-1">
           <Sidebar />
           
-          <main className="flex-1 p-6 md:p-8 space-y-6 max-w-6xl mx-auto w-full">
-            {/* Page Title & Task Invitations Alert Button */}
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100">
-                Workspace
-              </h1>
+          <main className="flex-1 p-4 sm:p-6 md:p-8 space-y-6 max-w-6xl mx-auto w-full">
+            {/* Page Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                  Dashboard
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                  Organize, prioritize, and accomplish your work efficiently.
+                </p>
+              </div>
 
               {pendingTaskShares.length > 0 && (
                 <Button
                   size="sm"
                   variant="outline"
-                  className="relative rounded-xl border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold hover:bg-amber-100 transition-all gap-2"
+                  className="relative rounded-2xl border-amber-300/80 dark:border-amber-700/80 bg-amber-50/80 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold hover:bg-amber-100 transition-all gap-2 shadow-xs"
                   onClick={() => setIsSharesModalOpen(true)}
                   icon={<Mail className="h-4 w-4 text-amber-600" />}
                 >
@@ -107,7 +112,7 @@ export default function DashboardPage() {
             <Statistics />
 
             {/* Controls Bar: Search, Filter, Sort and "+ New Task" */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between border-t border-b border-slate-100 dark:border-slate-800/80 py-4">
+            <div className="glass-panel rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-xs">
               <div className="w-full md:max-w-xs">
                 <SearchBar />
               </div>
@@ -117,8 +122,8 @@ export default function DashboardPage() {
                 <Button
                   onClick={() => setIsCreateOpen(true)}
                   variant="primary"
-                  size="sm"
-                  className="rounded-xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/10 gap-1.5"
+                  size="md"
+                  className="rounded-2xl font-bold gap-2"
                   icon={<Plus className="h-4 w-4" />}
                 >
                   New Task
