@@ -185,11 +185,6 @@ export default function ChatPage() {
   const handleRespondRequestClick = async (requestId: string, action: "accept" | "decline" | "cancel") => {
     try {
       await respondChatRequest(requestId, action);
-      if (action === "accept") {
-        toast.success("Chat request accepted!");
-      } else if (action === "decline") {
-        toast.info("Chat request declined");
-      }
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
       if (msg && msg.includes("Chat request not found")) {
@@ -202,11 +197,6 @@ export default function ChatPage() {
   const handleRespondChannelInviteClick = async (inviteId: string, action: "accept" | "decline") => {
     try {
       await respondChannelInvite(inviteId, action);
-      if (action === "accept") {
-        toast.success("Joined channel!");
-      } else {
-        toast.info("Channel invitation declined");
-      }
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
       toast.error(msg || "Failed to respond to channel invite");

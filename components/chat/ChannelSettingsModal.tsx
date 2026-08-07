@@ -44,17 +44,6 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Sync state when channel prop changes (pattern: adjust state during render)
-  const [prevChannel, setPrevChannel] = useState(channel);
-  if (channel !== prevChannel) {
-    setPrevChannel(channel);
-    if (channel) {
-      setName(channel.name);
-      setDescription(channel.description || "");
-      setAvatarUrl(channel.avatar_url || "");
-    }
-  }
-
   const loadMembers = useCallback(async () => {
     if (!channelId) return;
     setLoadingMembers(true);
@@ -69,10 +58,15 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
   }, [channelId]);
 
   useEffect(() => {
-    if (isOpen && channelId) {
+    if (isOpen && channel) {
+      setName(channel.name || "");
+      setDescription(channel.description || "");
+      setAvatarUrl(channel.avatar_url || "");
+      setNameError("");
+      setDescriptionError("");
       loadMembers();
     }
-  }, [isOpen, channelId, loadMembers]);
+  }, [isOpen, channelId, channel, loadMembers]);
 
   if (!isOpen || !channel) return null;
 
@@ -80,23 +74,15 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
   const isOwner = channel.my_role === "owner";
 
   const handleNameChange = (val: string) => {
-    setName(val);
-    if (val.trim().length === 0) {
-      setNameError("");
-    } else if (val.length > 50) {
-      setNameError("Channel name cannot exceed 50 characters");
-    } else {
-      setNameError("");
-    }
+    const truncated = val.slice(0, 50);
+    setName(truncated);
+    setNameError("");
   };
 
   const handleDescriptionChange = (val: string) => {
-    setDescription(val);
-    if (val.length > 250) {
-      setDescriptionError("Description cannot exceed 250 characters");
-    } else {
-      setDescriptionError("");
-    }
+    const truncated = val.slice(0, 250);
+    setDescription(truncated);
+    setDescriptionError("");
   };
 
   const handleSaveGeneral = async (e: React.FormEvent) => {
@@ -105,16 +91,6 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
 
     if (!trimmedName) {
       setNameError("Channel name is required");
-      return;
-    }
-
-    if (trimmedName.length > 50) {
-      setNameError("Channel name cannot exceed 50 characters");
-      return;
-    }
-
-    if (description.length > 250) {
-      setDescriptionError("Description cannot exceed 250 characters");
       return;
     }
 
@@ -273,13 +249,14 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Channel Name
                   </label>
-                  <span className={`text-[10px] font-semibold ${name.length > 50 ? "text-rose-500 font-bold" : "text-slate-400"}`}>
+                  <span className={`text-[10px] font-semibold ${name.length >= 50 ? "text-amber-500 font-bold" : "text-slate-400"}`}>
                     {name.length}/50
                   </span>
                 </div>
                 <Input
                   id="edit-channel-name"
                   value={name}
+                  maxLength={50}
                   onChange={(e) => handleNameChange(e.target.value)}
                   disabled={!isAdminOrOwner}
                   error={nameError}
@@ -292,13 +269,14 @@ export function ChannelSettingsModal({ isOpen, onClose, channelId }: ChannelSett
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Description
                   </label>
-                  <span className={`text-[10px] font-semibold ${description.length > 250 ? "text-rose-500 font-bold" : "text-slate-400"}`}>
+                  <span className={`text-[10px] font-semibold ${description.length >= 250 ? "text-amber-500 font-bold" : "text-slate-400"}`}>
                     {description.length}/250
                   </span>
                 </div>
                 <textarea
                   rows={3}
                   value={description}
+                  maxLength={250}
                   onChange={(e) => handleDescriptionChange(e.target.value)}
                   disabled={!isAdminOrOwner}
                   className={`w-full px-3 py-2 text-xs rounded-xl border bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 transition-colors resize-none disabled:opacity-60 ${

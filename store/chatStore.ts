@@ -722,12 +722,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
           ) {
             useTaskStore.getState().fetchTasks();
             useTaskStore.getState().fetchPendingShares();
-
-            if (payload.type === "task_share_requested") {
-              toast.info(`New task invitation from @${payload.owner_username}!`);
-            } else if (payload.type === "task_share_responded" && payload.action === "accept") {
-              toast.success(`Task invitation accepted!`);
-            }
           }
         } catch (err) {
           console.error("Error parsing WebSocket message", err);
