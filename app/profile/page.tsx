@@ -385,33 +385,47 @@ export default function ProfilePage() {
                 </p>
               </div>
 
-              {/* Segmented Control Tabs (Responsive: Scrollable on Mobile) */}
-              <div className="w-full sm:w-auto overflow-x-auto no-scrollbar py-0.5">
-                <div className="flex p-1 rounded-2xl bg-slate-200/60 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 w-max sm:w-auto backdrop-blur-md gap-1">
-                  {([
-                    { id: "general", label: "General" },
-                    { id: "security", label: "Security" },
-                    { id: "preferences", label: "Preferences" },
-                    { id: "notifications", label: "Notifications" },
-                    { id: "danger", label: "Danger Zone" },
-                  ] as const).map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 ${
-                        activeTab === tab.id
-                          ? tab.id === "danger"
-                            ? "bg-rose-600 text-white shadow-xs font-black"
-                            : "bg-white text-indigo-600 dark:bg-slate-800 dark:text-indigo-400 shadow-xs font-black border border-slate-200/60 dark:border-slate-700/60"
-                          : tab.id === "danger"
-                          ? "text-rose-500 hover:text-rose-600 dark:text-rose-400"
-                          : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
+              {/* Mobile Select Dropdown (sm:hidden, NO horizontal scroll) */}
+              <div className="w-full sm:hidden">
+                <Select
+                  value={activeTab}
+                  onChange={(val) => setActiveTab(val as any)}
+                  options={[
+                    { value: "general", label: "General Settings" },
+                    { value: "security", label: "Security & Password" },
+                    { value: "preferences", label: "Chat Preferences" },
+                    { value: "notifications", label: "Notifications" },
+                    { value: "danger", label: "Danger Zone" },
+                  ]}
+                  className="w-full font-bold text-xs"
+                />
+              </div>
+
+              {/* Desktop Segmented Control Tabs (hidden sm:flex) */}
+              <div className="hidden sm:flex p-1 rounded-2xl bg-slate-200/60 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 w-fit backdrop-blur-md">
+                {([
+                  { id: "general", label: "General" },
+                  { id: "security", label: "Security" },
+                  { id: "preferences", label: "Preferences" },
+                  { id: "notifications", label: "Notifications" },
+                  { id: "danger", label: "Danger Zone" },
+                ] as const).map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      activeTab === tab.id
+                        ? tab.id === "danger"
+                          ? "bg-rose-600 text-white shadow-xs font-black"
+                          : "bg-white text-indigo-600 dark:bg-slate-800 dark:text-indigo-400 shadow-xs font-black border border-slate-200/60 dark:border-slate-700/60"
+                        : tab.id === "danger"
+                        ? "text-rose-500 hover:text-rose-600 dark:text-rose-400"
+                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
             </div>
 
