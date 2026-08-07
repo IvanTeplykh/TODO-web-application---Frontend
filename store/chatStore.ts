@@ -729,9 +729,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       };
 
       ws.onclose = (event: CloseEvent) => {
-        if (activeWS === ws) {
-          activeWS = null;
-        }
+        if (activeWS !== ws) return;
+        activeWS = null;
         if (pingInterval) {
           clearInterval(pingInterval);
           pingInterval = null;

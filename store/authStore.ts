@@ -43,6 +43,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   login: async (data: LoginInput) => {
+    useChatStore.getState().disconnectWS();
+    removeToken();
     set({ loading: true });
     try {
       const response = await authService.login(data);
@@ -60,6 +62,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   register: async (data: RegisterInput) => {
+    useChatStore.getState().disconnectWS();
+    removeToken();
     set({ loading: true });
     try {
       await authService.register(data);
@@ -75,17 +79,21 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     set({ loading: true });
+    removeToken();
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("todo_unread_counts");
+      localStorage.removeItem("user");
+    }
+    useChatStore.getState().disconnectWS();
     try {
-      useChatStore.getState().disconnectWS();
       await authService.logout();
     } catch {
       // Ignore logout request errors (token might have already expired)
     } finally {
-      removeToken();
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("todo_unread_counts");
-      }
       set({ user: null, token: null, isAuthenticated: false, loading: false });
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/register")) {
+        window.location.href = "/login";
+      }
     }
   },
 
