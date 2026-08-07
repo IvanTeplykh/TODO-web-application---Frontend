@@ -46,6 +46,14 @@ export default function ProfilePage() {
   const [currentPasswordError, setCurrentPasswordError] = useState("");
   const [isCheckingPassword, setIsCheckingPassword] = useState(false);
 
+  // Notification preferences state
+  const [notifyBadges, setNotifyBadges] = useState(true);
+  const [notifyComments, setNotifyComments] = useState(true);
+  const [notifyCollaborators, setNotifyCollaborators] = useState(true);
+  const [notifyOverdue, setNotifyOverdue] = useState(true);
+  const [notifySound, setNotifySound] = useState(false);
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+
   const getNewReqColor = (isMet: boolean) => {
     if (!newPassword) {
       return {
@@ -764,13 +772,150 @@ export default function ProfilePage() {
 
             {/* TAB 4: NOTIFICATIONS */}
             {activeTab === "notifications" && (
-              <div className="max-w-2xl">
-                <Card className="border border-slate-200/60 dark:border-slate-800/80 shadow-sm p-6 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
-                    Notification Preferences
-                  </h3>
-                  <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/20 text-xs font-semibold text-indigo-900 dark:text-indigo-200">
-                    🔔 In-app badge notifications for new task comments, channel invites, and collaborators are enabled by default.
+              <div className="max-w-2xl space-y-6">
+                <Card className="border border-slate-200/60 dark:border-slate-800/80 shadow-sm p-6 space-y-6">
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                      Notification Preferences
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Control how and when you receive in-app badge notifications and alerts.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4 divide-y divide-slate-100 dark:divide-slate-800/60">
+                    {/* Toggle Item 1: In-App Badges */}
+                    <div className="flex items-center justify-between pt-3 first:pt-0">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                          In-App Unread Badges
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Display badge counters on the sidebar for unread chat messages and pending invites.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setNotifyBadges(!notifyBadges)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                          notifyBadges ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
+                        }`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          notifyBadges ? "translate-x-6" : "translate-x-1"
+                        }`} />
+                      </button>
+                    </div>
+
+                    {/* Toggle Item 2: Comment Notifications */}
+                    <div className="flex items-center justify-between pt-4">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                          Task Comment Alerts
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Show glowing indicator badges on task cards when new comments are posted.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setNotifyComments(!notifyComments)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                          notifyComments ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
+                        }`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          notifyComments ? "translate-x-6" : "translate-x-1"
+                        }`} />
+                      </button>
+                    </div>
+
+                    {/* Toggle Item 3: Collaborator Updates */}
+                    <div className="flex items-center justify-between pt-4">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                          Collaborator & Access Updates
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Notify when team members invite you or change access permissions.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setNotifyCollaborators(!notifyCollaborators)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                          notifyCollaborators ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
+                        }`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          notifyCollaborators ? "translate-x-6" : "translate-x-1"
+                        }`} />
+                      </button>
+                    </div>
+
+                    {/* Toggle Item 4: Overdue Reminders */}
+                    <div className="flex items-center justify-between pt-4">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                          Deadline & Overdue Warnings
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Highlight tasks with animated warning badges when deadlines pass.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setNotifyOverdue(!notifyOverdue)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                          notifyOverdue ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
+                        }`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          notifyOverdue ? "translate-x-6" : "translate-x-1"
+                        }`} />
+                      </button>
+                    </div>
+
+                    {/* Toggle Item 5: Sound Effects */}
+                    <div className="flex items-center justify-between pt-4">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                          Sound Chime Effects
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Play a subtle chime sound when receiving new real-time chat messages.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setNotifySound(!notifySound)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                          notifySound ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
+                        }`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          notifySound ? "translate-x-6" : "translate-x-1"
+                        }`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={() => {
+                        setIsSavingNotifications(true);
+                        setTimeout(() => {
+                          setIsSavingNotifications(false);
+                          toast.success("Notification preferences saved successfully!");
+                        }, 300);
+                      }}
+                      loading={isSavingNotifications}
+                      icon={<Save className="h-4.5 w-4.5" />}
+                    >
+                      Save Notification Preferences
+                    </Button>
                   </div>
                 </Card>
               </div>

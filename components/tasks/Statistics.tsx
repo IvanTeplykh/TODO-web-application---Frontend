@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { tasksService } from "../../services/tasks";
 import { useTaskStore } from "../../store/taskStore";
 import { Card } from "../ui/Card";
-import { CheckCircle2, ListTodo, AlertCircle, Clock, Sparkles, TrendingUp } from "lucide-react";
+import { CheckCircle2, ListTodo, AlertCircle, Clock, Sparkles, TrendingUp, TrendingDown } from "lucide-react";
 
 export function Statistics() {
   const { tasks, total, status, setFilters } = useTaskStore();
@@ -16,13 +16,19 @@ export function Statistics() {
     percent: 0,
   });
 
+  const [weeklyTrend, setWeeklyTrend] = useState<{ percent: number; isUp: boolean }>({
+    percent: 0,
+    isUp: true,
+  });
+
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const [allRes, doneRes, overdueRes] = await Promise.all([
+        const [allRes, doneRes, overdueRes, listRes] = await Promise.all([
           tasksService.getTasks({ limit: 1, status: "all" }),
           tasksService.getTasks({ limit: 1, status: "done" }),
           tasksService.getTasks({ limit: 1, status: "overdue" }),
+          tasksService.getTasks({ limit: 100, status: "all" }),
         ]);
         
         const tot = allRes.total;
@@ -31,12 +37,45 @@ export function Statistics() {
         const overdueCount = overdueRes.total;
         const pct = tot > 0 ? Math.round((comp / tot) * 100) : 0;
 
+        // Calculate real weekly comparison percentage
+        const now = new Date().getTime();
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+
+        const thisWeekTasks = listRes.tasks.filter((t) => {
+          const createdTime = new Date(t.created_at).getTime();
+          return now - createdTime <= sevenDaysMs;
+        }).length;
+
+        const lastWeekTasks = listRes.tasks.filter((t) => {
+          const createdTime = new Date(t.created_at).getTime();
+          const age = now - createdTime;
+          return age > sevenDaysMs && age <= fourteenDaysMs;
+        }).length;
+
+        let trendPct = 0;
+        let isUp = true;
+
+        if (lastWeekTasks === 0) {
+          trendPct = thisWeekTasks > 0 ? 100 : 0;
+          isUp = true;
+        } else {
+          const diff = thisWeekTasks - lastWeekTasks;
+          trendPct = Math.round((diff / lastWeekTasks) * 100);
+          isUp = trendPct >= 0;
+        }
+
         setStats({
           total: tot,
           completed: comp,
           pending: pend,
           overdue: overdueCount,
           percent: pct,
+        });
+
+        setWeeklyTrend({
+          percent: Math.abs(trendPct),
+          isUp,
         });
       } catch (error) {
         console.error("Failed to load statistics", error);
@@ -120,9 +159,22 @@ export function Statistics() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold self-start sm:self-auto">
-            <TrendingUp className="h-4 w-4" />
-            <span>+12% this week</span>
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold self-start sm:self-auto border ${
+              weeklyTrend.isUp
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+            }`}
+          >
+            {weeklyTrend.isUp ? (
+              <TrendingUp className="h-4 w-4 text-emerald-500" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-rose-500" />
+            )}
+            <span>
+              {weeklyTrend.isUp ? "+" : "-"}
+              {weeklyTrend.percent}% this week
+            </span>
           </div>
         </div>
 
