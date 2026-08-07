@@ -663,9 +663,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
             const currentUserId = useAuthStore.getState().user?.id;
 
             if (req) {
-              if (payload.type === "chat_request_received" && req.recipient_id === currentUserId) {
+              const currId = (currentUserId || "").toLowerCase();
+              const recId = String(req.recipient_id || "").toLowerCase();
+              const reqId = String(req.requester_id || "").toLowerCase();
+
+              if (payload.type === "chat_request_received" && recId === currId) {
                 toast.info(`New chat request from @${req.requester_name}!`);
-              } else if (payload.type === "chat_request_updated" && req.requester_id === currentUserId) {
+              } else if (payload.type === "chat_request_updated" && reqId === currId) {
                 if (req.status === "accepted") {
                   toast.success(`@${req.recipient_name} accepted your chat request!`);
                 } else if (req.status === "declined") {

@@ -222,12 +222,13 @@ export default function ChatPage() {
     }
   };
 
+  const currentUserIdStr = (user?.id || "").toLowerCase();
   const acceptedUsers = users.filter((u) => u.connection_status === "accepted");
   const pendingIncoming = chatRequests.filter(
-    (r) => r.recipient_id === user?.id && r.status === "pending"
+    (r) => String(r.recipient_id).toLowerCase() === currentUserIdStr && String(r.status).toLowerCase() === "pending"
   );
   const pendingOutgoing = chatRequests.filter(
-    (r) => r.requester_id === user?.id && r.status === "pending"
+    (r) => String(r.requester_id).toLowerCase() === currentUserIdStr && String(r.status).toLowerCase() === "pending"
   );
 
   const discoverUsers = users.filter(
