@@ -27,6 +27,8 @@ import {
   ChevronDown,
   ChevronRight,
   UserMinus,
+  Paperclip,
+  Smile,
 } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
@@ -1051,17 +1053,37 @@ export default function ChatPage() {
                 ) : (
                   <form
                     onSubmit={handleSend}
-                    className="p-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 bg-slate-50/40 dark:bg-slate-900/40"
+                    className="p-3.5 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 bg-white/80 dark:bg-slate-900/60 backdrop-blur-md"
                   >
-                    <Input
-                      id="chat-message-input"
-                      placeholder={`Message ${activeRecipient.name}...`}
-                      value={inputContent}
-                      onChange={(e) => setInputContent(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      className="flex-1 text-xs h-10"
-                      autoComplete="off"
-                    />
+                    <div className="relative flex-1 flex items-center">
+                      <Input
+                        id="chat-message-input"
+                        placeholder={`Message ${activeRecipient.name}...`}
+                        value={inputContent}
+                        onChange={(e) => setInputContent(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="w-full text-xs h-11 pr-20 pl-4 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700/60"
+                        autoComplete="off"
+                      />
+                      <div className="absolute right-3 flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
+                        <button
+                          type="button"
+                          onClick={() => toast.info("Attachments are enabled in workspace settings")}
+                          className="p-1 rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors"
+                          title="Attach file"
+                        >
+                          <Paperclip className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toast.info("Emoji picker ready")}
+                          className="p-1 rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors"
+                          title="Insert emoji"
+                        >
+                          <Smile className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
 
                     <Button
                       type="submit"
@@ -1069,7 +1091,7 @@ export default function ChatPage() {
                       size="sm"
                       disabled={!inputContent.trim()}
                       icon={<Send className="h-4 w-4" />}
-                      className="h-10 px-4"
+                      className="h-11 px-5 rounded-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 shadow-md shadow-indigo-500/25"
                     >
                       Send
                     </Button>

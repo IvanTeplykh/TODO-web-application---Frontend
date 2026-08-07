@@ -346,6 +346,8 @@ export default function ProfilePage() {
     return username.trim().substring(0, 2).toUpperCase();
   };
 
+  const [activeTab, setActiveTab] = useState<"general" | "security" | "preferences" | "notifications" | "danger">("general");
+
   return (
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -354,251 +356,249 @@ export default function ProfilePage() {
         <div className="flex flex-1">
           <Sidebar />
 
-          <main className="flex-1 p-6 md:p-8 max-w-4xl mx-auto w-full space-y-6">
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-slate-100">
-                Account Settings
-              </h1>
+          <main className="flex-1 p-6 md:p-8 max-w-5xl mx-auto w-full space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 dark:border-slate-800/60 pb-5">
+              <div>
+                <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                  Account Settings
+                </h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  Manage your personal profile, security credentials, preferences, and workspace settings.
+                </p>
+              </div>
+
+              {/* Segmented Control Tabs */}
+              <div className="flex p-1 rounded-2xl bg-slate-200/60 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 w-fit self-start sm:self-auto backdrop-blur-md">
+                {([
+                  { id: "general", label: "General" },
+                  { id: "security", label: "Security" },
+                  { id: "preferences", label: "Preferences" },
+                  { id: "notifications", label: "Notifications" },
+                  { id: "danger", label: "Danger Zone" },
+                ] as const).map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      activeTab === tab.id
+                        ? "bg-white text-indigo-600 dark:bg-slate-800 dark:text-indigo-400 shadow-xs font-black border border-slate-200/60 dark:border-slate-700/60"
+                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-              {/* Profile Photo Editor Card */}
-              <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6 flex flex-col items-center text-center">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-450 dark:text-slate-500 mb-6 self-start">
-                  Profile Photo
-                </h3>
-                
-                {/* Avatar Preview */}
-                <div className="relative group h-28 w-28 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 mb-4 flex items-center justify-center shadow-inner">
-                  {avatar ? (
-                    <img 
-                      src={avatar} 
-                      alt="Avatar Preview" 
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-3xl font-black text-indigo-600 dark:text-indigo-400">
-                      {getInitials()}
-                    </span>
-                  )}
+            {/* TAB 1: GENERAL */}
+            {activeTab === "general" && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                {/* Profile Photo Editor Card */}
+                <Card className="border border-slate-200/60 dark:border-slate-800/80 shadow-sm p-6 flex flex-col items-center text-center">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-6 self-start">
+                    Profile Photo
+                  </h3>
                   
-                  {/* Photo Change Overlay */}
-                  <div 
-                    onClick={triggerFileInput}
-                    className="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
-                  >
-                    <Camera className="h-5 w-5 mb-1" />
-                    <span className="text-[10px] font-bold uppercase">Change</span>
+                  {/* Avatar Preview */}
+                  <div className="relative group h-28 w-28 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 mb-4 flex items-center justify-center shadow-inner">
+                    {avatar ? (
+                      <img 
+                        src={avatar} 
+                        alt="Avatar Preview" 
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-3xl font-black text-indigo-600 dark:text-indigo-400">
+                        {getInitials()}
+                      </span>
+                    )}
+                    
+                    {/* Photo Change Overlay */}
+                    <div 
+                      onClick={triggerFileInput}
+                      className="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                    >
+                      <Camera className="h-5 w-5 mb-1" />
+                      <span className="text-[10px] font-bold uppercase">Change</span>
+                    </div>
                   </div>
-                </div>
 
-                <input 
-                  type="file" 
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/jpeg,image/png,image/jpg"
-                  className="hidden"
-                />
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/jpeg,image/png,image/jpg"
+                    className="hidden"
+                  />
 
-                <div className="flex flex-col gap-2 w-full mt-2">
-                  {isPhotoChanged ? (
-                    <>
-                      <Button
-                        type="button"
-                        variant="primary"
-                        size="sm"
-                        className="w-full h-9 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
-                        onClick={handleSavePhoto}
-                        loading={isSavingPhoto}
-                        icon={<Save className="h-3.5 w-3.5" />}
-                      >
-                        Save Changes
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="w-full h-9 text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                        onClick={handleCancelPhotoChange}
-                        disabled={isSavingPhoto}
-                      >
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="w-full h-9 text-xs font-semibold"
-                        onClick={triggerFileInput}
-                        icon={<Camera className="h-3.5 w-3.5" />}
-                      >
-                        {avatar ? "Change Photo" : "Upload Photo"}
-                      </Button>
-                      
-                      {avatar && (
+                  <div className="flex flex-col gap-2 w-full mt-2">
+                    {isPhotoChanged ? (
+                      <>
+                        <Button
+                          type="button"
+                          variant="primary"
+                          size="sm"
+                          className="w-full h-9 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                          onClick={handleSavePhoto}
+                          loading={isSavingPhoto}
+                          icon={<Save className="h-3.5 w-3.5" />}
+                        >
+                          Save Changes
+                        </Button>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="w-full h-9 text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
-                          onClick={handleRemovePhotoClick}
-                          icon={<Trash2 className="h-3.5 w-3.5" />}
+                          className="w-full h-9 text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          onClick={handleCancelPhotoChange}
+                          disabled={isSavingPhoto}
                         >
-                          Remove Photo
+                          Cancel
                         </Button>
-                      )}
-                    </>
-                  )}
-                </div>
-                
-                <p className="text-[10px] text-slate-400 dark:text-slate-655 mt-4 leading-normal">
-                  JPG or PNG. Max size 5MB.
-                </p>
-              </Card>
-
-              {/* Profile Details and Password Forms Column */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Profile Details Form Card */}
-                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500 mb-6">
-                    Personal Details
-                  </h3>
-
-                  <form onSubmit={handleSave} className="space-y-5">
-                    {/* Username Input */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          Username
-                        </label>
-                        {!isEditingUsername && (
-                          <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
-                            Click button to edit
-                          </span>
-                        )}
-                      </div>
-                      <Input
-                        id="profile-username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter your username"
-                        required
-                        icon={<UserIcon className="h-4 w-4 text-slate-400" />}
-                        disabled={!isEditingUsername}
-                        className={`w-full disabled:opacity-65 disabled:bg-slate-50/50 disabled:cursor-not-allowed dark:disabled:bg-slate-900/30 ${
-                          isEditingUsername
-                            ? "!border-indigo-500 focus:!ring-indigo-500/25 focus:!border-indigo-500 dark:!border-indigo-500"
-                            : ""
-                        }`}
-                        rightElement={
-                          <button
-                            type="button"
-                            onClick={() => setIsEditingUsername(!isEditingUsername)}
-                            className={`p-1.5 rounded-md transition-all duration-200 focus:outline-none cursor-pointer flex items-center justify-center font-medium ${
-                              isEditingUsername
-                                ? "bg-rose-500 hover:bg-rose-600 text-white dark:bg-rose-600 dark:hover:bg-rose-700 focus:ring-2 focus:ring-rose-500/30"
-                                : "bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500/40"
-                            }`}
-                          >
-                            {isEditingUsername ? (
-                              <X className="h-3.5 w-3.5" />
-                            ) : (
-                              <Edit2 className="h-3.5 w-3.5" />
-                            )}
-                          </button>
-                        }
-                      />
-                    </div>
-
-                    {/* Email Read-only Input */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          Email Address
-                        </label>
-                        <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase">
-                          <Lock className="h-2.5 w-2.5" /> Read-only
-                        </span>
-                      </div>
-                      <div className="relative w-full">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
-                          <Mail className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <p
-                          id="profile-email"
-                          className="w-full rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2 pl-10 text-sm text-slate-900 dark:text-slate-100 bg-slate-50/50 dark:bg-slate-900/30 opacity-65 flex items-center min-h-[38px] truncate"
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full h-9 text-xs font-semibold"
+                          onClick={triggerFileInput}
+                          icon={<Camera className="h-3.5 w-3.5" />}
                         >
-                          {user?.email || ""}
-                        </p>
+                          {avatar ? "Change Photo" : "Upload Photo"}
+                        </Button>
+                        
+                        {avatar && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="w-full h-9 text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                            onClick={handleRemovePhotoClick}
+                            icon={<Trash2 className="h-3.5 w-3.5" />}
+                          >
+                            Remove Photo
+                          </Button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-4 leading-normal">
+                    JPG or PNG. Max size 5MB.
+                  </p>
+                </Card>
+
+                {/* Profile Details Form Card */}
+                <div className="lg:col-span-2">
+                  <Card className="border border-slate-200/60 dark:border-slate-800/80 shadow-sm p-6">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-6">
+                      Personal Details
+                    </h3>
+
+                    <form onSubmit={handleSave} className="space-y-5">
+                      {/* Username Input */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Username
+                          </label>
+                          {!isEditingUsername && (
+                            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                              Click button to edit
+                            </span>
+                          )}
+                        </div>
+                        <Input
+                          id="profile-username"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder="Enter your username"
+                          required
+                          icon={<UserIcon className="h-4 w-4 text-slate-400" />}
+                          disabled={!isEditingUsername}
+                          className={`w-full disabled:opacity-65 disabled:bg-slate-50/50 disabled:cursor-not-allowed dark:disabled:bg-slate-900/30 ${
+                            isEditingUsername
+                              ? "!border-indigo-500 focus:!ring-indigo-500/25 focus:!border-indigo-500 dark:!border-indigo-500"
+                              : ""
+                          }`}
+                          rightElement={
+                            <button
+                              type="button"
+                              onClick={() => setIsEditingUsername(!isEditingUsername)}
+                              className={`p-1.5 rounded-md transition-all duration-200 focus:outline-none cursor-pointer flex items-center justify-center font-medium ${
+                                isEditingUsername
+                                  ? "bg-rose-500 hover:bg-rose-600 text-white dark:bg-rose-600 dark:hover:bg-rose-700 focus:ring-2 focus:ring-rose-500/30"
+                                  : "bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500/40"
+                              }`}
+                            >
+                              {isEditingUsername ? (
+                                <X className="h-3.5 w-3.5" />
+                              ) : (
+                                <Edit2 className="h-3.5 w-3.5" />
+                              )}
+                            </button>
+                          }
+                        />
                       </div>
-                    </div>
 
-                    {/* Save Profile Button */}
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
-                      <button
-                        type="button"
-                        onClick={handleLogoutClick}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 focus:outline-none cursor-pointer"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Logout
-                      </button>
+                      {/* Email Read-only Input */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Email Address
+                          </label>
+                          <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase">
+                            <Lock className="h-2.5 w-2.5" /> Read-only
+                          </span>
+                        </div>
+                        <div className="relative w-full">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                            <Mail className="h-4 w-4 text-slate-400" />
+                          </div>
+                          <p
+                            id="profile-email"
+                            className="w-full rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2 pl-10 text-sm text-slate-900 dark:text-slate-100 bg-slate-50/50 dark:bg-slate-900/30 opacity-65 flex items-center min-h-[38px] truncate"
+                          >
+                            {user?.email || ""}
+                          </p>
+                        </div>
+                      </div>
 
-                      <Button
-                        type="submit"
-                        variant="primary"
-                        loading={isSaving}
-                        disabled={!isEditingUsername || username.trim() === (user?.username || "")}
-                        icon={<Save className="h-4.5 w-4.5" />}
-                      >
-                        Save Changes
-                      </Button>
-                    </div>
-                  </form>
-                </Card>
+                      {/* Save Profile Button */}
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
+                        <button
+                          type="button"
+                          onClick={handleLogoutClick}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 focus:outline-none cursor-pointer"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Logout
+                        </button>
 
-                {/* Chat Settings Card */}
-                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6 relative z-20">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500 mb-6 flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                    Chat Settings
-                  </h3>
+                        <Button
+                          type="submit"
+                          variant="primary"
+                          loading={isSaving}
+                          disabled={!isEditingUsername || username.trim() === (user?.username || "")}
+                          icon={<Save className="h-4.5 w-4.5" />}
+                        >
+                          Save Changes
+                        </Button>
+                      </div>
+                    </form>
+                  </Card>
+                </div>
+              </div>
+            )}
 
-                  <form onSubmit={handleSaveChatSettings} className="space-y-5">
-                    <Select
-                      id="chat-retention-select"
-                      label="Private Chats Auto-Delete Period"
-                      value={retentionDays}
-                      options={[
-                        { value: 7, label: "7 Days (1 Week)" },
-                        { value: 30, label: "30 Days (1 Month)" },
-                        { value: 90, label: "90 Days (3 Months)" },
-                        { value: 180, label: "180 Days (6 Months — Default)" },
-                        { value: 365, label: "365 Days (1 Year)" },
-                      ]}
-                      onChange={(val) => setRetentionDays(Number(val))}
-                    />
-
-                    <div className="flex items-center justify-end pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
-                      <Button
-                        type="submit"
-                        variant="primary"
-                        loading={isSavingChatSettings}
-                        disabled={retentionDays === (user?.chat_retention_days ?? 180)}
-                        icon={<Save className="h-4.5 w-4.5" />}
-                      >
-                        Save Chat Settings
-                      </Button>
-                    </div>
-                  </form>
-                </Card>
-
-                {/* Change Password Card */}
-                <Card className="border border-slate-200/55 dark:border-slate-800/80 shadow-sm p-6 relative z-10">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500 mb-6">
+            {/* TAB 2: SECURITY */}
+            {activeTab === "security" && (
+              <div className="max-w-2xl">
+                <Card className="border border-slate-200/60 dark:border-slate-800/80 shadow-sm p-6">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-6">
                     Change Password
                   </h3>
 
@@ -681,25 +681,25 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Password requirements checklist */}
-                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900/60 p-3 border border-slate-100 dark:border-slate-800 space-y-1.5">
-                      <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                        Password must contain:
+                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900/60 p-3.5 border border-slate-100 dark:border-slate-800 space-y-2">
+                      <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Password Requirements:
                       </span>
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] font-medium">
-                        <div className={`flex items-center gap-1.5 transition-colors duration-200 ${reqLen.text}`}>
-                          <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${reqLen.dot}`} />
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] font-semibold">
+                        <div className={`flex items-center gap-1.5 ${reqLen.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${reqLen.dot}`} />
                           Min. 8 characters
                         </div>
-                        <div className={`flex items-center gap-1.5 transition-colors duration-200 ${reqUpper.text}`}>
-                          <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${reqUpper.dot}`} />
+                        <div className={`flex items-center gap-1.5 ${reqUpper.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${reqUpper.dot}`} />
                           One uppercase letter
                         </div>
-                        <div className={`flex items-center gap-1.5 transition-colors duration-200 ${reqNumber.text}`}>
-                          <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${reqNumber.dot}`} />
+                        <div className={`flex items-center gap-1.5 ${reqNumber.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${reqNumber.dot}`} />
                           One number
                         </div>
-                        <div className={`flex items-center gap-1.5 transition-colors duration-200 ${reqSpecial.text}`}>
-                          <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${reqSpecial.dot}`} />
+                        <div className={`flex items-center gap-1.5 ${reqSpecial.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${reqSpecial.dot}`} />
                           One special char
                         </div>
                       </div>
@@ -719,8 +719,66 @@ export default function ProfilePage() {
                     </div>
                   </form>
                 </Card>
+              </div>
+            )}
 
-                {/* Danger Zone: Delete Account */}
+            {/* TAB 3: PREFERENCES */}
+            {activeTab === "preferences" && (
+              <div className="max-w-2xl space-y-6">
+                <Card className="border border-slate-200/60 dark:border-slate-800/80 shadow-sm p-6">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-6 flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                    Chat & Workspace Preferences
+                  </h3>
+
+                  <form onSubmit={handleSaveChatSettings} className="space-y-5">
+                    <Select
+                      id="chat-retention-select"
+                      label="Private Chats Auto-Delete Period"
+                      value={retentionDays}
+                      options={[
+                        { value: 7, label: "7 Days (1 Week)" },
+                        { value: 30, label: "30 Days (1 Month)" },
+                        { value: 90, label: "90 Days (3 Months)" },
+                        { value: 180, label: "180 Days (6 Months — Default)" },
+                        { value: 365, label: "365 Days (1 Year)" },
+                      ]}
+                      onChange={(val) => setRetentionDays(Number(val))}
+                    />
+
+                    <div className="flex items-center justify-end pt-4 border-t border-slate-100 dark:border-slate-800/60 mt-6">
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        loading={isSavingChatSettings}
+                        disabled={retentionDays === (user?.chat_retention_days ?? 180)}
+                        icon={<Save className="h-4.5 w-4.5" />}
+                      >
+                        Save Preferences
+                      </Button>
+                    </div>
+                  </form>
+                </Card>
+              </div>
+            )}
+
+            {/* TAB 4: NOTIFICATIONS */}
+            {activeTab === "notifications" && (
+              <div className="max-w-2xl">
+                <Card className="border border-slate-200/60 dark:border-slate-800/80 shadow-sm p-6 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                    Notification Preferences
+                  </h3>
+                  <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-500/20 text-xs font-semibold text-indigo-900 dark:text-indigo-200">
+                    🔔 In-app badge notifications for new task comments, channel invites, and collaborators are enabled by default.
+                  </div>
+                </Card>
+              </div>
+            )}
+
+            {/* TAB 5: DANGER ZONE */}
+            {activeTab === "danger" && (
+              <div className="max-w-2xl">
                 <Card className="border-rose-200/70 dark:border-rose-900/40 bg-rose-50/20 dark:bg-rose-950/10">
                   <CardHeader className="border-b border-rose-100 dark:border-rose-900/30">
                     <h2 className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
@@ -740,7 +798,7 @@ export default function ProfilePage() {
                     <Button
                       type="button"
                       variant="primary"
-                      className="bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10 text-xs shrink-0"
+                      className="bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10 text-xs shrink-0 font-bold"
                       onClick={() => setIsDeleteAccountOpen(true)}
                     >
                       <Trash2 className="h-4 w-4 mr-1.5" />
@@ -749,7 +807,7 @@ export default function ProfilePage() {
                   </div>
                 </Card>
               </div>
-            </div>
+            )}
           </main>
         </div>
 

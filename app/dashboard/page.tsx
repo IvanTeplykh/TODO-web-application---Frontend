@@ -132,7 +132,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Task list layout (Cards grid) */}
-            <TaskList onViewTask={setActiveTaskForView} />
+            <TaskList onViewTask={setActiveTaskForView} onCreateTask={() => setIsCreateOpen(true)} />
 
             {/* Pagination */}
             {pages > 1 && (

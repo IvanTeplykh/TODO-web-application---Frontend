@@ -88,16 +88,19 @@ export function Sidebar() {
             <button
               key={idx}
               onClick={item.onClick}
-              className={`flex w-full items-center rounded-2xl py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 group relative cursor-pointer ${
+              className={`flex w-full items-center rounded-xl py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 group relative cursor-pointer ${
                 collapsed ? "justify-center px-0" : "gap-3 px-3.5 justify-center md:justify-start"
               } ${
                 item.active
-                  ? "bg-gradient-to-r from-indigo-500/15 to-violet-500/10 text-indigo-700 dark:from-indigo-500/20 dark:to-violet-500/15 dark:text-indigo-300 font-bold border border-indigo-500/20 dark:border-indigo-500/30 shadow-xs"
-                  : "text-slate-500 hover:bg-slate-100/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-white"
+                  ? "bg-slate-200/70 text-slate-900 dark:bg-slate-800/70 dark:text-white font-bold"
+                  : "text-slate-500 hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/40 dark:hover:text-white"
               }`}
             >
+              {item.active && (
+                <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-indigo-600 dark:bg-indigo-500" />
+              )}
               <div className="relative flex-shrink-0">
-                <Icon className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${
+                <Icon className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 ${
                   item.active ? "text-indigo-600 dark:text-indigo-400" : ""
                 }`} />
                 {item.badge != null && item.badge > 0 && (

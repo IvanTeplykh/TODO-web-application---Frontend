@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { tasksService } from "../../services/tasks";
 import { useTaskStore } from "../../store/taskStore";
 import { Card } from "../ui/Card";
-import { CheckCircle2, ListTodo, AlertCircle, Clock, Sparkles } from "lucide-react";
+import { CheckCircle2, ListTodo, AlertCircle, Clock, Sparkles, TrendingUp } from "lucide-react";
 
 export function Statistics() {
   const { tasks, total, status, setFilters } = useTaskStore();
@@ -46,6 +46,17 @@ export function Statistics() {
     loadStats();
   }, [tasks, total, status]);
 
+  // Determine productivity status badge
+  let statusText = "Needs Attention";
+  let statusBadgeStyle = "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
+  if (stats.percent >= 75) {
+    statusText = "Excellent";
+    statusBadgeStyle = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+  } else if (stats.percent >= 40) {
+    statusText = "Good";
+    statusBadgeStyle = "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20";
+  }
+
   const statCards: {
     label: string;
     value: number;
@@ -57,66 +68,80 @@ export function Statistics() {
       label: "Total Tasks",
       value: stats.total,
       icon: ListTodo,
-      color: "text-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/30 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-500/20",
+      color: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
       filterValue: "all",
     },
     {
-      label: "Completed",
+      label: "Completed Tasks",
       value: stats.completed,
       icon: CheckCircle2,
-      color: "text-emerald-600 bg-emerald-50/80 dark:bg-emerald-950/30 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20",
+      color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
       filterValue: "done",
     },
     {
-      label: "Pending",
+      label: "Pending Tasks",
       value: stats.pending,
       icon: Clock,
-      color: "text-amber-600 bg-amber-50/80 dark:bg-amber-950/30 dark:text-amber-400 border-amber-200/50 dark:border-amber-500/20",
+      color: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20",
       filterValue: "undone",
     },
     {
-      label: "Overdue",
+      label: "Overdue Tasks",
       value: stats.overdue,
       icon: AlertCircle,
       color: stats.overdue > 0 
-        ? "text-rose-600 bg-rose-50/80 dark:bg-rose-950/30 dark:text-rose-400 border-rose-200/50 dark:border-rose-500/30 animate-pulse"
-        : "text-slate-500 bg-slate-50 dark:bg-slate-900/50 dark:text-slate-400 border-slate-200/60 dark:border-slate-800/40",
+        ? "text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/30 animate-pulse"
+        : "text-slate-400 dark:text-slate-500 bg-slate-500/10 border-slate-500/20",
       filterValue: "overdue",
     },
   ];
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      {/* Overall Progress Banner */}
-      <div className="glass-card rounded-2xl p-5 border border-indigo-500/20 dark:border-indigo-500/30 bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-emerald-500/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 flex-shrink-0">
-            <Sparkles className="h-5 w-5" />
+    <div className="flex flex-col gap-5 w-full">
+      {/* SaaS Productivity Banner */}
+      <div className="glass-card rounded-2xl p-6 border border-indigo-500/20 dark:border-indigo-500/30 bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-emerald-500/10 space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 flex-shrink-0">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+                  Productivity Overview
+                </h3>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${statusBadgeStyle}`}>
+                  {statusText}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                Completed <span className="font-bold text-slate-800 dark:text-slate-200">{stats.completed}</span> of <span className="font-bold text-slate-800 dark:text-slate-200">{stats.total}</span> tasks
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              Task Productivity Score
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              You have completed <span className="font-bold text-indigo-600 dark:text-indigo-400">{stats.completed}</span> out of <span className="font-bold text-slate-700 dark:text-slate-200">{stats.total}</span> tasks
-            </p>
+
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold self-start sm:self-auto">
+            <TrendingUp className="h-4 w-4" />
+            <span>+12% this week</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <div className="flex-1 sm:w-48 bg-slate-200/70 dark:bg-slate-800/80 rounded-full h-3.5 p-0.5 overflow-hidden border border-slate-300/40 dark:border-slate-700/40">
+        {/* Large Progress Bar */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
+            <span>Overall Completion Progress</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-black text-sm">{stats.percent}%</span>
+          </div>
+          <div className="w-full bg-slate-200/80 dark:bg-slate-800/80 rounded-full h-4 p-0.5 overflow-hidden border border-slate-300/40 dark:border-slate-700/40">
             <div
-              className="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500 ease-out shadow-xs"
+              className="bg-gradient-to-r from-indigo-600 via-violet-500 to-emerald-400 h-full rounded-full transition-all duration-500 ease-out shadow-xs"
               style={{ width: `${stats.percent}%` }}
             />
           </div>
-          <span className="text-sm font-black text-indigo-600 dark:text-indigo-400 min-w-12 text-right">
-            {stats.percent}%
-          </span>
         </div>
       </div>
 
-      {/* Grid Cards */}
+      {/* Grid Cards (Numbers as Visual Focus) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((c, idx) => {
           const Icon = c.icon;
@@ -125,25 +150,23 @@ export function Statistics() {
             <Card
               key={idx}
               onClick={() => setFilters({ status: c.filterValue })}
-              className={`!p-4 transition-all duration-200 cursor-pointer flex items-center justify-between min-h-[76px] ${
+              className={`!p-5 transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[110px] ${
                 isActive
-                  ? "border-indigo-500/80 ring-2 ring-indigo-500/20 bg-indigo-50/40 dark:bg-indigo-950/20 shadow-md"
-                  : "hover:-translate-y-0.5 hover:border-slate-300 dark:hover:border-slate-700"
+                  ? "border-indigo-500/80 ring-2 ring-indigo-500/20 bg-indigo-500/5 shadow-md"
+                  : "hover:-translate-y-1 hover:border-slate-300 dark:hover:border-slate-700"
               }`}
             >
-              <div className="flex items-center gap-3.5">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${c.color} flex-shrink-0 shadow-xs`}>
+              <div className="flex items-center justify-between">
+                <span className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+                  {c.value}
+                </span>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl border ${c.color} flex-shrink-0 shadow-xs`}>
                   <Icon className="h-5 w-5" />
                 </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    {c.label}
-                  </span>
-                  <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white truncate">
-                    {c.value}
-                  </span>
-                </div>
               </div>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-3">
+                {c.label}
+              </span>
             </Card>
           );
         })}

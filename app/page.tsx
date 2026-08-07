@@ -285,7 +285,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="bg-slate-100/60 dark:bg-slate-900/40 border-y border-slate-200/60 dark:border-slate-800/60 py-16 md:py-24 backdrop-blur-xs">
+      <section className="bg-slate-100/60 dark:bg-slate-900/40 border-y border-slate-200/60 dark:border-slate-800/60 py-20 md:py-28 backdrop-blur-xs">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
@@ -302,10 +302,10 @@ export default function LandingPage() {
               return (
                 <div
                   key={idx}
-                  className="glass-card p-6 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 hover:-translate-y-1 transition-all duration-200"
+                  className="glass-card group p-7 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 hover:-translate-y-2 hover:shadow-xl hover:border-indigo-500/40 transition-all duration-300 relative overflow-hidden"
                 >
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl mb-4 border ${f.color} shadow-xs`}
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl mb-4 border ${f.color} shadow-xs group-hover:scale-110 transition-transform duration-300`}
                   >
                     <Icon className="h-6 w-6" />
                   </div>
@@ -323,20 +323,23 @@ export default function LandingPage() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="mx-auto max-w-6xl px-6 py-16 md:py-24 w-full">
-        <div className="glass-card rounded-3xl p-8 md:p-12 border border-indigo-500/20 dark:border-indigo-500/30 bg-gradient-to-r from-indigo-600/10 via-purple-600/5 to-cyan-600/10 text-center space-y-6 relative overflow-hidden">
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+      <section className="mx-auto max-w-6xl px-6 py-20 md:py-28 w-full relative">
+        {/* Soft Radial Glow behind CTA */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 blur-3xl pointer-events-none rounded-full" />
+
+        <div className="glass-card rounded-3xl p-10 md:p-16 border border-indigo-500/30 dark:border-indigo-500/40 bg-gradient-to-r from-indigo-600/10 via-purple-600/5 to-cyan-600/10 text-center space-y-6 relative overflow-hidden shadow-2xl">
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
             Ready to elevate your productivity?
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto font-medium">
-            Join thousands of users organizing tasks efficiently with TODO APP.
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300 max-w-lg mx-auto font-medium">
+            Join thousands of professionals organizing tasks efficiently with TODO APP.
           </p>
-          <div className="flex justify-center pt-2">
+          <div className="flex justify-center pt-3">
             <Link
               href={isAuthenticated ? "/dashboard" : "/register"}
-              className="inline-flex h-12 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-8 font-bold text-white shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all text-sm gap-2"
+              className="inline-flex h-13 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 px-9 font-bold text-white shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-1 transition-all text-sm gap-2.5"
             >
-              <span>Get Started Now</span>
+              <span>Get Started Free</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
