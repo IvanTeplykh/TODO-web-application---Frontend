@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -28,9 +29,9 @@ export function Footer() {
           <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             GitHub
           </a>
-          <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <Link href="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             Privacy Policy
-          </a>
+          </Link>
           <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             Terms of Service
           </a>
