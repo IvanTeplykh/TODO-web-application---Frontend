@@ -121,12 +121,7 @@ export function RegisterForm() {
     }
     try {
       await registerUser(data);
-      toast.success("Account created successfully! Logging in...");
-      await login({
-        email: data.email,
-        password: data.password,
-        rememberMe: false,
-      });
+      toast.success("Account created successfully!");
     } catch (error) {
       toast.error(typeof error === "string" ? error : "Registration failed");
     }

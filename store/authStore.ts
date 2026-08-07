@@ -67,13 +67,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true });
     try {
       await authService.register(data);
-      set({ loading: false });
+      const response = await authService.login({
+        email: data.email,
+        password: data.password,
+      });
+      const token = response.access_token;
+      setToken(token, false);
+      const user = await authService.me();
+      set({ user, token, isAuthenticated: true, loading: false });
     } catch (error) {
-      set({ loading: false });
+      removeToken();
+      set({ user: null, token: null, isAuthenticated: false, loading: false });
       if (axios.isAxiosError(error)) {
         throw error.response?.data?.detail || "Registration failed";
       }
-      throw "Registration failed";
+      throw typeof error === "string" ? error : "Registration failed";
     }
   },
 
