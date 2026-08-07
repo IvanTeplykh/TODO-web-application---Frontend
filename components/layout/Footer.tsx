@@ -23,9 +23,9 @@ export function Footer() {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-6 font-semibold text-slate-600 dark:text-slate-400">
-          <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <Link href="/docs" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             Documentation
-          </a>
+          </Link>
           <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             GitHub
           </a>
