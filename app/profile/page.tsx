@@ -815,19 +815,19 @@ export default function ProfilePage() {
 
                   <div className="space-y-4 divide-y divide-slate-100 dark:divide-slate-800/60">
                     {/* Toggle Item 1: In-App Badges */}
-                    <div className="flex items-center justify-between pt-3 first:pt-0">
-                      <div>
+                    <div className="flex items-center justify-between gap-4 pt-3 first:pt-0">
+                      <div className="flex-1 min-w-0">
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                           In-App Unread Badges
                         </h4>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">
                           Display badge counters on the sidebar for unread chat messages and pending invites.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setNotifyBadges(!notifyBadges)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                           notifyBadges ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
                         }`}
                       >
@@ -838,19 +838,19 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Toggle Item 2: Comment Notifications */}
-                    <div className="flex items-center justify-between pt-4">
-                      <div>
+                    <div className="flex items-center justify-between gap-4 pt-4">
+                      <div className="flex-1 min-w-0">
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                           Task Comment Alerts
                         </h4>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">
                           Show glowing indicator badges on task cards when new comments are posted.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setNotifyComments(!notifyComments)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                           notifyComments ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
                         }`}
                       >
@@ -861,19 +861,19 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Toggle Item 3: Collaborator Updates */}
-                    <div className="flex items-center justify-between pt-4">
-                      <div>
+                    <div className="flex items-center justify-between gap-4 pt-4">
+                      <div className="flex-1 min-w-0">
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                           Collaborator & Access Updates
                         </h4>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">
                           Notify when team members invite you or change access permissions.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setNotifyCollaborators(!notifyCollaborators)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                           notifyCollaborators ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
                         }`}
                       >
@@ -884,19 +884,19 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Toggle Item 4: Overdue Reminders */}
-                    <div className="flex items-center justify-between pt-4">
-                      <div>
+                    <div className="flex items-center justify-between gap-4 pt-4">
+                      <div className="flex-1 min-w-0">
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                           Deadline & Overdue Warnings
                         </h4>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">
                           Highlight tasks with animated warning badges when deadlines pass.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setNotifyOverdue(!notifyOverdue)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                           notifyOverdue ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
                         }`}
                       >
@@ -907,19 +907,19 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Toggle Item 5: Sound Effects */}
-                    <div className="flex items-center justify-between pt-4">
-                      <div>
+                    <div className="flex items-center justify-between gap-4 pt-4">
+                      <div className="flex-1 min-w-0">
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                           Sound Chime Effects
                         </h4>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">
                           Play a subtle chime sound when receiving new real-time chat messages.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setNotifySound(!notifySound)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                           notifySound ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
                         }`}
                       >
