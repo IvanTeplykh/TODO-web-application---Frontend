@@ -32,9 +32,9 @@ export function Footer() {
           <Link href="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             Privacy Policy
           </Link>
-          <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <Link href="/terms" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             Terms of Service
-          </a>
+          </Link>
           <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             Contact
           </a>
