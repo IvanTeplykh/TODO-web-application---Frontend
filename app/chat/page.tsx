@@ -182,11 +182,13 @@ export default function ChatPage() {
     }
   };
 
-  const handleRespondRequestClick = async (requestId: string, action: "accept" | "decline") => {
+  const handleRespondRequestClick = async (requestId: string, action: "accept" | "decline" | "cancel") => {
     try {
       await respondChatRequest(requestId, action);
       if (action === "accept") {
         toast.success("Chat request accepted!");
+      } else if (action === "cancel") {
+        toast.info("Chat request cancelled");
       } else {
         toast.info("Chat request declined");
       }
@@ -685,9 +687,20 @@ export default function ChatPage() {
                                 className="flex items-center justify-between px-3 py-2 rounded-xl text-xs bg-slate-100/70 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400"
                               >
                                 <span className="truncate font-medium">{req.recipient_name}</span>
-                                <span className="flex items-center gap-1 text-[10px] text-amber-500 font-semibold">
-                                  <Clock className="h-3 w-3" /> Pending
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="flex items-center gap-1 text-[10px] text-amber-500 font-semibold">
+                                    <Clock className="h-3 w-3" /> Pending
+                                  </span>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 text-[10px] py-0 px-2 text-rose-500 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                    onClick={() => handleRespondRequestClick(req.id, "cancel")}
+                                    icon={<X className="h-3 w-3" />}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
                               </div>
                             ))
                           )}
@@ -736,9 +749,23 @@ export default function ChatPage() {
                                 </div>
 
                                 {status === "pending_sent" ? (
-                                  <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md">
-                                    <Clock className="h-3 w-3" /> Sent
-                                  </span>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md">
+                                      <Clock className="h-3 w-3" /> Sent
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 text-[10px] py-0 px-2 text-rose-500 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                      onClick={() => {
+                                        const req = chatRequests.find((r) => r.recipient_id === u.id && r.status === "pending");
+                                        if (req) handleRespondRequestClick(req.id, "cancel");
+                                      }}
+                                      icon={<X className="h-3 w-3" />}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
                                 ) : status === "pending_received" ? (
                                   <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-md">
                                     Request received
@@ -992,12 +1019,24 @@ export default function ChatPage() {
                 {!activeRecipient.is_global && !activeRecipient.is_channel && activeRecipient.connection_status !== "accepted" ? (
                   <div className="p-4 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 text-center space-y-2">
                     {activeRecipient.connection_status === "pending_sent" ? (
-                      <div className="flex flex-col items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                      <div className="flex flex-col items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
                         <Clock className="h-5 w-5 animate-pulse" />
                         <span className="font-bold">Chat Request Sent</span>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400">
                           Waiting for {activeRecipient.name} to accept your request before sending messages.
                         </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-[11px] mt-1 text-rose-500 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                          onClick={() => {
+                            const req = chatRequests.find((r) => r.recipient_id === activeRecipient.id && r.status === "pending");
+                            if (req) handleRespondRequestClick(req.id, "cancel");
+                          }}
+                          icon={<X className="h-3.5 w-3.5" />}
+                        >
+                          Cancel Request
+                        </Button>
                       </div>
                     ) : activeRecipient.connection_status === "pending_received" && incomingReqForActive ? (
                       <div className="flex flex-col items-center gap-2 text-xs">

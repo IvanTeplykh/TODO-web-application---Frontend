@@ -115,7 +115,7 @@ interface ChatState {
   editMessage: (messageId: string, newContent: string) => Promise<void>;
   deleteMessage: (messageId: string) => Promise<void>;
   sendChatRequest: (targetUsernameOrId: string) => Promise<void>;
-  respondChatRequest: (requestId: string, action: "accept" | "decline") => Promise<void>;
+  respondChatRequest: (requestId: string, action: "accept" | "decline" | "cancel") => Promise<void>;
   removeContact: (targetUserId: string) => Promise<void>;
   connectWS: () => void;
   disconnectWS: () => void;
@@ -464,10 +464,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  respondChatRequest: async (requestId: string, action: "accept" | "decline") => {
+  respondChatRequest: async (requestId: string, action: "accept" | "decline" | "cancel") => {
     try {
       await api.patch(`/chat/requests/${requestId}`, { action });
-      toast.success(`Chat request ${action}ed!`);
+      if (action === "accept") {
+        toast.success("Chat request accepted!");
+      } else if (action === "cancel") {
+        toast.info("Chat request cancelled");
+      } else {
+        toast.info("Chat request declined");
+      }
       await get().fetchRequests();
       await get().fetchUsers();
     } catch (err: any) {

@@ -46,7 +46,7 @@ export const chatService = {
     return response.data;
   },
 
-  respondRequest: async (requestId: string, action: "accept" | "decline"): Promise<ChatRequest> => {
+  respondRequest: async (requestId: string, action: "accept" | "decline" | "cancel"): Promise<ChatRequest> => {
     const response = await api.patch<ChatRequest>(`/chat/requests/${requestId}`, {
       action,
     });
