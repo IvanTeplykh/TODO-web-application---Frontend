@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { tasksService } from "../../services/tasks";
 import { useTaskStore } from "../../store/taskStore";
+import { Task } from "../../types/task";
 import { Card } from "../ui/Card";
 import { CheckCircle2, ListTodo, AlertCircle, Clock, Sparkles, TrendingUp, TrendingDown } from "lucide-react";
 
@@ -42,12 +43,12 @@ export function Statistics() {
         const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
         const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
 
-        const thisWeekTasks = listRes.tasks.filter((t) => {
+        const thisWeekTasks = (listRes.items || []).filter((t: Task) => {
           const createdTime = new Date(t.created_at).getTime();
           return now - createdTime <= sevenDaysMs;
         }).length;
 
-        const lastWeekTasks = listRes.tasks.filter((t) => {
+        const lastWeekTasks = (listRes.items || []).filter((t: Task) => {
           const createdTime = new Date(t.created_at).getTime();
           const age = now - createdTime;
           return age > sevenDaysMs && age <= fourteenDaysMs;
