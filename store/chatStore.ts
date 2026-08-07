@@ -469,15 +469,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
       await api.patch(`/chat/requests/${requestId}`, { action });
       if (action === "accept") {
         toast.success("Chat request accepted!");
-      } else if (action === "cancel") {
-        toast.info("Chat request cancelled");
-      } else {
+      } else if (action === "decline") {
         toast.info("Chat request declined");
       }
       await get().fetchRequests();
       await get().fetchUsers();
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || "Failed to respond to chat request.");
+      const detail = err?.response?.data?.detail;
+      if (detail && detail.includes("Chat request not found")) {
+        await get().fetchRequests();
+        await get().fetchUsers();
+        return;
+      }
+      toast.error(detail || "Failed to respond to chat request.");
     }
   },
 
@@ -672,8 +676,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
               } else if (payload.type === "chat_request_updated" && reqId === currId) {
                 if (req.status === "accepted") {
                   toast.success(`@${req.recipient_name} accepted your chat request!`);
-                } else if (req.status === "declined") {
-                  toast.info(`@${req.recipient_name} declined your chat request.`);
                 }
               }
 

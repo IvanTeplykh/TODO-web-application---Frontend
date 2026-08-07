@@ -187,13 +187,14 @@ export default function ChatPage() {
       await respondChatRequest(requestId, action);
       if (action === "accept") {
         toast.success("Chat request accepted!");
-      } else if (action === "cancel") {
-        toast.info("Chat request cancelled");
-      } else {
+      } else if (action === "decline") {
         toast.info("Chat request declined");
       }
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;
+      if (msg && msg.includes("Chat request not found")) {
+        return;
+      }
       toast.error(msg || "Failed to respond to request");
     }
   };
