@@ -42,7 +42,7 @@ export default function ChatPage() {
   const { user } = useAuthStore();
   const {
     users,
-    chatRequests,
+    requests: chatRequests,
     channels,
     channelInvites,
     activeRecipient,
@@ -96,12 +96,13 @@ export default function ChatPage() {
 
   // Initial data fetch & WebSocket connection (once on mount)
   useEffect(() => {
-    fetchUsers();
-    fetchRequests();
-    fetchChannels();
-    fetchChannelInvites();
-    connectWS();
-  }, [fetchUsers, fetchRequests, fetchChannels, fetchChannelInvites, connectWS]);
+    const store = useChatStore.getState();
+    store.fetchUsers();
+    store.fetchRequests();
+    store.fetchChannels();
+    store.fetchChannelInvites();
+    store.connectWS();
+  }, []);
 
   // Fetch messages whenever active recipient changes
   useEffect(() => {
@@ -784,7 +785,7 @@ export default function ChatPage() {
                         {isValidAvatarUrl(activeRecipient.avatar_url) ? (
                           <img
                             src={activeRecipient.avatar_url!}
-                            alt={activeRecipient.name}
+                            alt={activeRecipient.name || activeRecipient.username || "Avatar"}
                             className="h-full w-full object-cover"
                             onError={(e) => { e.currentTarget.style.display = "none"; }}
                           />
@@ -798,12 +799,12 @@ export default function ChatPage() {
                           {isValidAvatarUrl(activeRecipient.avatar_url) ? (
                             <img
                               src={activeRecipient.avatar_url!}
-                              alt={activeRecipient.name}
+                              alt={activeRecipient.name || activeRecipient.username || "Avatar"}
                               className="h-full w-full object-cover"
                               onError={(e) => { e.currentTarget.style.display = "none"; }}
                             />
                           ) : (
-                            getInitials(activeRecipient.name)
+                            getInitials(activeRecipient.name || activeRecipient.username || "")
                           )}
                         </div>
                         <span
@@ -895,7 +896,7 @@ export default function ChatPage() {
                                 onError={(e) => { e.currentTarget.style.display = "none"; }}
                               />
                             ) : (
-                              getInitials(msg.sender_name)
+                              getInitials(msg.sender_name || "User")
                             )}
                           </div>
 

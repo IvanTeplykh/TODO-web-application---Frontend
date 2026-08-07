@@ -1,51 +1,93 @@
 import { create } from "zustand";
-import { ChatUser, ChatMessage, ChatRecipient, ChatRequest, Channel, ChannelInvite } from "../types/chat";
-import { chatService } from "../services/chat";
-import { channelService } from "../services/channel";
+import { toast } from "sonner";
+import api, { getBaseURL } from "../lib/axios";
 import { getToken } from "../lib/auth";
-import { getBaseURL } from "../lib/axios";
 import { useAuthStore } from "./authStore";
 import { useTaskStore } from "./taskStore";
-import { useUIStore } from "./uiStore";
-import { toast } from "sonner";
 
-const playChimeSound = () => {
-  try {
-    const notifySound = useUIStore.getState().notificationPreferences.notifySound;
-    if (!notifySound) return;
+export interface ChatUser {
+  id: string;
+  username: string;
+  avatar_url?: string | null;
+  is_online?: boolean;
+  connection_status?: "none" | "pending_sent" | "pending_received" | "accepted" | "declined";
+}
 
-    if (typeof window === "undefined") return;
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
+export interface ChatMessage {
+  id: string;
+  sender_id: string;
+  sender_name?: string;
+  sender_avatar?: string | null;
+  recipient_id: string; // user_id or "global" or channel_id
+  content: string;
+  content_hash?: string;
+  created_at: string;
+  is_edited?: boolean;
+  updated_at?: string | null;
+}
 
-    const ctx = new AudioContextClass();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+export interface ChatRequest {
+  id: string;
+  requester_id: string;
+  requester_name: string;
+  requester_avatar?: string | null;
+  recipient_id: string;
+  recipient_name: string;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+}
 
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+export interface ActiveRecipient {
+  id: string; // user_id, "global", or channel_id
+  username?: string;
+  name?: string | null;
+  avatar_url?: string | null;
+  is_online?: boolean;
+  is_global?: boolean;
+  is_channel?: boolean;
+  description?: string | null;
+  my_role?: string | null;
+  members_count?: number;
+  connection_status?: "none" | "pending_sent" | "pending_received" | "accepted" | "declined";
+}
 
-    gain.gain.setValueAtTime(0.12, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+export interface Channel {
+  id: string;
+  name: string;
+  description?: string | null;
+  avatar_url?: string | null;
+  owner_id: string;
+  created_at: string;
+  my_role: "owner" | "admin" | "member";
+  members_count: number;
+}
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+export interface ChannelMember {
+  id: string;
+  user_id: string;
+  username: string;
+  avatar_url?: string | null;
+  role: "owner" | "admin" | "member";
+  status: "pending" | "accepted";
+  joined_at: string;
+}
 
-    osc.start();
-    osc.stop(ctx.currentTime + 0.3);
-  } catch (e) {
-    console.error("Failed to play chime sound", e);
-  }
-};
+export interface ChannelInvite {
+  id: string;
+  channel_id: string;
+  channel_name: string;
+  channel_description?: string | null;
+  channel_avatar?: string | null;
+  created_at: string;
+}
 
 interface ChatState {
   users: ChatUser[];
-  chatRequests: ChatRequest[];
+  activeRecipient: ActiveRecipient;
+  messages: ChatMessage[];
+  requests: ChatRequest[];
   channels: Channel[];
   channelInvites: ChannelInvite[];
-  activeRecipient: ChatRecipient;
-  messages: ChatMessage[];
   unreadCounts: Record<string, number>;
   loading: boolean;
   connected: boolean;
@@ -55,426 +97,410 @@ interface ChatState {
   fetchRequests: () => Promise<void>;
   fetchChannels: () => Promise<void>;
   fetchChannelInvites: () => Promise<void>;
-  respondChannelInvite: (inviteId: string, action: "accept" | "decline") => Promise<void>;
-  createChannel: (data: { name: string; description?: string; avatar_url?: string }) => Promise<Channel>;
-  updateChannel: (channelId: string, data: { name?: string; description?: string; avatar_url?: string }) => Promise<Channel>;
+  createChannel: (
+    dataOrName: { name: string; description?: string; avatar_url?: string } | string,
+    description?: string,
+    avatar_url?: string
+  ) => Promise<Channel | null>;
+  updateChannel: (channelId: string, data: { name?: string; description?: string; avatar_url?: string }) => Promise<void>;
   deleteChannel: (channelId: string) => Promise<void>;
+  addChannelMember: (channelId: string, data: { user_id?: string; username?: string }) => Promise<void>;
+  getChannelMembers: (channelId: string) => Promise<ChannelMember[]>;
+  respondChannelInvite: (inviteId: string, action: "accept" | "decline") => Promise<void>;
+  removeChannelMember: (channelId: string, targetUserId: string) => Promise<void>;
+  updateChannelMemberRole: (channelId: string, targetUserId: string, role: "admin" | "member") => Promise<void>;
   fetchMessages: (recipientId: string) => Promise<void>;
-  editMessage: (messageId: string, content: string) => Promise<void>;
+  setActiveRecipient: (recipient: ActiveRecipient) => void;
+  sendMessage: (content: string) => Promise<void>;
+  editMessage: (messageId: string, newContent: string) => Promise<void>;
   deleteMessage: (messageId: string) => Promise<void>;
-  sendChatRequest: (recipientId: string) => Promise<void>;
+  sendChatRequest: (targetUsernameOrId: string) => Promise<void>;
   respondChatRequest: (requestId: string, action: "accept" | "decline") => Promise<void>;
   removeContact: (targetUserId: string) => Promise<void>;
-  setActiveRecipient: (recipient: ChatRecipient) => void;
-  sendMessage: (content: string) => Promise<void>;
   connectWS: () => void;
   disconnectWS: () => void;
 }
 
-export const DEFAULT_RECIPIENT: ChatRecipient = {
+export const DEFAULT_RECIPIENT: ActiveRecipient = {
   id: "global",
-  name: "Public Channel",
+  username: "Global Public Chat",
   is_global: true,
+  is_online: true,
   connection_status: "accepted",
 };
 
-const RECIPIENT_STORAGE_KEY = "todo_active_recipient";
-const UNREAD_COUNTS_STORAGE_KEY = "todo_unread_counts";
+const UNREAD_STORAGE_KEY = "todo_unread_counts";
 
-const getSavedRecipient = (): ChatRecipient => {
-  if (typeof window === "undefined") return DEFAULT_RECIPIENT;
-  try {
-    const saved = localStorage.getItem(RECIPIENT_STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed && parsed.id) {
-        if (parsed.id === "global") return DEFAULT_RECIPIENT;
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.error("Failed to parse saved active recipient", e);
-  }
-  return DEFAULT_RECIPIENT;
-};
-
-const saveRecipientToStorage = (recipient: ChatRecipient) => {
-  if (typeof window === "undefined") return;
-  try {
-    const minimalRecipient = {
-      id: recipient.id,
-      name: recipient.name,
-      is_global: recipient.id === "global" || recipient.is_global,
-      is_channel: recipient.is_channel,
-      connection_status: recipient.connection_status,
-    };
-    localStorage.setItem(RECIPIENT_STORAGE_KEY, JSON.stringify(minimalRecipient));
-  } catch (e) {
-    console.error("Failed to save active recipient", e);
-  }
-};
-
-const getSavedUnreadCounts = (): Record<string, number> => {
+function getStoredUnreadCounts(): Record<string, number> {
   if (typeof window === "undefined") return {};
   try {
-    const saved = localStorage.getItem(UNREAD_COUNTS_STORAGE_KEY);
-    if (saved) {
-      return JSON.parse(saved);
-    }
-  } catch (e) {
-    console.error("Failed to parse saved unread counts", e);
+    const raw = localStorage.getItem(UNREAD_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
   }
-  return {};
-};
+}
 
-const saveUnreadCountsToStorage = (counts: Record<string, number>) => {
+function saveUnreadCountsToStorage(counts: Record<string, number>) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(UNREAD_COUNTS_STORAGE_KEY, JSON.stringify(counts));
-  } catch (e) {
-    console.error("Failed to save unread counts", e);
+    localStorage.setItem(UNREAD_STORAGE_KEY, JSON.stringify(counts));
+  } catch {
+    // ignore
   }
-};
+}
+
+let chimeAudio: HTMLAudioElement | null = null;
+function playChimeSound() {
+  if (typeof window === "undefined") return;
+  try {
+    if (!chimeAudio) {
+      chimeAudio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+      chimeAudio.volume = 0.4;
+    }
+    chimeAudio.currentTime = 0;
+    chimeAudio.play().catch(() => {});
+  } catch {
+    // ignore audio block policy
+  }
+}
+
+// Module-level WS connection management variables to prevent duplicate socket & listener leaks
+let activeWS: WebSocket | null = null;
+let pingInterval: ReturnType<typeof setInterval> | null = null;
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let visibilityListener: (() => void) | null = null;
+let currentReconnectDelay = 1000;
+
+function cleanupWebSocket() {
+  if (pingInterval) {
+    clearInterval(pingInterval);
+    pingInterval = null;
+  }
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+  if (typeof document !== "undefined" && visibilityListener) {
+    document.removeEventListener("visibilitychange", visibilityListener);
+    visibilityListener = null;
+  }
+  if (activeWS) {
+    activeWS.onopen = null;
+    activeWS.onmessage = null;
+    activeWS.onerror = null;
+    activeWS.onclose = null;
+    if (activeWS.readyState === WebSocket.OPEN || activeWS.readyState === WebSocket.CONNECTING) {
+      try {
+        activeWS.close();
+      } catch {
+        // ignore
+      }
+    }
+    activeWS = null;
+  }
+}
 
 export const useChatStore = create<ChatState>((set, get) => ({
   users: [],
-  chatRequests: [],
+  activeRecipient: DEFAULT_RECIPIENT,
+  messages: [],
+  requests: [],
   channels: [],
   channelInvites: [],
-  activeRecipient: getSavedRecipient(),
-  messages: [],
-  unreadCounts: getSavedUnreadCounts(),
+  unreadCounts: getStoredUnreadCounts(),
   loading: false,
   connected: false,
   ws: null,
 
   fetchUsers: async () => {
     try {
-      const users = await chatService.getUsers();
-      set((state) => {
-        const onlineMap = new Map(state.users.map((u) => [u.id.toLowerCase(), u.is_online]));
-        const mergedUsers = users.map((u) => {
-          const wasOnline = onlineMap.get(u.id.toLowerCase());
-          return {
-            ...u,
-            is_online: wasOnline !== undefined ? Boolean(u.is_online || wasOnline) : u.is_online,
-          };
-        });
-
-        const currentActive = state.activeRecipient;
-        let updatedRecipient = currentActive;
-        if (!currentActive.is_global && !currentActive.is_channel) {
-          const updatedUser = mergedUsers.find((u) => u.id.toLowerCase() === currentActive.id.toLowerCase());
-          if (updatedUser) {
-            updatedRecipient = {
-              id: updatedUser.id,
-              name: updatedUser.username,
-              avatar_url: updatedUser.avatar_url,
-              is_online: updatedUser.is_online,
-              connection_status: updatedUser.connection_status,
-            };
-            saveRecipientToStorage(updatedRecipient);
-          }
-        }
-        return { users: mergedUsers, activeRecipient: updatedRecipient };
-      });
-    } catch (error) {
-      console.error("Failed to fetch chat users", error);
+      const res = await api.get("/chat/users");
+      set({ users: res.data });
+    } catch (err) {
+      console.error("Failed to fetch chat users", err);
     }
   },
 
   fetchRequests: async () => {
     try {
-      const requests = await chatService.getRequests();
-      set({ chatRequests: requests });
-    } catch (error) {
-      console.error("Failed to fetch chat requests", error);
+      const res = await api.get("/chat/requests");
+      set({ requests: res.data });
+    } catch (err) {
+      console.error("Failed to fetch chat requests", err);
     }
   },
 
   fetchChannels: async () => {
     try {
-      const channels = await channelService.getMyChannels();
-      set({ channels });
-      const currentActive = get().activeRecipient;
-      if (currentActive.is_channel) {
-        const updatedChannel = channels.find((c) => c.id === currentActive.id);
-        if (updatedChannel) {
-          const updatedRecipient: ChatRecipient = {
-            id: updatedChannel.id,
-            name: updatedChannel.name,
-            avatar_url: updatedChannel.avatar_url,
-            description: updatedChannel.description,
-            is_channel: true,
-            my_role: updatedChannel.my_role,
-            members_count: updatedChannel.members_count,
-          };
-          set({ activeRecipient: updatedRecipient });
-          saveRecipientToStorage(updatedRecipient);
-        } else {
-          set({ activeRecipient: DEFAULT_RECIPIENT });
-          saveRecipientToStorage(DEFAULT_RECIPIENT);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch channels", error);
+      const res = await api.get("/channels");
+      set({ channels: res.data });
+    } catch (err) {
+      console.error("Failed to fetch channels", err);
     }
   },
 
   fetchChannelInvites: async () => {
     try {
-      const channelInvites = await channelService.getPendingInvites();
-      set({ channelInvites });
-    } catch (error) {
-      console.error("Failed to fetch channel invites", error);
+      const res = await api.get("/channels/invites/pending");
+      set({ channelInvites: res.data });
+    } catch (err) {
+      console.error("Failed to fetch channel invites", err);
     }
   },
 
-  respondChannelInvite: async (inviteId: string, action: "accept" | "decline") => {
-    try {
-      await channelService.respondToInvite(inviteId, action);
-      set((state) => ({
-        channelInvites: state.channelInvites.filter((inv) => inv.id !== inviteId),
-      }));
-      // Refresh channels after accepting
-      if (action === "accept") {
-        const channels = await channelService.getMyChannels();
-        set({ channels });
-      }
-    } catch (error) {
-      console.error("Failed to respond to channel invite", error);
-      throw error;
-    }
-  },
+  createChannel: async (dataOrName, description, avatar_url) => {
+    let nameVal = "";
+    let descVal = description;
+    let avatarVal = avatar_url;
 
-  createChannel: async (data) => {
+    if (typeof dataOrName === "object") {
+      nameVal = dataOrName.name;
+      descVal = dataOrName.description;
+      avatarVal = dataOrName.avatar_url;
+    } else {
+      nameVal = dataOrName;
+    }
+
     try {
-      const newChannel = await channelService.createChannel(data);
-      set((state) => ({ channels: [newChannel, ...state.channels] }));
-      return newChannel;
-    } catch (error) {
-      console.error("Failed to create channel", error);
-      throw error;
+      const res = await api.post("/channels", { name: nameVal, description: descVal, avatar_url: avatarVal });
+      toast.success(`Channel #${nameVal} created!`);
+      await get().fetchChannels();
+      return res.data;
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to create channel.");
+      return null;
     }
   },
 
   updateChannel: async (channelId, data) => {
     try {
-      const updated = await channelService.updateChannel(channelId, data);
-      set((state) => {
-        const nextActive =
-          state.activeRecipient.id === updated.id
-            ? { ...state.activeRecipient, name: updated.name, avatar_url: updated.avatar_url, description: updated.description }
-            : state.activeRecipient;
-        if (state.activeRecipient.id === updated.id) {
-          saveRecipientToStorage(nextActive);
-        }
-        return {
-          channels: state.channels.map((c) => (c.id === updated.id ? updated : c)),
-          activeRecipient: nextActive,
-        };
-      });
-      return updated;
-    } catch (error) {
-      console.error("Failed to update channel", error);
-      throw error;
+      const res = await api.patch(`/channels/${channelId}`, data);
+      toast.success("Channel details updated!");
+      set((state) => ({
+        channels: state.channels.map((c) => (c.id === channelId ? { ...c, ...res.data } : c)),
+        activeRecipient:
+          state.activeRecipient.id === channelId
+            ? { ...state.activeRecipient, ...res.data }
+            : state.activeRecipient,
+      }));
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to update channel.");
     }
   },
 
   deleteChannel: async (channelId) => {
     try {
-      await channelService.deleteChannel(channelId);
-      set((state) => {
-        const nextChannels = state.channels.filter((c) => c.id !== channelId);
-        const nextActive = state.activeRecipient.id === channelId ? DEFAULT_RECIPIENT : state.activeRecipient;
-        if (state.activeRecipient.id === channelId) {
-          saveRecipientToStorage(DEFAULT_RECIPIENT);
-        }
-        return { channels: nextChannels, activeRecipient: nextActive };
-      });
-    } catch (error) {
-      console.error("Failed to delete channel", error);
-      throw error;
+      await api.delete(`/channels/${channelId}`);
+      toast.success("Channel deleted!");
+      set((state) => ({
+        channels: state.channels.filter((c) => c.id !== channelId),
+        activeRecipient: state.activeRecipient.id === channelId ? DEFAULT_RECIPIENT : state.activeRecipient,
+      }));
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to delete channel.");
     }
   },
 
-  sendChatRequest: async (recipientId: string) => {
+  addChannelMember: async (channelId, data) => {
     try {
-      const newReq = await chatService.sendRequest(recipientId);
+      await api.post(`/channels/${channelId}/members`, data);
+      toast.success("Invitation sent successfully!");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to send invitation.");
+    }
+  },
+
+  getChannelMembers: async (channelId) => {
+    try {
+      const res = await api.get(`/channels/${channelId}/members`);
+      return res.data;
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to load channel members.");
+      return [];
+    }
+  },
+
+  respondChannelInvite: async (inviteId, action) => {
+    try {
+      await api.post(`/channels/invites/${inviteId}/respond?action=${action}`);
+      if (action === "accept") toast.success("Joined channel!");
+      else toast.info("Invitation declined.");
+      await get().fetchChannels();
+      await get().fetchChannelInvites();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to respond to invite.");
+    }
+  },
+
+  removeChannelMember: async (channelId, targetUserId) => {
+    try {
+      await api.delete(`/channels/${channelId}/members/${targetUserId}`);
+      toast.success("Member removed.");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to remove member.");
+    }
+  },
+
+  updateChannelMemberRole: async (channelId, targetUserId, role) => {
+    try {
+      await api.patch(`/channels/${channelId}/members/${targetUserId}/role`, { role });
+      toast.success(`Role updated to ${role}`);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to update member role.");
+    }
+  },
+
+  fetchMessages: async (recipientId: string) => {
+    set({ loading: true });
+    try {
+      let endpoint = `/chat/messages?recipient_id=${encodeURIComponent(recipientId)}`;
+      const channelMatch = get().channels.find((c) => c.id === recipientId);
+      if (channelMatch || get().activeRecipient.is_channel) {
+        endpoint = `/channels/${recipientId}/messages`;
+      }
+
+      const res = await api.get(endpoint);
+      set({ messages: res.data, loading: false });
+
+      set((state) => {
+        const next = { ...state.unreadCounts };
+        delete next[recipientId];
+        saveUnreadCountsToStorage(next);
+        return { unreadCounts: next };
+      });
+    } catch (err) {
+      console.error("Failed to fetch messages", err);
+      set({ loading: false });
+    }
+  },
+
+  setActiveRecipient: (recipient: ActiveRecipient) => {
+    set({ activeRecipient: recipient });
+    get().fetchMessages(recipient.id);
+  },
+
+  sendMessage: async (content: string) => {
+    if (!content.trim()) return;
+
+    const recipient = get().activeRecipient;
+    const ws = activeWS;
+    const connected = get().connected;
+
+    if (ws && connected && ws.readyState === WebSocket.OPEN) {
+      ws.send(
+        JSON.stringify({
+          recipient_id: recipient.id,
+          content: content.trim(),
+        })
+      );
+    } else {
+      try {
+        let res;
+        if (recipient.is_channel) {
+          res = await api.post(`/channels/${recipient.id}/messages`, { content: content.trim() });
+        } else {
+          res = await api.post("/chat/messages", {
+            recipient_id: recipient.id,
+            content: content.trim(),
+          });
+        }
+        set((state) => ({
+          messages: state.messages.some((m) => m.id === res.data.id)
+            ? state.messages
+            : [...state.messages, res.data].slice(-500),
+        }));
+      } catch (err) {
+        console.error("Failed to send message via HTTP fallback", err);
+        toast.error("Failed to send message. Please check connection.");
+      }
+      get().connectWS();
+    }
+  },
+
+  editMessage: async (messageId: string, newContent: string) => {
+    if (!newContent.trim()) return;
+    const activeRec = get().activeRecipient;
+    try {
+      let res;
+      if (activeRec.is_channel) {
+        res = await api.patch(`/channels/${activeRec.id}/messages/${messageId}`, { content: newContent.trim() });
+      } else {
+        res = await api.patch(`/chat/messages/${messageId}`, { content: newContent.trim() });
+      }
       set((state) => ({
-        chatRequests: [...state.chatRequests.filter((r) => r.id !== newReq.id), newReq],
+        messages: state.messages.map((m) => (m.id === messageId ? res.data : m)),
       }));
+      toast.success("Message edited!");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to edit message.");
+    }
+  },
+
+  deleteMessage: async (messageId: string) => {
+    const activeRec = get().activeRecipient;
+    try {
+      if (activeRec.is_channel) {
+        await api.delete(`/channels/${activeRec.id}/messages/${messageId}`);
+      } else {
+        await api.delete(`/chat/messages/${messageId}`);
+      }
+      set((state) => ({
+        messages: state.messages.filter((m) => m.id !== messageId),
+      }));
+      toast.success("Message deleted!");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to delete message.");
+    }
+  },
+
+  sendChatRequest: async (targetUsernameOrId: string) => {
+    try {
+      const res = await api.post("/chat/requests", { recipient_id: targetUsernameOrId });
+      toast.success(`Chat request sent to @${res.data.recipient_name}!`);
+      await get().fetchRequests();
       await get().fetchUsers();
-    } catch (error) {
-      console.error("Failed to send chat request", error);
-      throw error;
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to send chat request.");
     }
   },
 
   respondChatRequest: async (requestId: string, action: "accept" | "decline") => {
     try {
-      const updatedReq = await chatService.respondRequest(requestId, action);
-      set((state) => ({
-        chatRequests: state.chatRequests.map((r) => (r.id === updatedReq.id ? updatedReq : r)),
-      }));
+      await api.patch(`/chat/requests/${requestId}`, { action });
+      toast.success(`Chat request ${action}ed!`);
+      await get().fetchRequests();
       await get().fetchUsers();
-      if (action === "accept" && get().activeRecipient.id === updatedReq.requester_id) {
-        get().setActiveRecipient({
-          ...get().activeRecipient,
-          connection_status: "accepted",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to respond to chat request", error);
-      throw error;
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to respond to chat request.");
     }
   },
 
   removeContact: async (targetUserId: string) => {
     try {
-      await chatService.removeContact(targetUserId);
+      await api.delete(`/chat/contacts/${targetUserId}`);
+      toast.info("Contact removed.");
       await get().fetchUsers();
       await get().fetchRequests();
-      const currentRecipient = get().activeRecipient;
-      if (currentRecipient.id === targetUserId) {
-        set({
-          activeRecipient: DEFAULT_RECIPIENT,
-          messages: [],
-        });
-        saveRecipientToStorage(DEFAULT_RECIPIENT);
-      }
-    } catch (error) {
-      console.error("Failed to remove contact", error);
-      throw error;
-    }
-  },
-
-  fetchMessages: async (recipientId: string) => {
-    if (get().messages.length === 0) {
-      set({ loading: true });
-    }
-    try {
-      let messages: ChatMessage[] = [];
-      const recipient = get().activeRecipient;
-      const isChannel = recipient.is_channel || (recipientId !== "global" && get().channels.some((c) => c.id === recipientId));
-
-      if (isChannel) {
-        messages = await channelService.getChannelMessages(recipientId);
-      } else {
-        messages = await chatService.getMessages(recipientId);
-      }
-      set({ messages, loading: false });
-
-      // Clear unread count for this recipient
-      set((state) => {
-        const nextUnread = { ...state.unreadCounts };
-        delete nextUnread[recipientId];
-        delete nextUnread[recipientId.toLowerCase()];
-        saveUnreadCountsToStorage(nextUnread);
-        return { unreadCounts: nextUnread };
-      });
-    } catch (error) {
-      console.error("Failed to fetch chat messages", error);
-      set({ loading: false });
-    }
-  },
-
-  editMessage: async (messageId: string, content: string) => {
-    const recipient = get().activeRecipient;
-    const isChannel = recipient.is_channel || (recipient.id !== "global" && get().channels.some((c) => c.id === recipient.id));
-    try {
-      let updated: ChatMessage;
-      if (isChannel) {
-        updated = await channelService.editChannelMessage(recipient.id, messageId, content);
-      } else {
-        updated = await chatService.editMessage(messageId, content);
-      }
-      set((state) => ({
-        messages: state.messages.map((m) => (m.id === updated.id ? updated : m)),
-      }));
-    } catch (error) {
-      console.error("Failed to edit message", error);
-      throw error;
-    }
-  },
-
-  deleteMessage: async (messageId: string) => {
-    const recipient = get().activeRecipient;
-    const isChannel = recipient.is_channel || (recipient.id !== "global" && get().channels.some((c) => c.id === recipient.id));
-    try {
-      if (isChannel) {
-        await channelService.deleteChannelMessage(recipient.id, messageId);
-      } else {
-        await chatService.deleteMessage(messageId);
-      }
-      set((state) => ({
-        messages: state.messages.filter((m) => m.id !== messageId),
-      }));
-    } catch (error) {
-      console.error("Failed to delete message", error);
-      throw error;
-    }
-  },
-
-  setActiveRecipient: (recipient: ChatRecipient) => {
-    set({ activeRecipient: recipient, messages: [] });
-    saveRecipientToStorage(recipient);
-    get().fetchMessages(recipient.id);
-  },
-
-  sendMessage: async (content: string) => {
-    const { activeRecipient } = get();
-    if (!content.trim()) return;
-
-    const isGlobal = activeRecipient.id === "global" || activeRecipient.is_global;
-    const isChannel = !isGlobal && (activeRecipient.is_channel || get().channels.some((c) => c.id === activeRecipient.id));
-
-    if (isChannel) {
-      try {
-        const posted = await channelService.postChannelMessage(activeRecipient.id, content.trim());
-        set((state) => {
-          if (state.messages.some((m) => m.id === posted.id)) return state;
-          return { messages: [...state.messages, posted] };
-        });
-      } catch (err) {
-        console.error("Failed to send channel message", err);
-        throw err;
-      }
-    } else {
-      const recipientId = isGlobal ? "global" : activeRecipient.id;
-      const { ws, connected } = get();
-      if (ws && connected && ws.readyState === WebSocket.OPEN) {
-        ws.send(
-          JSON.stringify({
-            recipient_id: recipientId,
-            content: content.trim(),
-          })
-        );
-      } else {
-        // Fallback to HTTP when WS is unavailable; then trigger reconnection
-        try {
-          const sent = await chatService.sendMessage(recipientId, content.trim());
-          set((state) => {
-            if (state.messages.some((m) => m.id === sent.id)) return state;
-            return { messages: [...state.messages, sent] };
-          });
-        } catch (err) {
-          console.error("Failed to send message via HTTP fallback", err);
-          toast.error("Failed to send message. Please check connection.");
-        }
-        get().connectWS();
-      }
+      set({ activeRecipient: DEFAULT_RECIPIENT });
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to remove contact.");
     }
   },
 
   connectWS: () => {
-    const existingWS = get().ws;
-    if (existingWS && (existingWS.readyState === WebSocket.OPEN || existingWS.readyState === WebSocket.CONNECTING)) {
+    if (activeWS && (activeWS.readyState === WebSocket.OPEN || activeWS.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
     const token = getToken();
-    if (!token) return;
+    if (!token) {
+      cleanupWebSocket();
+      set({ ws: null, connected: false });
+      return;
+    }
+
+    cleanupWebSocket();
 
     const apiUrl = getBaseURL();
     const cleanUrl = apiUrl.replace(/\/+$/, "");
@@ -484,18 +510,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     try {
       const ws = new WebSocket(wsUrl);
-      let pingInterval: NodeJS.Timeout | null = null;
-      let visibilityListener: (() => void) | null = null;
-      let reconnectDelay = 1000;
+      activeWS = ws;
+      set({ ws });
 
       ws.onopen = () => {
-        reconnectDelay = 1000;
+        if (activeWS !== ws) return;
+        currentReconnectDelay = 1000;
         set({ connected: true });
+
         get().fetchUsers();
         get().fetchRequests();
         get().fetchChannels();
         get().fetchMessages(get().activeRecipient.id);
 
+        if (pingInterval) clearInterval(pingInterval);
         pingInterval = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN && typeof document !== "undefined" && !document.hidden) {
             ws.send(JSON.stringify({ type: "ping" }));
@@ -503,6 +531,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }, 20000);
 
         if (typeof document !== "undefined") {
+          if (visibilityListener) document.removeEventListener("visibilitychange", visibilityListener);
           visibilityListener = () => {
             if (!document.hidden && ws.readyState === WebSocket.OPEN) {
               ws.send(JSON.stringify({ type: "ping" }));
@@ -513,11 +542,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       };
 
       ws.onmessage = (event) => {
+        if (activeWS !== ws) return;
+
         try {
           const payload = JSON.parse(event.data);
-
           if (payload.type === "pong") return;
-          console.log("[WS EVENT]", payload);
 
           if (payload.type === "new_message") {
             const msg: ChatMessage = payload.message;
@@ -525,7 +554,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
             const currentUserId = useAuthStore.getState().user?.id;
 
             const isGlobal = currentRecipient.id === "global" || currentRecipient.is_global;
-
             const msgSender = (msg.sender_id || "").toLowerCase();
             const msgRecipient = (msg.recipient_id || "").toLowerCase();
             const currUser = (currentUserId || "").toLowerCase();
@@ -544,7 +572,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
             if (isForActiveConversation) {
               set((state) => {
                 if (state.messages.some((m) => m.id === msg.id)) return state;
-                return { messages: [...state.messages, msg] };
+                const updated = [...state.messages, msg];
+                return { messages: updated.length > 500 ? updated.slice(-500) : updated };
               });
             } else {
               const targetUser = get().users.find((u) => u.id.toLowerCase() === msgSender);
@@ -571,7 +600,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
             if (currentRecipient.is_channel && currentRecipient.id === payload.message.channel_id) {
               set((state) => {
                 if (state.messages.some((m) => m.id === msg.id)) return state;
-                return { messages: [...state.messages, msg] };
+                const updated = [...state.messages, msg];
+                return { messages: updated.length > 500 ? updated.slice(-500) : updated };
               });
             } else if (!isMe) {
               const key = payload.message.channel_id;
@@ -584,30 +614,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 return { unreadCounts: nextUnread };
               });
             }
-          } else if (payload.type === "channel_message_edited") {
+          } else if (payload.type === "channel_message_edited" || payload.type === "message_edited") {
             const updatedMsg: ChatMessage = payload.message;
             set((state) => ({
               messages: state.messages.map((m) => (m.id === updatedMsg.id ? updatedMsg : m)),
             }));
-          } else if (payload.type === "channel_message_deleted") {
-            const deletedId: string = payload.message_id;
-            set((state) => ({
-              messages: state.messages.filter((m) => m.id !== deletedId),
-            }));
-          } else if (payload.type === "message_edited") {
-            const updatedMsg: ChatMessage = payload.message;
-            set((state) => ({
-              messages: state.messages.map((m) => (m.id === updatedMsg.id ? updatedMsg : m)),
-            }));
-          } else if (payload.type === "message_deleted") {
+          } else if (payload.type === "channel_message_deleted" || payload.type === "message_deleted") {
             const deletedId: string = payload.message_id;
             set((state) => ({
               messages: state.messages.filter((m) => m.id !== deletedId),
             }));
           } else if (payload.type === "online_users") {
-            const onlineSet = new Set(
-              (payload.user_ids || []).map((id: string) => String(id).toLowerCase())
-            );
+            const onlineSet = new Set((payload.user_ids || []).map((id: string) => String(id).toLowerCase()));
             set((state) => ({
               users: state.users.map((u) => ({
                 ...u,
@@ -650,7 +668,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 }
               }
 
-              // Real-time connection_status update for open active recipient
               const currentActive = get().activeRecipient;
               if (!currentActive.is_global && !currentActive.is_channel) {
                 if (currentActive.id === req.requester_id || currentActive.id === req.recipient_id) {
@@ -662,8 +679,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                   } else if (req.status === "declined") {
                     newStatus = "declined";
                   }
-                  const updatedActive = { ...currentActive, connection_status: newStatus };
-                  set({ activeRecipient: updatedActive });
+                  set({ activeRecipient: { ...currentActive, connection_status: newStatus } });
                 }
               }
             }
@@ -708,39 +724,49 @@ export const useChatStore = create<ChatState>((set, get) => ({
       };
 
       ws.onclose = (event: CloseEvent) => {
-        if (pingInterval) clearInterval(pingInterval);
+        if (activeWS === ws) {
+          activeWS = null;
+        }
+        if (pingInterval) {
+          clearInterval(pingInterval);
+          pingInterval = null;
+        }
         if (typeof document !== "undefined" && visibilityListener) {
           document.removeEventListener("visibilitychange", visibilityListener);
+          visibilityListener = null;
         }
+
         set({ connected: false, ws: null });
+
         if (event.code === 1008) {
           console.warn("WebSocket authentication failed (1008). Stopping reconnection loop.");
+          currentReconnectDelay = 1000;
           return;
         }
-        // Exponential backoff strategy for reconnection
-        const currentDelay = reconnectDelay;
-        reconnectDelay = Math.min(reconnectDelay * 2, 30000);
-        setTimeout(() => {
+
+        const delay = currentReconnectDelay;
+        currentReconnectDelay = Math.min(currentReconnectDelay * 2, 30000);
+
+        if (reconnectTimer) clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(() => {
+          reconnectTimer = null;
           get().connectWS();
-        }, currentDelay);
+        }, delay);
       };
 
       ws.onerror = (err) => {
+        if (activeWS !== ws) return;
         console.error("WebSocket error", err);
         set({ connected: false });
       };
-
-      set({ ws });
     } catch (err) {
       console.error("Failed to initialize WebSocket connection", err);
     }
   },
 
   disconnectWS: () => {
-    const ws = get().ws;
-    if (ws) {
-      ws.close();
-      set({ ws: null, connected: false });
-    }
+    currentReconnectDelay = 1000;
+    cleanupWebSocket();
+    set({ ws: null, connected: false });
   },
 }));

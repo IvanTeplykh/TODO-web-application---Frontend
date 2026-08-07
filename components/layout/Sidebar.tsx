@@ -13,7 +13,7 @@ export function Sidebar() {
   const router = useRouter();
   const { status, setFilters } = useTaskStore();
   const { isSidebarCollapsed, toggleSidebar, notificationPreferences } = useUIStore();
-  const { unreadCounts, chatRequests, channelInvites } = useChatStore();
+  const { unreadCounts, requests: chatRequests, channelInvites } = useChatStore();
   const { user } = useAuthStore();
   const collapsed = isSidebarCollapsed;
 

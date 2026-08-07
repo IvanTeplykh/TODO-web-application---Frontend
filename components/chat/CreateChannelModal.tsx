@@ -84,15 +84,17 @@ export function CreateChannelModal({ isOpen, onClose }: CreateChannelModalProps)
         avatar_url: avatarUrl.trim() || undefined,
       });
 
-      setActiveRecipient({
-        id: newChannel.id,
-        name: newChannel.name,
-        avatar_url: newChannel.avatar_url,
-        description: newChannel.description,
-        is_channel: true,
-        my_role: "owner",
-        members_count: 1,
-      });
+      if (newChannel) {
+        setActiveRecipient({
+          id: newChannel.id,
+          name: newChannel.name,
+          avatar_url: newChannel.avatar_url,
+          description: newChannel.description,
+          is_channel: true,
+          my_role: "owner",
+          members_count: 1,
+        });
+      }
 
       handleClose();
     } catch (err: unknown) {

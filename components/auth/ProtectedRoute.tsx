@@ -8,7 +8,6 @@ import { Spinner } from "../ui/Spinner";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuthStore();
-  const { connectWS, fetchUsers, fetchRequests, fetchChannels, fetchChannelInvites } = useChatStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,13 +18,14 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isAuthenticated) {
-      connectWS();
-      fetchUsers();
-      fetchRequests();
-      fetchChannels();
-      fetchChannelInvites();
+      const store = useChatStore.getState();
+      store.connectWS();
+      store.fetchUsers();
+      store.fetchRequests();
+      store.fetchChannels();
+      store.fetchChannelInvites();
     }
-  }, [isAuthenticated, connectWS, fetchUsers, fetchRequests, fetchChannels, fetchChannelInvites]);
+  }, [isAuthenticated]);
 
   if (loading || !isAuthenticated) {
     return (
