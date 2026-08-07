@@ -385,27 +385,33 @@ export default function ProfilePage() {
                 </p>
               </div>
 
-              {/* Segmented Control Tabs */}
-              <div className="flex p-1 rounded-2xl bg-slate-200/60 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 w-fit self-start sm:self-auto backdrop-blur-md">
-                {([
-                  { id: "general", label: "General" },
-                  { id: "security", label: "Security" },
-                  { id: "preferences", label: "Preferences" },
-                  { id: "notifications", label: "Notifications" },
-                  { id: "danger", label: "Danger Zone" },
-                ] as const).map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                      activeTab === tab.id
-                        ? "bg-white text-indigo-600 dark:bg-slate-800 dark:text-indigo-400 shadow-xs font-black border border-slate-200/60 dark:border-slate-700/60"
-                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+              {/* Segmented Control Tabs (Responsive: Scrollable on Mobile) */}
+              <div className="w-full sm:w-auto overflow-x-auto no-scrollbar py-0.5">
+                <div className="flex p-1 rounded-2xl bg-slate-200/60 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 w-max sm:w-auto backdrop-blur-md gap-1">
+                  {([
+                    { id: "general", label: "General" },
+                    { id: "security", label: "Security" },
+                    { id: "preferences", label: "Preferences" },
+                    { id: "notifications", label: "Notifications" },
+                    { id: "danger", label: "Danger Zone" },
+                  ] as const).map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 ${
+                        activeTab === tab.id
+                          ? tab.id === "danger"
+                            ? "bg-rose-600 text-white shadow-xs font-black"
+                            : "bg-white text-indigo-600 dark:bg-slate-800 dark:text-indigo-400 shadow-xs font-black border border-slate-200/60 dark:border-slate-700/60"
+                          : tab.id === "danger"
+                          ? "text-rose-500 hover:text-rose-600 dark:text-rose-400"
+                          : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -941,26 +947,26 @@ export default function ProfilePage() {
             {/* TAB 5: DANGER ZONE */}
             {activeTab === "danger" && (
               <div className="max-w-2xl">
-                <Card className="border-rose-200/70 dark:border-rose-900/40 bg-rose-50/20 dark:bg-rose-950/10">
-                  <CardHeader className="border-b border-rose-100 dark:border-rose-900/30">
+                <Card className="border-rose-200/80 dark:border-rose-900/50 bg-rose-50/40 dark:bg-rose-950/20 shadow-sm">
+                  <CardHeader className="border-b border-rose-100 dark:border-rose-900/40 pb-4">
                     <h2 className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
                       <Trash2 className="h-4.5 w-4.5" />
                       Danger Zone
                     </h2>
                   </CardHeader>
                   <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">
                         Delete Account Permanently
                       </h3>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 max-w-md">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed max-w-md">
                         Once deleted, your account cannot be recovered. Shared tasks where you are Owner will be automatically transferred to Co-Owners or Collaborators.
                       </p>
                     </div>
                     <Button
                       type="button"
                       variant="primary"
-                      className="bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/10 text-xs shrink-0 font-bold"
+                      className="w-full sm:w-auto justify-center bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 text-xs shrink-0 font-bold py-2.5 px-4"
                       onClick={() => setIsDeleteAccountOpen(true)}
                     >
                       <Trash2 className="h-4 w-4 mr-1.5" />
