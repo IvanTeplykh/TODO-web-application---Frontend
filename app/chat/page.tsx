@@ -231,6 +231,21 @@ export default function ChatPage() {
     (r) => String(r.requester_id).toLowerCase() === currentUserIdStr && String(r.status).toLowerCase() === "pending"
   );
 
+  const findPendingRequestForUser = (targetUserId: string) => {
+    const targetIdStr = String(targetUserId || "").toLowerCase();
+    const currIdStr = (user?.id || "").toLowerCase();
+    return chatRequests.find((r) => {
+      const recId = String(r.recipient_id || "").toLowerCase();
+      const reqId = String(r.requester_id || "").toLowerCase();
+      const isPending = String(r.status || "").toLowerCase() === "pending";
+      return (
+        isPending &&
+        ((recId === targetIdStr && reqId === currIdStr) ||
+          (reqId === targetIdStr && recId === currIdStr))
+      );
+    });
+  };
+
   const discoverUsers = users.filter(
     (u) =>
       u.connection_status !== "accepted" &&
@@ -759,7 +774,7 @@ export default function ChatPage() {
                                       variant="outline"
                                       className="h-7 text-[10px] py-0 px-2 text-rose-500 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                                       onClick={() => {
-                                        const req = chatRequests.find((r) => r.recipient_id === u.id && r.status === "pending");
+                                        const req = findPendingRequestForUser(u.id);
                                         if (req) handleRespondRequestClick(req.id, "cancel");
                                       }}
                                       icon={<X className="h-3 w-3" />}
@@ -1031,7 +1046,7 @@ export default function ChatPage() {
                           variant="outline"
                           className="h-7 text-[11px] mt-1 text-rose-500 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                           onClick={() => {
-                            const req = chatRequests.find((r) => r.recipient_id === activeRecipient.id && r.status === "pending");
+                            const req = findPendingRequestForUser(activeRecipient.id);
                             if (req) handleRespondRequestClick(req.id, "cancel");
                           }}
                           icon={<X className="h-3.5 w-3.5" />}
