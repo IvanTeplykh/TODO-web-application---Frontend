@@ -6,7 +6,38 @@ import { getToken } from "../lib/auth";
 import { getBaseURL } from "../lib/axios";
 import { useAuthStore } from "./authStore";
 import { useTaskStore } from "./taskStore";
+import { useUIStore } from "./uiStore";
 import { toast } from "sonner";
+
+const playChimeSound = () => {
+  try {
+    const notifySound = useUIStore.getState().notificationPreferences.notifySound;
+    if (!notifySound) return;
+
+    if (typeof window === "undefined") return;
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch (e) {
+    console.error("Failed to play chime sound", e);
+  }
+};
 
 interface ChatState {
   users: ChatUser[];
@@ -482,6 +513,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 ((msgSender === currUser && msgRecipient === activeId) ||
                   (msgSender === activeId && (msgRecipient === currUser || msgRecipient === "global"))));
 
+            if (msgSender !== currUser) {
+              playChimeSound();
+            }
+
             if (isForActiveConversation) {
               set((state) => {
                 if (state.messages.some((m) => m.id === msg.id)) return state;
@@ -502,6 +537,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
             const currentRecipient = get().activeRecipient;
             const currentUserId = useAuthStore.getState().user?.id;
             const isMe = msg.sender_id === currentUserId;
+
+            if (!isMe) {
+              playChimeSound();
+            }
 
             if (currentRecipient.is_channel && currentRecipient.id === payload.message.channel_id) {
               set((state) => {
