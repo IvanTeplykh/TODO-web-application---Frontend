@@ -25,30 +25,28 @@ export function Statistics() {
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const [allRes, doneRes, overdueRes, listRes] = await Promise.all([
-          tasksService.getTasks({ limit: 1, status: "all" }),
+        const [doneRes, overdueRes] = await Promise.all([
           tasksService.getTasks({ limit: 1, status: "done" }),
           tasksService.getTasks({ limit: 1, status: "overdue" }),
-          tasksService.getTasks({ limit: 100, status: "all" }),
         ]);
-        
-        const tot = allRes.total;
+
+        const tot = total;
         const comp = doneRes.total;
-        const pend = tot - comp;
+        const pend = Math.max(0, tot - comp);
         const overdueCount = overdueRes.total;
         const pct = tot > 0 ? Math.round((comp / tot) * 100) : 0;
 
-        // Calculate real weekly comparison percentage
+        // Calculate weekly comparison percentage from loaded tasks
         const now = new Date().getTime();
         const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
         const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
 
-        const thisWeekTasks = (listRes.items || []).filter((t: Task) => {
+        const thisWeekTasks = (tasks || []).filter((t: Task) => {
           const createdTime = new Date(t.created_at).getTime();
           return now - createdTime <= sevenDaysMs;
         }).length;
 
-        const lastWeekTasks = (listRes.items || []).filter((t: Task) => {
+        const lastWeekTasks = (tasks || []).filter((t: Task) => {
           const createdTime = new Date(t.created_at).getTime();
           const age = now - createdTime;
           return age > sevenDaysMs && age <= fourteenDaysMs;
@@ -83,8 +81,10 @@ export function Statistics() {
       }
     };
 
-    loadStats();
-  }, [tasks, total, status]);
+    if (total > 0 || tasks.length > 0) {
+      loadStats();
+    }
+  }, [total]);
 
   // Determine productivity status badge
   let statusText = "Needs Attention";
