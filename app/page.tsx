@@ -155,8 +155,7 @@ export default function LandingPage() {
         {/* Hero Dual Preview Stack: Chat Card (Angled behind) & Main Workspace Card (Front) */}
         <div className="lg:col-span-6 relative w-full select-none flex items-center justify-center py-6 sm:py-10">
           
-          {/* Background Chat Window (Angled Behind) */}
-          <div className="absolute top-0 right-2 sm:-right-4 w-[88%] sm:w-[92%] rounded-3xl p-5 border border-indigo-500/30 dark:border-indigo-500/40 bg-slate-900/90 text-white shadow-2xl backdrop-blur-2xl transform rotate-[7deg] translate-y-3 sm:translate-y-4 hover:rotate-[4deg] transition-transform duration-500 ease-out z-0 opacity-90 hover:opacity-100">
+          <div className="absolute top-0 right-2 sm:-right-4 w-[88%] sm:w-[92%] rounded-3xl p-5 border border-indigo-500/30 dark:border-indigo-500/40 bg-slate-900/90 text-white shadow-2xl backdrop-blur-2xl transform rotate-[7deg] translate-y-3 sm:translate-y-4 hover:rotate-[2deg] hover:scale-[1.02] transition-all duration-500 ease-out z-0 hover:z-20 opacity-90 hover:opacity-100">
             {/* Chat Top Header */}
             <div className="flex items-center justify-between border-b border-indigo-500/20 pb-3 mb-3">
               <div className="flex items-center gap-2.5">
